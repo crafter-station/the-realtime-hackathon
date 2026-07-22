@@ -5,6 +5,7 @@ import sharp from "sharp";
 
 const root = process.cwd();
 const outputDirectory = path.join(root, "public", "brand-assets");
+const socialOutputDirectory = path.join(outputDirectory, "social");
 const appDirectory = path.join(root, "src", "app");
 const emailStaticDirectory = path.join(root, "emails", "static");
 const fontFamily = "Geist Pixel";
@@ -210,6 +211,7 @@ async function render(name, width, height, content, options = {}) {
 }
 
 await mkdir(outputDirectory, { recursive: true });
+await mkdir(socialOutputDirectory, { recursive: true });
 await mkdir(emailStaticDirectory, { recursive: true });
 
 const particlePng = await sharp(particleArtwork())
@@ -268,7 +270,7 @@ await render(
 );
 
 await render(
-  "linkedin-post",
+  "social/linkedin-post",
   1_080,
   1_350,
   `
@@ -287,7 +289,7 @@ await render(
 );
 
 await render(
-  "x-post",
+  "social/x-post",
   1_200,
   1_500,
   `
@@ -306,7 +308,7 @@ await render(
 );
 
 await render(
-  "instagram-post",
+  "social/instagram-post",
   1_080,
   1_350,
   `
@@ -366,12 +368,12 @@ const manifest = {
     "og-image.webp": "1200x630",
     "luma-square.png": "1080x1080",
     "luma-square.webp": "1080x1080",
-    "linkedin-post.png": "1080x1350",
-    "linkedin-post.webp": "1080x1350",
-    "x-post.png": "1200x1500",
-    "x-post.webp": "1200x1500",
-    "instagram-post.png": "1080x1350",
-    "instagram-post.webp": "1080x1350",
+    "social/linkedin-post.png": "1080x1350",
+    "social/linkedin-post.webp": "1080x1350",
+    "social/x-post.png": "1200x1500",
+    "social/x-post.webp": "1200x1500",
+    "social/instagram-post.png": "1080x1350",
+    "social/instagram-post.webp": "1080x1350",
     "particle-torus.png": "1600x1600",
     "email-signal.png": "1200x360",
     "crafter-station-icon-64.png": "64x64",

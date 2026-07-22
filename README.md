@@ -116,7 +116,7 @@ bun run build
 .
 ├── docs/                  # Operational documentation and README images
 ├── emails/                # Confirmation emails and PDF letter components
-├── public/brand-assets/   # Generated event artwork, icons, and fonts
+├── public/brand-assets/   # Generated web, social, video, email, and icon assets
 ├── scripts/               # Brand and official-letter generators
 └── src/
     ├── app/               # App Router page, metadata, styles, and 3D scenes
@@ -141,9 +141,10 @@ lists, private meeting links, signature images, or API keys.
 ## Brand Assets
 
 Generated campaign artwork is stored in
-[`public/brand-assets/`](./public/brand-assets/), including Open Graph, Luma,
-LinkedIn, X, Instagram, email, favicon, and app-icon variants. Their dimensions and
-palette are recorded in
+[`public/brand-assets/`](./public/brand-assets/). Platform post images are grouped
+under [`social/`](./public/brand-assets/social/), videos under
+[`video/`](./public/brand-assets/video/), and web, email, favicon, and app-icon
+assets remain at the root. Their dimensions and palette are recorded in
 [`public/brand-assets/assets.json`](./public/brand-assets/assets.json).
 
 `bun run brand:generate` overwrites the complete tracked asset set and requires
