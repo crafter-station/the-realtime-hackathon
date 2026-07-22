@@ -64,7 +64,7 @@ const eventJsonLd = {
   description:
     "A 39-hour online hackathon for builders creating multiplayer, live, and agentic products with Portal.",
   startDate: "2026-08-07T19:00:00-05:00",
-  endDate: "2026-08-09T14:00:00-05:00",
+  endDate: "2026-08-09T19:00:00-05:00",
   eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
   eventStatus: "https://schema.org/EventScheduled",
   image: "https://hackathon.useportal.co/og.png",

@@ -206,7 +206,7 @@ export default function Home() {
             >
               <div className="shell missions-slide">
                 <div className="section-heading-row section-heading-row--missions">
-                  <h2 id={headingId}>Pick a track.</h2>
+                  <h2 id={headingId}>Pick a track</h2>
                 </div>
 
                 <TrackParticles
@@ -245,7 +245,7 @@ export default function Home() {
         <section className="portal-section" aria-labelledby="portal-title">
           <div className="shell">
             <div className="section-heading-row">
-              <h2 id="portal-title">Use Portal. Ship realtime.</h2>
+              <h2 id="portal-title">Use Portal Ship realtime</h2>
             </div>
 
             <ul className="capability-list" aria-label="Portal capabilities">
@@ -285,7 +285,7 @@ export default function Home() {
             <div className="schedule-heading">
               <div>
                 <h2>
-                  <span>39-hour</span> schedule.
+                  <span>39-hour</span> schedule
                 </h2>
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function Home() {
         >
           <div className="shell judging-slide">
             <header className="judging-slide__header">
-              <h2 id="judging-title">Evaluation criteria.</h2>
+              <h2 id="judging-title">Evaluation criteria</h2>
             </header>
 
             <ol className="judging-slide__list">
@@ -368,7 +368,7 @@ export default function Home() {
 
         <section className="faq-section" id="faq">
           <div className="shell editorial-grid">
-            <h2>FAQ.</h2>
+            <h2>FAQ</h2>
             <Accordion className="faq-list" defaultValue={[]}>
               {faqs.map((faq, index) => {
                 const Icon = faq.icon;
@@ -389,7 +389,7 @@ export default function Home() {
 
         <section className="apply-section" id="apply">
           <div className="shell apply-section__inner">
-            <h2>Build it live.</h2>
+            <h2>Build it live</h2>
             <div className="apply-section__action">
               <a
                 className={buttonVariants({
