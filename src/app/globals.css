@@ -1003,7 +1003,9 @@ h2 {
 }
 
 .judging {
+  max-width: 64rem;
   margin-top: clamp(3rem, 6vw, 5rem);
+  margin-inline: auto;
 }
 
 .judging__header {
@@ -1586,7 +1588,6 @@ h2 {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: 1rem;
-  border-block: 1px solid var(--schedule-rule);
   color: var(--schedule-ink);
 }
 
@@ -1676,6 +1677,7 @@ h2 {
 
 .schedule-section .schedule-day__date {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.65rem;
   color: var(--schedule-muted);
@@ -1708,6 +1710,7 @@ h2 {
 
 .schedule-section .schedule-day__phase {
   display: flex;
+  flex-direction: row;
   align-self: end;
   grid-column: 1 / -1;
   align-items: center;
@@ -1775,10 +1778,6 @@ h2 {
   .schedule-heading h2 {
     max-width: none;
     font-size: clamp(2.8rem, 14vw, 4rem);
-  }
-
-  .schedule-heading h2 span {
-    display: inline;
   }
 
   .schedule-window {
@@ -3256,8 +3255,9 @@ h2 {
 
 /* Minimal final slide: mirror the opening particle object. */
 .countdown-slide {
-  display: block;
+  display: grid;
   min-height: 100svh;
+  grid-template-rows: minmax(0, 1fr) auto;
   border: 0;
   background: var(--white);
   color: var(--black);
@@ -3270,7 +3270,7 @@ h2 {
 
 .countdown-slide__body {
   display: flex;
-  min-height: 100svh;
+  min-height: 0;
   align-items: stretch;
   justify-content: center;
   flex-direction: column;
@@ -3322,7 +3322,7 @@ h2 {
 
 @media (max-width: 48rem) {
   .countdown-slide__body {
-    min-height: 100svh;
+    min-height: 0;
     padding-block: 2.5rem;
   }
 
@@ -3350,7 +3350,7 @@ h2 {
 
 @media (max-height: 46rem) and (min-width: 48.01rem) {
   .countdown-slide__body {
-    min-height: 100svh;
+    min-height: 0;
     padding-block: 1.5rem;
   }
 
@@ -3361,6 +3361,17 @@ h2 {
   .particle-countdown {
     min-height: 15rem;
     margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 48rem) and (max-height: 46rem) {
+  .countdown-slide__body {
+    padding-block: 1.25rem;
+  }
+
+  .particle-countdown {
+    min-height: clamp(12rem, 35svh, 16rem);
+    margin-top: 1.25rem;
   }
 }
 

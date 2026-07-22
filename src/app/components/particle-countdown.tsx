@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const eventStart = new Date("2026-08-07T19:00:00-05:00").getTime();
@@ -60,7 +61,7 @@ function hash(value: number) {
   return result - Math.floor(result);
 }
 
-export function ParticleCountdown() {
+export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
   const [clock, setClock] = useState<ClockSnapshot>(syncingClock);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -604,6 +605,7 @@ export function ParticleCountdown() {
           </span>
         </div>
       </div>
+      {footer}
     </section>
   );
 }

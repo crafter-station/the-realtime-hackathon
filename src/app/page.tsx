@@ -535,29 +535,35 @@ export default function Home() {
           </div>
         </section>
 
-        <ParticleCountdown />
+        <ParticleCountdown
+          footer={
+            <footer className="site-footer">
+              <div className="shell site-footer__bottom">
+                <span>PORTAL x CRAFTER STATION</span>
+                <div>
+                  <a
+                    href="https://useportal.co/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <IconLabel trailingIcon={ArrowUpRight}>Portal</IconLabel>
+                  </a>
+                  <a
+                    href="https://docs.useportal.co/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <IconLabel trailingIcon={ArrowUpRight}>Docs</IconLabel>
+                  </a>
+                </div>
+                <a href="#top">
+                  <IconLabel trailingIcon={ArrowUpIcon}>Back to top</IconLabel>
+                </a>
+              </div>
+            </footer>
+          }
+        />
       </main>
-
-      <footer className="site-footer">
-        <div className="shell site-footer__bottom">
-          <span>PORTAL x CRAFTER STATION</span>
-          <div>
-            <a href="https://useportal.co/" target="_blank" rel="noreferrer">
-              <IconLabel trailingIcon={ArrowUpRight}>Portal</IconLabel>
-            </a>
-            <a
-              href="https://docs.useportal.co/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <IconLabel trailingIcon={ArrowUpRight}>Docs</IconLabel>
-            </a>
-          </div>
-          <a href="#top">
-            <IconLabel trailingIcon={ArrowUpIcon}>Back to top</IconLabel>
-          </a>
-        </div>
-      </footer>
     </>
   );
 }
