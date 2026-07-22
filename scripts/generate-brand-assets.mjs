@@ -157,15 +157,11 @@ function crafterStationLogo(x, y, size, color = colors.white) {
 }
 
 function iconSvg(size) {
-  const border = Math.max(2, Math.round(size * 0.065));
-  return svgDocument(
-    size,
-    size,
-    `
-      <rect width="${size}" height="${size}" rx="${Math.round(size * 0.08)}" fill="${colors.black}"/>
-      <rect x="${border / 2}" y="${border / 2}" width="${size - border}" height="${size - border}" rx="${Math.round(size * 0.065)}" fill="none" stroke="${colors.orange}" stroke-width="${border}"/>
-      <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-size="${Math.round(size * 0.47)}" font-weight="700" letter-spacing="-0.09em" fill="${colors.white}">P<tspan fill="${colors.orange}">/</tspan></text>
-    `,
+  return Buffer.from(
+    portalLogoSource.replace(
+      'width="1014" height="1014"',
+      `width="${size}" height="${size}"`,
+    ),
   );
 }
 
