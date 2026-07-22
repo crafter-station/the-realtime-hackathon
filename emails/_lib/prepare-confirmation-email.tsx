@@ -51,6 +51,9 @@ export async function prepareConfirmationEmail({
   ]);
 
   return {
+    from: "The Realtime Hackathon <therealtimehackathon@crafterstation.com>",
+    cc: "contact@crafterstation.com",
+    replyTo: "contact@crafterstation.com",
     subject: getRoleConfirmationSubject(eventRole),
     html,
     text,

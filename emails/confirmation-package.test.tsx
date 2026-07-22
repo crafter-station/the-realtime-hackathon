@@ -13,6 +13,11 @@ describe("confirmed role email package", () => {
         issuedOn: "July 22, 2026",
       });
 
+      expect(email.from).toBe(
+        "The Realtime Hackathon <therealtimehackathon@crafterstation.com>",
+      );
+      expect(email.cc).toBe("contact@crafterstation.com");
+      expect(email.replyTo).toBe("contact@crafterstation.com");
       expect(email.subject).toStartWith("Confirmed:");
       expect(email.html).toContain("OFFICIAL CONFIRMATION");
       expect(email.text).toContain("Personalized letter included");

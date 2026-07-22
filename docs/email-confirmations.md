@@ -122,6 +122,9 @@ The returned object has this shape:
 
 ```ts
 {
+  from: "The Realtime Hackathon <therealtimehackathon@crafterstation.com>";
+  cc: "contact@crafterstation.com";
+  replyTo: "contact@crafterstation.com";
   subject: string;
   html: string;
   text: string;
@@ -153,7 +156,7 @@ Set the API key outside source control:
 export RESEND_API_KEY="re_your_api_key"
 ```
 
-The sender domain must be verified in Resend before using a `hack.useportal.co` address.
+The `crafterstation.com` sender domain must be verified in Resend before sending.
 
 Create a server-only script such as `scripts/send-confirmation.ts`:
 
@@ -172,9 +175,10 @@ const confirmation = await prepareConfirmationEmail({
 });
 
 const { data, error } = await resend.emails.send({
-  from: "The Realtime Hackathon <team@hack.useportal.co>",
+  from: confirmation.from,
   to: ["jordan@example.com"],
-  replyTo: "team@hack.useportal.co",
+  cc: confirmation.cc,
+  replyTo: confirmation.replyTo,
   subject: confirmation.subject,
   html: confirmation.html,
   text: confirmation.text,
