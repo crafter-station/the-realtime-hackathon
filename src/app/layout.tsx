@@ -12,7 +12,7 @@ const geistPixel = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hackathon.useportal.co"),
+  metadataBase: new URL("https://hack.useportal.co"),
   title: "The Realtime Hackathon by Portal",
   description:
     "Build a live, multiplayer, or agentic AI product with Portal in one weekend. Online August 7–9, 2026, with US$800 in cash prizes.",
@@ -68,10 +68,10 @@ const eventJsonLd = {
   endDate: "2026-08-09T19:00:00-05:00",
   eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
   eventStatus: "https://schema.org/EventScheduled",
-  image: "https://hackathon.useportal.co/og.png",
+  image: "https://hack.useportal.co/og.png",
   location: {
     "@type": "VirtualLocation",
-    url: "https://hackathon.useportal.co",
+    url: "https://hack.useportal.co",
   },
   organizer: [
     {

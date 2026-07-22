@@ -1,11 +1,12 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
 const root = process.cwd();
 const outputDirectory = path.join(root, "public", "brand-assets");
 const appDirectory = path.join(root, "src", "app");
+const emailStaticDirectory = path.join(root, "emails", "static");
 const fontFamily = "Geist Pixel";
 const fontFullName = "Geist Pixel Regular";
 
@@ -209,12 +210,25 @@ async function render(name, width, height, content, options = {}) {
 }
 
 await mkdir(outputDirectory, { recursive: true });
+await mkdir(emailStaticDirectory, { recursive: true });
 
 const particlePng = await sharp(particleArtwork())
   .png({ compressionLevel: 9 })
   .toBuffer();
 await writeFile(path.join(outputDirectory, "particle-torus.png"), particlePng);
 const particleData = particlePng.toString("base64");
+
+await sharp(particlePng)
+  .resize(1_200, 360, { fit: "cover", position: "centre" })
+  .png({ compressionLevel: 9 })
+  .toFile(path.join(outputDirectory, "email-signal.png"));
+
+await sharp(
+  await readFile(path.join(outputDirectory, "crafter-station-icon-dark.svg")),
+)
+  .resize(64, 64)
+  .png({ compressionLevel: 9 })
+  .toFile(path.join(outputDirectory, "crafter-station-icon-64.png"));
 
 const og = await render(
   "og-image",
@@ -309,6 +323,22 @@ await writeFile(path.join(outputDirectory, "favicon.ico"), favicon);
 await writeFile(path.join(appDirectory, "favicon.ico"), favicon);
 await writeFile(path.join(appDirectory, "icon.png"), icons.get(512));
 await writeFile(path.join(appDirectory, "apple-icon.png"), icons.get(180));
+await copyFile(
+  path.join(appDirectory, "fonts", "geist-pixel-latin.woff2"),
+  path.join(outputDirectory, "geist-pixel-latin.woff2"),
+);
+
+for (const fileName of [
+  "crafter-station-icon-64.png",
+  "email-signal.png",
+  "geist-pixel-latin.woff2",
+  "icon-64.png",
+]) {
+  await copyFile(
+    path.join(outputDirectory, fileName),
+    path.join(emailStaticDirectory, fileName),
+  );
+}
 
 const manifest = {
   palette: colors,
@@ -322,6 +352,9 @@ const manifest = {
     "instagram-post.png": "1080x1350",
     "instagram-post.webp": "1080x1350",
     "particle-torus.png": "1600x1600",
+    "email-signal.png": "1200x360",
+    "crafter-station-icon-64.png": "64x64",
+    "geist-pixel-latin.woff2": "Geist Pixel Latin web font",
     "favicon.ico": "16x16, 32x32, 64x64",
     "apple-touch-icon.png": "180x180",
     "icon-192.png": "192x192",

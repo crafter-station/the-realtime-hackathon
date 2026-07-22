@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+/.react-email/
+/.email-output/
 
 # production
 /build
