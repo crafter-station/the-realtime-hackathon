@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "brand:generate": "node scripts/generate-brand-assets.mjs",
+    "font:setup": "node scripts/setup-brand-font.mjs",
     "dev": "next dev",
     "email:dev": "email dev --dir emails --port 3001",
     "email:export": "email export --dir emails --outDir .email-output --pretty",

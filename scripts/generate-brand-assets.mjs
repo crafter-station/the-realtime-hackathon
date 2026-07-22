@@ -8,8 +8,8 @@ const outputDirectory = path.join(root, "public", "brand-assets");
 const socialOutputDirectory = path.join(outputDirectory, "social");
 const appDirectory = path.join(root, "src", "app");
 const emailStaticDirectory = path.join(root, "emails", "static");
-const fontFamily = "Geist Pixel";
-const fontFullName = "Geist Pixel Regular";
+const fontFamily = "Geist Pixel Square";
+const fontFullName = fontFamily;
 
 const resolvedFontFamily = execFileSync("fc-match", [
   "--format=%{fullname}",
@@ -17,7 +17,7 @@ const resolvedFontFamily = execFileSync("fc-match", [
 ]).toString();
 if (resolvedFontFamily !== fontFullName) {
   throw new Error(
-    `Install the project ${fontFamily} font before generating assets.`,
+    `Install the project font with \`bun run font:setup\` before generating assets.`,
   );
 }
 

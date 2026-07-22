@@ -147,9 +147,16 @@ under [`social/`](./public/brand-assets/social/), videos under
 assets remain at the root. Their dimensions and palette are recorded in
 [`public/brand-assets/assets.json`](./public/brand-assets/assets.json).
 
-`bun run brand:generate` overwrites the complete tracked asset set and requires
-the local **Geist Pixel Regular** font. Run it only when intentionally
-regenerating every brand output.
+Asset generation uses **Geist Pixel Square** and `fontconfig`. Install
+`fontconfig` first (`brew install fontconfig` on macOS, or use your Linux
+package manager), then install the pinned font release:
+
+```bash
+bun run font:setup
+```
+
+`bun run brand:generate` overwrites the complete tracked asset set. Run it only
+when intentionally regenerating every brand output.
 
 ## License
 
