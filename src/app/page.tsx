@@ -140,7 +140,6 @@ export default function Home() {
 
       <main id="main-content">
         <section className="hero hero--landing" id="top">
-          <PartnerLinks />
           <SignalEngine />
 
           <div className="shell hero-landing__masthead">
@@ -149,20 +148,21 @@ export default function Home() {
               <span className="hero-landing__slash">REALTIME</span>
               <span>HACKATHON</span>
             </h1>
+            <PartnerLinks featured />
+          </div>
+
+          <div className="hero-landing__action">
             <p className="hero-landing__meta">
               <IconLabel icon={CalendarDays} tone="accent">
-                AUG 07-09 2026
+                AUG 07-09
               </IconLabel>
               <IconLabel icon={Globe2} tone="muted">
-                ONLINE / UTC-5
+                ONLINE
               </IconLabel>
               <IconLabel icon={Users} size="sm" tone="muted">
                 Teams of 1-4
               </IconLabel>
             </p>
-          </div>
-
-          <div className="hero-landing__action">
             <a
               className={buttonVariants({
                 size: "lg",
