@@ -1,19 +1,15 @@
 import {
-  RoleInvitationEmail,
-  type RoleInvitationEmailProps,
+  RoleConfirmationEmail,
+  type RoleConfirmationEmailProps,
 } from "./_components/role-invitation";
 
-type JudgeInvitationEmailProps = Omit<
-  RoleInvitationEmailProps,
-  "invitationRole"
->;
+type JudgeInvitationEmailProps = Omit<RoleConfirmationEmailProps, "eventRole">;
 
 export default function JudgeInvitationEmail(props: JudgeInvitationEmailProps) {
-  return <RoleInvitationEmail {...props} invitationRole="judge" />;
+  return <RoleConfirmationEmail {...props} eventRole="judge" />;
 }
 
 JudgeInvitationEmail.PreviewProps = {
   recipientName: "Jordan",
   actionUrl: "https://hack.useportal.co",
-  assetBaseUrl: "",
 } satisfies JudgeInvitationEmailProps;

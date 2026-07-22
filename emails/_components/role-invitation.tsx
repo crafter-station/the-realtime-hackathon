@@ -15,55 +15,19 @@ import {
   Section,
   Text,
 } from "react-email";
+import {
+  type EventRole,
+  eventDetails,
+  roleDetails,
+} from "../_lib/event-details";
 
-export type InvitationRole = "mentor" | "judge";
-
-export type RoleInvitationEmailProps = {
-  invitationRole: InvitationRole;
+export type RoleConfirmationEmailProps = {
+  eventRole: EventRole;
   recipientName?: string;
+  recipientBackground?: string;
   actionUrl?: string;
+  actionLabel?: string;
   assetBaseUrl?: string;
-};
-
-type RoleContent = {
-  noun: string;
-  headline: string;
-  introduction: string;
-  responsibilities: readonly string[];
-  date: string;
-  commitment: string;
-};
-
-const siteUrl = "https://hack.useportal.co";
-const assetOrigin = "https://the-realtime-hackathon.vercel.app";
-
-const roleContent: Record<InvitationRole, RoleContent> = {
-  mentor: {
-    noun: "mentor",
-    headline: "Help builders get unstuck.",
-    introduction:
-      "Your practical perspective can turn a promising idea into something people can actually use. We would love you to guide teams through the hard product and technical decisions that happen when the clock is running.",
-    responsibilities: [
-      "Guide teams during focused office hours",
-      "Pressure-test product and technical choices",
-      "Share direct feedback that helps builders ship",
-    ],
-    date: "Aug 7-9",
-    commitment: "Scheduled with you",
-  },
-  judge: {
-    noun: "judge",
-    headline: "Help choose what deserves to win.",
-    introduction:
-      "Your judgment can recognize the projects that make realtime technology genuinely useful. We would love you to help us evaluate the finalists with rigor, curiosity, and a clear eye for what works.",
-    responsibilities: [
-      "Review the finalist demos",
-      "Score projects against one shared rubric",
-      "Help select the winning teams",
-    ],
-    date: "Aug 9",
-    commitment: "Finalist review",
-  },
 };
 
 const colors = {
@@ -85,18 +49,22 @@ function assetUrl(assetBaseUrl: string, fileName: string) {
   return `${assetBaseUrl.replace(/\/$/, "")}/brand-assets/${fileName}`;
 }
 
-export function getRoleInvitationSubject(role: InvitationRole) {
-  return `Invitation to ${roleContent[role].noun}: The Realtime Hackathon`;
+export function getRoleConfirmationSubject(role: EventRole) {
+  return roleDetails[role].subject;
 }
 
-export function RoleInvitationEmail({
-  invitationRole,
+export function RoleConfirmationEmail({
+  eventRole,
   recipientName = "there",
-  actionUrl = siteUrl,
-  assetBaseUrl = assetOrigin,
-}: RoleInvitationEmailProps) {
-  const content = roleContent[invitationRole];
+  recipientBackground,
+  actionUrl,
+  actionLabel,
+  assetBaseUrl = eventDetails.assetOrigin,
+}: RoleConfirmationEmailProps) {
+  const content = roleDetails[eventRole];
   const roleLabel = content.noun.toUpperCase();
+  const resolvedActionUrl = actionUrl ?? content.actionUrl;
+  const resolvedActionLabel = actionLabel ?? content.actionLabel;
 
   return (
     <Html lang="en" dir="ltr">
@@ -114,9 +82,7 @@ export function RoleInvitationEmail({
           fontStyle="normal"
         />
       </Head>
-      <Preview>
-        You are invited to join The Realtime Hackathon as a {content.noun}.
-      </Preview>
+      <Preview>{content.preview}</Preview>
       <Body style={body}>
         <Container style={container}>
           <Section style={signalBar} />
@@ -137,8 +103,8 @@ export function RoleInvitationEmail({
                 <Text style={brandNameRight}>CRAFTER STATION</Text>
                 <Img
                   src={assetUrl(assetBaseUrl, "crafter-station-icon-64.png")}
-                  width="28"
-                  height="28"
+                  width="20"
+                  height="20"
                   alt="Crafter Station"
                   style={brandMarkRight}
                 />
@@ -155,18 +121,37 @@ export function RoleInvitationEmail({
           />
 
           <Section style={main}>
-            <Text style={eyebrow}>PRIVATE INVITATION / ROLE: {roleLabel}</Text>
+            <Text style={eyebrow}>
+              OFFICIAL CONFIRMATION / ROLE: {roleLabel}
+            </Text>
             <Heading as="h1" style={heading}>
               {content.headline}
             </Heading>
 
             <Text style={greeting}>Hi {recipientName},</Text>
             <Text style={bodyCopy}>
-              We are bringing together ambitious builders for a 39-hour online
-              sprint to create AI products that happen live. We would be honored
-              to have you join The Realtime Hackathon as a {content.noun}.
+              Following our previous conversation and your acceptance, this
+              email formally confirms your role as a {content.noun} for The
+              Realtime Hackathon, a fully online event taking place August 7-9,
+              2026.
             </Text>
             <Text style={bodyCopy}>{content.introduction}</Text>
+            {recipientBackground ? (
+              <Text style={bodyCopy}>
+                Your {recipientBackground} will be especially valuable to teams
+                building ambitious realtime products during the event.
+              </Text>
+            ) : null}
+
+            <Section style={attachmentPanel}>
+              <Text style={attachmentLabel}>ATTACHMENT / PDF</Text>
+              <Text style={attachmentTitle}>
+                Official {roleLabel.toLowerCase()} confirmation letter
+              </Text>
+              <Text style={attachmentMeta}>
+                Personalized letter included with this email
+              </Text>
+            </Section>
 
             <Section style={rolePanel}>
               <Text style={panelLabel}>YOUR ROLE / {roleLabel}</Text>
@@ -179,28 +164,28 @@ export function RoleInvitationEmail({
             </Section>
 
             <Row style={detailsRow}>
-              <Column style={detailColumn}>
-                <Text style={detailLabel}>WINDOW</Text>
-                <Text style={detailValue}>{content.date}</Text>
-              </Column>
-              <Column style={detailColumnMiddle}>
-                <Text style={detailLabel}>FORMAT</Text>
-                <Text style={detailValue}>Online</Text>
-              </Column>
-              <Column style={detailColumnLast}>
-                <Text style={detailLabel}>COMMITMENT</Text>
-                <Text style={detailValue}>{content.commitment}</Text>
-              </Column>
+              {content.details.map(([label, value], index) => (
+                <Column
+                  key={label}
+                  style={
+                    index === 0
+                      ? detailColumn
+                      : index === content.details.length - 1
+                        ? detailColumnLast
+                        : detailColumnMiddle
+                  }
+                >
+                  <Text style={detailLabel}>{label}</Text>
+                  <Text style={detailValue}>{value}</Text>
+                </Column>
+              ))}
             </Row>
 
             <Section style={actionSection}>
-              <Button href={actionUrl} style={button}>
-                VIEW THE EVENT&nbsp;&nbsp;-&gt;
+              <Button href={resolvedActionUrl} style={button}>
+                {resolvedActionLabel}&nbsp;&nbsp;-&gt;
               </Button>
-              <Text style={replyCopy}>
-                Interested? Reply to this email and we will coordinate the
-                details around your availability.
-              </Text>
+              <Text style={replyCopy}>{content.followUp}</Text>
             </Section>
 
             <Text style={signoff}>
@@ -217,7 +202,7 @@ export function RoleInvitationEmail({
                 <Text style={footerText}>THE REALTIME HACKATHON</Text>
               </Column>
               <Column align="right">
-                <Link href={siteUrl} style={footerLink}>
+                <Link href={eventDetails.siteUrl} style={footerLink}>
                   HACK.USEPORTAL.CO
                 </Link>
               </Column>
@@ -258,14 +243,16 @@ const header = {
 };
 
 const brandColumn = {
-  width: "50%",
+  width: "35%",
   verticalAlign: "middle" as const,
+  whiteSpace: "nowrap" as const,
 };
 
 const brandColumnRight = {
-  width: "50%",
+  width: "65%",
   verticalAlign: "middle" as const,
   textAlign: "right" as const,
+  whiteSpace: "nowrap" as const,
 };
 
 const brandMark = {
@@ -342,6 +329,37 @@ const bodyCopy = {
   color: colors.gray,
   fontSize: "15px",
   lineHeight: "25px",
+};
+
+const attachmentPanel = {
+  margin: "28px 0 0",
+  padding: "18px 20px",
+  border: `1px solid ${colors.rule}`,
+  backgroundColor: colors.black,
+};
+
+const attachmentLabel = {
+  margin: "0 0 7px",
+  color: colors.orange,
+  fontSize: "9px",
+  fontWeight: "700",
+  letterSpacing: "1.2px",
+  lineHeight: "13px",
+};
+
+const attachmentTitle = {
+  margin: "0",
+  color: colors.white,
+  fontSize: "13px",
+  fontWeight: "700",
+  lineHeight: "19px",
+};
+
+const attachmentMeta = {
+  margin: "5px 0 0",
+  color: colors.gray,
+  fontSize: "10px",
+  lineHeight: "15px",
 };
 
 const rolePanel = {

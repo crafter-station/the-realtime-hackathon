@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Email Confirmations
+
+Mentor and judge confirmation emails, personalized PDF letters, and sending instructions are documented in [`docs/email-confirmations.md`](docs/email-confirmations.md).
+
 ## Getting Started
 
 First, run the development server:
