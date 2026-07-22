@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { InteractionFeedback } from "./components/interaction-feedback";
@@ -106,6 +107,7 @@ export default function RootLayout({
           {JSON.stringify(eventJsonLd)}
         </script>
         {children}
+        <Analytics />
       </body>
     </html>
   );
