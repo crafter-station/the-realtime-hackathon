@@ -86,6 +86,7 @@ const schedule = [
   {
     day: "FRI",
     date: "AUG 07",
+    isoDate: "2026-08-07",
     title: "CONNECT",
     icon: Radio,
     items: [
@@ -97,6 +98,7 @@ const schedule = [
   {
     day: "SAT",
     date: "AUG 08",
+    isoDate: "2026-08-08",
     title: "BUILD",
     icon: Code2,
     items: [
@@ -109,6 +111,7 @@ const schedule = [
   {
     day: "SUN",
     date: "AUG 09",
+    isoDate: "2026-08-09",
     title: "SHIP",
     icon: Rocket,
     items: [
@@ -382,35 +385,59 @@ export default function Home() {
 
         <section className="schedule-section" id="schedule">
           <div className="shell">
-            <div className="section-heading-row">
-              <h2>39-hour schedule.</h2>
-              <p className="section-note">
-                <IconLabel icon={Clock3} tone="muted">
-                  All times UTC-5 / Lima.
-                </IconLabel>
-              </p>
+            <div className="schedule-heading">
+              <div>
+                <p
+                  className={labelVariants({
+                    tone: "accent",
+                    className: "schedule-heading__kicker",
+                  })}
+                >
+                  RUN OF SHOW / AUG 07-09
+                </p>
+                <h2>
+                  <span>39-hour</span> schedule.
+                </h2>
+              </div>
+
+              <div className="schedule-window">
+                <Clock3 aria-hidden="true" />
+                <div>
+                  <span>BUILD WINDOW</span>
+                  <strong>
+                    <time dateTime="2026-08-07T19:00:00-05:00">FRI 19:00</time>
+                    <ArrowDownRightIcon aria-hidden="true" />
+                    <time dateTime="2026-08-09T10:00:00-05:00">SUN 10:00</time>
+                  </strong>
+                  <small>ALL TIMES UTC-5 / LIMA</small>
+                </div>
+              </div>
             </div>
 
             <div className="schedule-grid">
-              {schedule.map((day) => {
+              {schedule.map((day, index) => {
                 const Icon = day.icon;
                 return (
                   <article className="schedule-day" key={day.day}>
-                    <div className="schedule-day__header">
-                      <div>
+                    <header className="schedule-day__header">
+                      <div className="schedule-day__date">
                         <span>{day.day}</span>
-                        <span>{day.date}</span>
+                        <time dateTime={day.isoDate}>{day.date}</time>
                       </div>
-                      <strong>
-                        <IconLabel icon={Icon} tone="accent">
-                          {day.title}
-                        </IconLabel>
-                      </strong>
-                    </div>
+                      <span className="schedule-day__index" aria-hidden="true">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className="schedule-day__phase">
+                        <Icon aria-hidden="true" />
+                        <h3>{day.title}</h3>
+                      </div>
+                    </header>
                     <ol>
                       {day.items.map(([time, label]) => (
                         <li key={`${day.day}-${time}`}>
-                          <time>{time}</time>
+                          <time dateTime={`${day.isoDate}T${time}:00-05:00`}>
+                            {time}
+                          </time>
                           <span>{label}</span>
                         </li>
                       ))}
