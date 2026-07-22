@@ -9,6 +9,7 @@
   --font-geist-mono: var(--font-geist-pixel);
   --orange: #ff4d00;
   --gray: #8f8f8f;
+  --link-muted: #737373;
   --black: #090909;
   --white: #ffffff;
 
@@ -155,10 +156,24 @@ a {
 .external-link--collapse {
   display: inline-flex;
   align-items: center;
+  gap: 0;
 }
 
-.portal-docs-link.external-link--collapse {
-  gap: 0;
+.external-link--lined {
+  border-bottom: 1px solid currentColor;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  line-height: 2.2;
+  text-transform: uppercase;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.external-link--lined:focus-visible {
+  border-color: var(--signal);
+  color: var(--signal);
 }
 
 .external-link-icon__frame {
@@ -198,6 +213,11 @@ a {
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .external-link--lined:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+
   .external-link:hover .external-link-icon {
     opacity: 1;
     transform: translate(0, 1px);
@@ -366,12 +386,12 @@ h2 {
 
 .site-nav a,
 .site-footer a {
-  color: var(--muted);
+  color: var(--link-muted);
   transition: color 150ms ease;
 }
 
 .site-nav a:hover,
-.site-footer a:hover {
+.site-footer a:not(.external-link--lined):hover {
   color: var(--paper);
 }
 
@@ -474,8 +494,7 @@ h2 {
   margin-top: 2rem;
 }
 
-.text-link,
-.portal-docs-link {
+.text-link {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
@@ -491,8 +510,7 @@ h2 {
     color 150ms ease;
 }
 
-.text-link:hover,
-.portal-docs-link:hover {
+.text-link:hover {
   border-color: var(--signal);
   color: var(--signal);
 }
@@ -892,8 +910,8 @@ h2 {
 
 .portal-docs-link {
   margin-top: 2.25rem;
-  border-color: var(--ink);
-  color: var(--ink);
+  border-color: var(--link-muted);
+  color: var(--link-muted);
 }
 
 .schedule-grid {
@@ -1823,6 +1841,7 @@ h2 {
 
   .text-link,
   .portal-docs-link,
+  .external-link--lined,
   .site-nav a,
   .site-footer a {
     transition: none;
@@ -3168,7 +3187,7 @@ h2 {
   background: transparent;
 }
 
-.countdown-slide > .site-footer a:hover {
+.countdown-slide > .site-footer a:not(.external-link--lined):hover {
   color: var(--slide-foreground);
 }
 
@@ -3273,11 +3292,6 @@ h2 {
   [data-slot="accordion-content"]
   > div {
   color: var(--black);
-}
-
-#main-content > section:nth-of-type(odd) .portal-docs-link {
-  border-color: var(--white);
-  color: var(--white);
 }
 
 #main-content > section:nth-of-type(odd) .capability-list li,

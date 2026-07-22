@@ -293,8 +293,6 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
         uniforms: {
           uIntro: { value: 0 },
           uPixelRatio: { value: 1 },
-          uPointer: { value: new THREE.Vector2() },
-          uPointerStrength: { value: 0 },
           uTime: { value: 0 },
           uTransition: { value: 1 },
         },
@@ -308,8 +306,6 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
 
           uniform float uIntro;
           uniform float uPixelRatio;
-          uniform vec2 uPointer;
-          uniform float uPointerStrength;
           uniform float uTime;
           uniform float uTransition;
 
@@ -322,16 +318,6 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
             float intro = smoothstep(aDelay * 0.38, 0.62 + aDelay * 0.28, uIntro);
             vec3 transformed = mix(position, glyphPosition, intro);
 
-            vec2 difference = glyphPosition.xy - uPointer;
-            float pointerDistance = length(difference);
-            vec2 direction = normalize(difference + vec2(0.0001));
-            float repel = smoothstep(0.32, 0.03, pointerDistance) *
-              uPointerStrength * intro;
-            vec2 tangent = vec2(-direction.y, direction.x);
-
-            transformed.xy += direction * repel * (0.13 + aSize * 0.02);
-            transformed.xy += tangent * repel * sin(uTime * 5.0 + aPhase) * 0.02;
-            transformed.z += repel * (0.28 + aDelay * 0.24);
             transformed.y += sin(uTime * 1.25 + aPhase) * 0.008 * intro;
             transformed.z += cos(uTime * 0.85 + aPhase) * 0.014 * intro;
 
@@ -339,8 +325,7 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
             vec4 viewPosition = viewMatrix * modelPosition;
             gl_Position = projectionMatrix * viewPosition;
             gl_PointSize = clamp(
-              (aSize + repel * 1.15) * uPixelRatio *
-                (10.0 / max(1.0, -viewPosition.z)),
+              aSize * uPixelRatio * (10.0 / max(1.0, -viewPosition.z)),
               1.0 * uPixelRatio,
               4.8 * uPixelRatio
             );
@@ -373,8 +358,6 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
       let fieldScale = 1;
       let inView = true;
       let lastTimestamp = 0;
-      let pointerStrengthTarget = 0;
-      let pointerStrength = 0;
       let reducedMotion = motionQuery.matches;
       let transitionStartedAt = performance.now() - 700;
       const introStartedAt = performance.now();
@@ -426,13 +409,6 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
           11,
           delta,
         );
-        pointerStrength = THREE.MathUtils.damp(
-          pointerStrength,
-          reducedMotion ? 0 : pointerStrengthTarget,
-          8,
-          delta,
-        );
-
         const intro = reducedMotion
           ? 1
           : THREE.MathUtils.clamp((timestamp - introStartedAt) / 1900, 0, 1);
@@ -445,14 +421,12 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
             );
 
         material.uniforms.uIntro.value = intro;
-        material.uniforms.uPointer.value.copy(pointerCurrent);
-        material.uniforms.uPointerStrength.value = pointerStrength;
         material.uniforms.uTime.value = reducedMotion ? 0 : timestamp * 0.001;
         material.uniforms.uTransition.value = easeInOut(transition);
         particleField.rotation.x = reducedMotion
           ? 0
-          : -pointerCurrent.y * 0.008;
-        particleField.rotation.y = reducedMotion ? 0 : pointerCurrent.x * 0.006;
+          : -pointerCurrent.y * 0.025;
+        particleField.rotation.y = reducedMotion ? 0 : pointerCurrent.x * 0.03;
         renderer.render(scene, camera);
 
         if (stage.dataset.renderer !== "ready") {
@@ -505,28 +479,14 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
           ((event.clientY - bounds.top) / bounds.height - 0.5) *
           2
         );
-        const visibleHeight =
-          2 *
-          Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) *
-          camera.position.z;
-        const visibleWidth = visibleHeight * camera.aspect;
-
-        pointerTarget.set(
-          (normalizedX * visibleWidth * 0.5) / fieldScale,
-          (normalizedY * visibleHeight * 0.5 - particleField.position.y) /
-            fieldScale,
-        );
-        pointerStrengthTarget = 1;
+        pointerTarget.set(normalizedX, normalizedY);
       };
 
-      const handlePointerLeave = () => {
-        pointerStrengthTarget = 0;
-      };
+      const handlePointerLeave = () => pointerTarget.set(0, 0);
 
       const handleMotionChange = (event: MediaQueryListEvent) => {
         reducedMotion = event.matches;
-        pointerStrengthTarget = 0;
-        pointerStrength = 0;
+        handlePointerLeave();
         start();
       };
 

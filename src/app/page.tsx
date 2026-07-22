@@ -2,7 +2,6 @@ import {
   Activity,
   ArrowUpIcon,
   Bell,
-  BookOpen,
   CalendarDays,
   Code2,
   Globe2,
@@ -180,14 +179,15 @@ export default function Home() {
             <a
               className={buttonVariants({
                 size: "lg",
-                className: "external-link hero-landing__cta",
+                className:
+                  "external-link external-link--collapse hero-landing__cta",
               })}
               href={registrationUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
               Register free
-              <ExternalLinkIcon />
+              <ExternalLinkIcon collapse />
             </a>
           </div>
         </section>
@@ -269,12 +269,12 @@ export default function Home() {
             </ul>
 
             <a
-              className="external-link external-link--collapse portal-docs-link"
+              className="external-link external-link--collapse external-link--lined portal-docs-link"
               href="https://docs.useportal.co/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <IconLabel icon={BookOpen}>Read Portal docs</IconLabel>
+              Read Portal docs
               <ExternalLinkIcon collapse />
             </a>
           </div>
@@ -394,14 +394,15 @@ export default function Home() {
               <a
                 className={buttonVariants({
                   variant: "outline",
-                  className: "external-link apply-section__cta",
+                  className:
+                    "external-link external-link--collapse apply-section__cta",
                 })}
                 href={registrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 Register free
-                <ExternalLinkIcon />
+                <ExternalLinkIcon collapse />
               </a>
             </div>
           </div>
@@ -412,7 +413,7 @@ export default function Home() {
             <footer className="site-footer">
               <div className="shell site-footer__bottom">
                 <a
-                  className="external-link external-link--collapse"
+                  className="external-link external-link--collapse external-link--lined"
                   href="https://crafter.run"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -422,7 +423,7 @@ export default function Home() {
                 </a>
                 <div>
                   <a
-                    className="external-link external-link--collapse"
+                    className="external-link external-link--collapse external-link--lined"
                     href="https://useportal.co/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -431,7 +432,7 @@ export default function Home() {
                     <ExternalLinkIcon collapse />
                   </a>
                   <a
-                    className="external-link external-link--collapse"
+                    className="external-link external-link--collapse external-link--lined"
                     href="https://docs.useportal.co/"
                     target="_blank"
                     rel="noopener noreferrer"
