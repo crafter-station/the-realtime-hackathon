@@ -269,19 +269,38 @@ await render(
 
 await render(
   "linkedin-post",
-  1_200,
-  627,
+  1_080,
+  1_350,
   `
-    ${background(1_200, 627)}
-    ${imageTag(particleData, 318, 11, 600, 0.94)}
-    ${portalLogo(65, 48, 36)}
-    <text class="title" x="600" y="224" text-anchor="middle" font-size="82">THE</text>
-    <text class="title orange" x="600" y="308" text-anchor="middle" font-size="82">REALTIME</text>
-    <text class="title" x="600" y="392" text-anchor="middle" font-size="82">HACKATHON</text>
-    <text class="title" x="600" y="464" text-anchor="middle" font-size="33">BUILD AI THAT HAPPENS NOW</text>
-    <text class="label" x="65" y="568" font-size="18">US$800 PRIZES</text>
-    <text class="label" x="1135" y="568" text-anchor="end" font-size="18">AUG 07-09  /  36H</text>
-    ${crafterStationLogo(1_099, 48, 36, colors.gray)}
+    ${background(1_080, 1_350)}
+    ${imageTag(particleData, 100, 202, 936, 0.98)}
+    ${portalLogo(64, 58, 42)}
+    <text class="title" x="540" y="565" text-anchor="middle" font-size="132">THE</text>
+    <text class="title orange" x="540" y="681" text-anchor="middle" font-size="132">REALTIME</text>
+    <text class="title" x="540" y="797" text-anchor="middle" font-size="132">HACKATHON</text>
+    <text class="title" x="540" y="875" text-anchor="middle" font-size="44">BUILD AI THAT HAPPENS NOW</text>
+    <text class="label" x="64" y="1282" font-size="26">US$800 PRIZES</text>
+    <text class="label" x="1016" y="1282" text-anchor="end" font-size="26">AUG 07-09  /  36H</text>
+    ${crafterStationLogo(974, 58, 42, colors.gray)}
+  `,
+  { webp: true },
+);
+
+await render(
+  "x-post",
+  1_200,
+  1_500,
+  `
+    ${background(1_200, 1_500)}
+    ${imageTag(particleData, 111, 224, 1_040, 0.98)}
+    ${portalLogo(71, 64, 47)}
+    <text class="title" x="600" y="628" text-anchor="middle" font-size="147">THE</text>
+    <text class="title orange" x="600" y="757" text-anchor="middle" font-size="147">REALTIME</text>
+    <text class="title" x="600" y="886" text-anchor="middle" font-size="147">HACKATHON</text>
+    <text class="title" x="600" y="972" text-anchor="middle" font-size="49">BUILD AI THAT HAPPENS NOW</text>
+    <text class="label" x="71" y="1424" font-size="29">US$800 PRIZES</text>
+    <text class="label" x="1129" y="1424" text-anchor="end" font-size="29">AUG 07-09  /  36H</text>
+    ${crafterStationLogo(1_082, 64, 47, colors.gray)}
   `,
   { webp: true },
 );
@@ -347,8 +366,10 @@ const manifest = {
     "og-image.webp": "1200x630",
     "luma-square.png": "1080x1080",
     "luma-square.webp": "1080x1080",
-    "linkedin-post.png": "1200x627",
-    "linkedin-post.webp": "1200x627",
+    "linkedin-post.png": "1080x1350",
+    "linkedin-post.webp": "1080x1350",
+    "x-post.png": "1200x1500",
+    "x-post.webp": "1200x1500",
     "instagram-post.png": "1080x1350",
     "instagram-post.webp": "1080x1350",
     "particle-torus.png": "1600x1600",

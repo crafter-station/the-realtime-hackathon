@@ -142,7 +142,7 @@ lists, private meeting links, signature images, or API keys.
 
 Generated campaign artwork is stored in
 [`public/brand-assets/`](./public/brand-assets/), including Open Graph, Luma,
-LinkedIn, Instagram, email, favicon, and app-icon variants. Their dimensions and
+LinkedIn, X, Instagram, email, favicon, and app-icon variants. Their dimensions and
 palette are recorded in
 [`public/brand-assets/assets.json`](./public/brand-assets/assets.json).
 
