@@ -1,28 +1,19 @@
 import {
   Activity,
-  ArrowDownIcon,
-  ArrowDownRightIcon,
   ArrowUpIcon,
-  ArrowUpRight,
   Bell,
   BookOpen,
-  BrainCircuit,
   CalendarDays,
-  Clock3,
   Code2,
   Globe2,
   History,
-  Medal,
   Megaphone,
   PackageCheck,
   Radio,
   RadioTower,
-  RefreshCw,
   Rocket,
   Send,
-  Server,
   Sparkles,
-  Trophy,
   Users,
   Workflow,
 } from "lucide-react";
@@ -33,20 +24,17 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { buttonVariants } from "@/components/ui/button";
-import { IconLabel, labelVariants } from "@/components/ui/icon-label";
+import { ExternalLinkIcon } from "@/components/ui/external-link-icon";
+import { IconLabel } from "@/components/ui/icon-label";
+import { KeyboardNavigation } from "./components/keyboard-navigation";
 import { ParticleCountdown } from "./components/particle-countdown";
+import { ParticleTrophy } from "./components/particle-trophy";
 import { SignalEngine } from "./components/signal-engine";
+import { TrackParticles } from "./components/track-particles";
 
 const registrationUrl = "https://luma.com/realtime-hackathon";
 
-const eventFacts = [
-  { icon: Clock3, value: "39H", label: "Build window" },
-  { icon: Globe2, value: "Online", label: "UTC-5" },
-  { icon: Users, value: "1-4", label: "Builders / team" },
-  { icon: Trophy, value: "$800", label: "Cash prizes" },
-];
-
-const missions = [
+const tracks = [
   {
     name: "CO-OP AI",
     description: "People and agents sharing one live workspace.",
@@ -68,6 +56,8 @@ const missions = [
     icon: Sparkles,
   },
 ];
+
+const trackSlides = [tracks.slice(0, 2), tracks.slice(2)];
 
 const portalCapabilities = [
   { label: "Channels", icon: RadioTower },
@@ -161,6 +151,8 @@ export default function Home() {
         Skip to content
       </a>
 
+      <KeyboardNavigation />
+
       <main id="main-content">
         <section className="hero hero--landing" id="top">
           <SignalEngine />
@@ -178,6 +170,9 @@ export default function Home() {
               <IconLabel icon={Globe2} tone="muted">
                 ONLINE / UTC-5
               </IconLabel>
+              <IconLabel icon={Users} size="sm" tone="muted">
+                Teams of 1-4
+              </IconLabel>
             </p>
           </div>
 
@@ -185,180 +180,102 @@ export default function Home() {
             <a
               className={buttonVariants({
                 size: "lg",
-                className: "hero-landing__cta",
+                className: "external-link hero-landing__cta",
               })}
               href={registrationUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               Register free
-              <ArrowDownRightIcon data-icon="inline-end" aria-hidden="true" />
+              <ExternalLinkIcon />
             </a>
-            <small>
-              <IconLabel icon={Users} size="sm" tone="muted">
-                Teams of 1-4
-              </IconLabel>
-            </small>
-          </div>
-
-          <a
-            className="hero-landing__scroll"
-            href="#event-details"
-            aria-label="Explore event details"
-          >
-            <ArrowDownIcon aria-hidden="true" />
-          </a>
-        </section>
-
-        <section
-          className="hero-details"
-          id="event-details"
-          aria-labelledby="event-details-title"
-        >
-          <div className="shell hero-details__intro">
-            <div>
-              <h2 id="event-details-title">Build it live. Ship by Sunday.</h2>
-            </div>
-          </div>
-
-          <ul className="shell facts" aria-label="Event facts">
-            {eventFacts.map((fact) => {
-              const Icon = fact.icon;
-              return (
-                <li className="fact" key={fact.label}>
-                  <IconLabel icon={Icon} tone="accent">
-                    {fact.label}
-                  </IconLabel>
-                  <span className="fact__value">{fact.value}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-
-        <section
-          className="signal-flow-section"
-          aria-labelledby="signal-flow-title"
-        >
-          <div className="shell">
-            <div className="section-heading-row">
-              <h2 id="signal-flow-title">Build the loop.</h2>
-              <p className="section-note">
-                <IconLabel icon={Workflow} tone="muted">
-                  AI decides. Portal syncs.
-                </IconLabel>
-              </p>
-            </div>
-
-            <ol className="signal-flow">
-              <li>
-                <IconLabel
-                  appearance="inherit"
-                  className="signal-flow__heading"
-                  icon={Radio}
-                  size="lg"
-                >
-                  <strong>INPUT</strong>
-                </IconLabel>
-                <span>People + live data</span>
-              </li>
-              <li>
-                <IconLabel
-                  appearance="inherit"
-                  className="signal-flow__heading"
-                  icon={BrainCircuit}
-                  size="lg"
-                >
-                  <strong>REASON</strong>
-                </IconLabel>
-                <span>AI decides</span>
-              </li>
-              <li>
-                <IconLabel
-                  appearance="inherit"
-                  className="signal-flow__heading"
-                  icon={Send}
-                  size="lg"
-                >
-                  <strong>ACT</strong>
-                </IconLabel>
-                <span>Portal syncs</span>
-              </li>
-              <li>
-                <IconLabel
-                  appearance="inherit"
-                  className="signal-flow__heading"
-                  icon={RefreshCw}
-                  size="lg"
-                >
-                  <strong>REPEAT</strong>
-                </IconLabel>
-                <span>State updates live</span>
-              </li>
-            </ol>
           </div>
         </section>
 
-        <section className="missions-section" id="missions">
-          <div className="shell">
-            <div className="section-heading-row section-heading-row--missions">
-              <h2>Pick a track.</h2>
-              <p className="section-note">
-                <IconLabel icon={Sparkles} tone="muted">
-                  Starting points, not limits.
-                </IconLabel>
-              </p>
-            </div>
+        {trackSlides.map((slideTracks, slideIndex) => {
+          const headingId = `tracks-title-${slideIndex + 1}`;
 
-            <div className="mission-list">
-              {missions.map((mission) => {
-                const Icon = mission.icon;
-                return (
-                  <article className="mission" key={mission.name}>
-                    <h3>
-                      <IconLabel appearance="inherit" icon={Icon} size="lg">
-                        {mission.name}
-                      </IconLabel>
-                    </h3>
-                    <p className="mission__summary">{mission.description}</p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+          return (
+            <section
+              className={`missions-section missions-section--visual-${
+                slideIndex === 0 ? "right" : "left"
+              }`}
+              id={slideIndex === 0 ? "tracks" : `tracks-${slideIndex + 1}`}
+              aria-labelledby={headingId}
+              key={slideTracks[0].name}
+            >
+              <div className="shell missions-slide">
+                <div className="section-heading-row section-heading-row--missions">
+                  <h2 id={headingId}>Pick a track.</h2>
+                </div>
+
+                <TrackParticles
+                  variant={slideIndex === 0 ? "cooperative" : "crowd"}
+                />
+
+                <div className="mission-list">
+                  {slideTracks.map((track) => {
+                    const Icon = track.icon;
+                    return (
+                      <article
+                        className="content-box content-box--standard mission"
+                        key={track.name}
+                      >
+                        <h3>
+                          <IconLabel
+                            appearance="inherit"
+                            className="content-box__title"
+                            icon={Icon}
+                          >
+                            {track.name}
+                          </IconLabel>
+                        </h3>
+                        <p className="content-box__description">
+                          {track.description}
+                        </p>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          );
+        })}
 
         <section className="portal-section" aria-labelledby="portal-title">
           <div className="shell">
             <div className="section-heading-row">
               <h2 id="portal-title">Use Portal. Ship realtime.</h2>
-              <p className="section-note">
-                <IconLabel icon={Server} tone="muted">
-                  AI backend + Portal live layer.
-                </IconLabel>
-              </p>
             </div>
 
             <ul className="capability-list" aria-label="Portal capabilities">
               {portalCapabilities.map((capability) => {
                 const Icon = capability.icon;
                 return (
-                  <li key={capability.label}>
-                    <IconLabel icon={Icon}>{capability.label}</IconLabel>
+                  <li
+                    className="content-box content-box--standard"
+                    key={capability.label}
+                  >
+                    <IconLabel
+                      appearance="inherit"
+                      className="content-box__title"
+                      icon={Icon}
+                    >
+                      {capability.label}
+                    </IconLabel>
                   </li>
                 );
               })}
             </ul>
 
             <a
-              className="portal-docs-link"
+              className="external-link external-link--collapse portal-docs-link"
               href="https://docs.useportal.co/"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
-              <IconLabel icon={BookOpen} trailingIcon={ArrowUpRight}>
-                Read Portal docs
-              </IconLabel>
+              <IconLabel icon={BookOpen}>Read Portal docs</IconLabel>
+              <ExternalLinkIcon collapse />
             </a>
           </div>
         </section>
@@ -367,49 +284,32 @@ export default function Home() {
           <div className="shell">
             <div className="schedule-heading">
               <div>
-                <p
-                  className={labelVariants({
-                    tone: "accent",
-                    className: "schedule-heading__kicker",
-                  })}
-                >
-                  RUN OF SHOW / AUG 07-09
-                </p>
                 <h2>
                   <span>39-hour</span> schedule.
                 </h2>
               </div>
-
-              <div className="schedule-window">
-                <Clock3 aria-hidden="true" />
-                <div>
-                  <span>BUILD WINDOW</span>
-                  <strong>
-                    <time dateTime="2026-08-07T19:00:00-05:00">FRI 19:00</time>
-                    <ArrowDownRightIcon aria-hidden="true" />
-                    <time dateTime="2026-08-09T10:00:00-05:00">SUN 10:00</time>
-                  </strong>
-                  <small>ALL TIMES UTC-5 / LIMA</small>
-                </div>
-              </div>
             </div>
 
             <div className="schedule-grid">
-              {schedule.map((day, index) => {
+              {schedule.map((day) => {
                 const Icon = day.icon;
                 return (
-                  <article className="schedule-day" key={day.day}>
+                  <article className="content-box schedule-day" key={day.day}>
                     <header className="schedule-day__header">
                       <div className="schedule-day__date">
                         <span>{day.day}</span>
                         <time dateTime={day.isoDate}>{day.date}</time>
                       </div>
-                      <span className="schedule-day__index" aria-hidden="true">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
                       <div className="schedule-day__phase">
-                        <Icon aria-hidden="true" />
-                        <h3>{day.title}</h3>
+                        <h3>
+                          <IconLabel
+                            appearance="inherit"
+                            className="content-box__title"
+                            icon={Icon}
+                          >
+                            {day.title}
+                          </IconLabel>
+                        </h3>
                       </div>
                     </header>
                     <ol>
@@ -418,7 +318,9 @@ export default function Home() {
                           <time dateTime={`${day.isoDate}T${time}:00-05:00`}>
                             {time}
                           </time>
-                          <span>{label}</span>
+                          <span className="content-box__description">
+                            {label}
+                          </span>
                         </li>
                       ))}
                     </ol>
@@ -429,47 +331,38 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="prizes-section" id="prizes">
-          <div className="shell">
-            <div className="prize-grid">
-              <div className="prize-copy">
-                <h2>
-                  <IconLabel appearance="inherit" icon={Trophy} size="xl">
-                    Prizes.
-                  </IconLabel>
-                </h2>
-              </div>
-              <div className="prize-card prize-card--first">
-                <IconLabel icon={Trophy} iconTone="current">
-                  First place
-                </IconLabel>
-                <strong>US$500</strong>
-              </div>
-              <div className="prize-card">
-                <IconLabel icon={Medal}>Second place</IconLabel>
-                <strong>US$300</strong>
-              </div>
+        <section className="prizes-section" id="prizes" aria-label="Prizes">
+          <ParticleTrophy />
+          <dl className="prize-slide__awards">
+            <div>
+              <dt>First place</dt>
+              <dd>US$500</dd>
             </div>
+            <div>
+              <dt>Second place</dt>
+              <dd>US$300</dd>
+            </div>
+          </dl>
+        </section>
 
-            <section className="judging" aria-labelledby="judging-title">
-              <div className="judging__header">
-                <h3 id="judging-title">Judging criteria</h3>
-                <p className={labelVariants({ tone: "muted" })}>
-                  100 points total
-                </p>
-              </div>
+        <section
+          className="judging-section"
+          id="judging"
+          aria-labelledby="judging-title"
+        >
+          <div className="shell judging-slide">
+            <header className="judging-slide__header">
+              <h2 id="judging-title">Evaluation criteria.</h2>
+            </header>
 
-              <ul className="judging__list">
-                {judging.map((criterion) => {
-                  return (
-                    <li key={criterion.label}>
-                      <span>{criterion.label}</span>
-                      <strong>{criterion.weight}%</strong>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+            <ol className="judging-slide__list">
+              {judging.map((criterion) => (
+                <li key={criterion.label}>
+                  <span>{criterion.label}</span>
+                  <strong>{criterion.weight}%</strong>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
@@ -500,16 +393,15 @@ export default function Home() {
             <div className="apply-section__action">
               <a
                 className={buttonVariants({
-                  variant: "inverse",
-                  size: "lg",
-                  className: "w-full",
+                  variant: "outline",
+                  className: "external-link apply-section__cta",
                 })}
                 href={registrationUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 Register free
-                <ArrowDownRightIcon data-icon="inline-end" aria-hidden="true" />
+                <ExternalLinkIcon />
               </a>
             </div>
           </div>
@@ -519,21 +411,33 @@ export default function Home() {
           footer={
             <footer className="site-footer">
               <div className="shell site-footer__bottom">
-                <span>PORTAL x CRAFTER STATION</span>
+                <a
+                  className="external-link external-link--collapse"
+                  href="https://crafter.run"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  By Crafter Station
+                  <ExternalLinkIcon collapse />
+                </a>
                 <div>
                   <a
+                    className="external-link external-link--collapse"
                     href="https://useportal.co/"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
-                    <IconLabel trailingIcon={ArrowUpRight}>Portal</IconLabel>
+                    Portal
+                    <ExternalLinkIcon collapse />
                   </a>
                   <a
+                    className="external-link external-link--collapse"
                     href="https://docs.useportal.co/"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
-                    <IconLabel trailingIcon={ArrowUpRight}>Docs</IconLabel>
+                    Docs
+                    <ExternalLinkIcon collapse />
                   </a>
                 </div>
                 <a href="#top">

@@ -29,18 +29,17 @@ export function SignalEngine() {
         renderer = new THREE.WebGLRenderer({
           canvas,
           antialias: false,
-          alpha: false,
+          alpha: true,
           powerPreference: "high-performance",
         });
       } catch {
         return;
       }
 
-      renderer.setClearColor(0x090909, 1);
+      renderer.setClearColor(0x090909, 0);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x090909);
 
       const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 30);
       camera.position.set(0, 0, 9.2);

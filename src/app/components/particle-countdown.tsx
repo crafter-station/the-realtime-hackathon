@@ -182,7 +182,7 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
       const delays = new Float32Array(particleCount);
       const phases = new Float32Array(particleCount);
       const sizes = new Float32Array(particleCount);
-      const particleColor = new THREE.Color(0x090909);
+      const particleColor = new THREE.Color(getComputedStyle(stage).color);
       let randomSeed = 0x1a2b3c4d;
 
       const random = () => {
@@ -325,7 +325,7 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
             vec2 difference = glyphPosition.xy - uPointer;
             float pointerDistance = length(difference);
             vec2 direction = normalize(difference + vec2(0.0001));
-            float repel = smoothstep(0.46, 0.03, pointerDistance) *
+            float repel = smoothstep(0.32, 0.03, pointerDistance) *
               uPointerStrength * intro;
             vec2 tangent = vec2(-direction.y, direction.x);
 
