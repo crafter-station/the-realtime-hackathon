@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { PartnerLinks } from "./partner-links";
 
 const eventStart = new Date("2026-08-07T19:00:00-05:00").getTime();
 const eventEnd = new Date("2026-08-09T10:00:00-05:00").getTime();
@@ -545,6 +546,7 @@ export function ParticleCountdown({ footer }: { footer?: ReactNode }) {
       id="countdown"
       aria-labelledby="countdown-title"
     >
+      <PartnerLinks />
       <div className="shell countdown-slide__body">
         <div className="countdown-slide__heading">
           <h2 id="countdown-title">The clock is ticking</h2>

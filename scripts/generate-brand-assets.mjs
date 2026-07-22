@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
@@ -26,6 +26,17 @@ const colors = {
   particle: "#b8b8b8",
   white: "#ffffff",
 };
+
+const portalLogoSource = await readFile(
+  path.join(outputDirectory, "logo-portal.svg"),
+  "utf8",
+);
+const portalLogoData = Buffer.from(
+  portalLogoSource
+    .replace(/<rect\b[^>]*\/>/, "")
+    .replace('viewBox="0 0 1014 1014"', 'viewBox="145 145 725 725"')
+    .replace('fill="white"', `fill="${colors.gray}"`),
+).toString("base64");
 
 function svgDocument(width, height, content, extraStyles = "") {
   return Buffer.from(`
@@ -133,6 +144,10 @@ function imageTag(particleData, x, y, size, opacity = 1) {
   return `<image href="data:image/png;base64,${particleData}" x="${x}" y="${y}" width="${size}" height="${size}" opacity="${opacity}"/>`;
 }
 
+function portalLogo(x, y, size) {
+  return `<image href="data:image/svg+xml;base64,${portalLogoData}" x="${x}" y="${y}" width="${size}" height="${size}"/>`;
+}
+
 function crafterStationLogo(x, y, size, color = colors.white) {
   return `
     <svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 257 257" aria-label="Crafter Station">
@@ -212,14 +227,14 @@ const og = await render(
   `
     ${background(1_200, 630)}
     ${imageTag(particleData, 318, 12, 600, 0.94)}
-    <text class="label" x="65" y="78" font-size="18">AUG 07-09  /  36H</text>
+    ${portalLogo(65, 48, 34)}
     <text class="title" x="600" y="225" text-anchor="middle" font-size="82">THE</text>
     <text class="title orange" x="600" y="309" text-anchor="middle" font-size="82">REALTIME</text>
     <text class="title" x="600" y="393" text-anchor="middle" font-size="82">HACKATHON</text>
     <text class="title" x="600" y="465" text-anchor="middle" font-size="33">BUILD AI THAT HAPPENS NOW</text>
     <text class="label" x="65" y="571" font-size="18">US$800 PRIZES</text>
-    <text class="label" x="1135" y="571" text-anchor="end" font-size="18">LUMA.COM/REALTIME-HACKATHON</text>
-    ${crafterStationLogo(1_122, 48, 34, colors.particle)}
+    <text class="label" x="1135" y="571" text-anchor="end" font-size="18">AUG 07-09  /  36H</text>
+    ${crafterStationLogo(1_101, 48, 34, colors.gray)}
   `,
   { webp: true },
 );
@@ -232,11 +247,12 @@ await render(
   `
     ${background(1_080, 1_080)}
     ${imageTag(particleData, 98, 65, 940, 0.68)}
+    ${portalLogo(56, 48, 48)}
     <text class="title" x="540" y="420" text-anchor="middle" font-size="112">THE</text>
     <text class="title orange" x="540" y="545" text-anchor="middle" font-size="112">REALTIME</text>
     <text class="title" x="540" y="670" text-anchor="middle" font-size="112">HACKATHON</text>
     <text class="label" x="540" y="938" text-anchor="middle" font-size="32">AUG 07-09</text>
-    ${crafterStationLogo(976, 48, 48)}
+    ${crafterStationLogo(976, 48, 48, colors.gray)}
   `,
   { webp: true },
 );
@@ -248,14 +264,14 @@ await render(
   `
     ${background(1_200, 627)}
     ${imageTag(particleData, 318, 11, 600, 0.94)}
-    <text class="label" x="65" y="78" font-size="18">AUG 07-09  /  36H</text>
+    ${portalLogo(65, 48, 36)}
     <text class="title" x="600" y="224" text-anchor="middle" font-size="82">THE</text>
     <text class="title orange" x="600" y="308" text-anchor="middle" font-size="82">REALTIME</text>
     <text class="title" x="600" y="392" text-anchor="middle" font-size="82">HACKATHON</text>
     <text class="title" x="600" y="464" text-anchor="middle" font-size="33">BUILD AI THAT HAPPENS NOW</text>
     <text class="label" x="65" y="568" font-size="18">US$800 PRIZES</text>
-    <text class="label" x="1135" y="568" text-anchor="end" font-size="18">LUMA.COM/REALTIME-HACKATHON</text>
-    ${crafterStationLogo(1_122, 48, 36, colors.particle)}
+    <text class="label" x="1135" y="568" text-anchor="end" font-size="18">AUG 07-09  /  36H</text>
+    ${crafterStationLogo(1_099, 48, 36, colors.gray)}
   `,
   { webp: true },
 );
@@ -267,14 +283,14 @@ await render(
   `
     ${background(1_080, 1_350)}
     ${imageTag(particleData, 100, 202, 936, 0.98)}
-    <text class="label" x="64" y="84" font-size="18">AUG 07-09  /  36H</text>
-    <text class="title" x="540" y="565" text-anchor="middle" font-size="112">THE</text>
-    <text class="title orange" x="540" y="681" text-anchor="middle" font-size="112">REALTIME</text>
-    <text class="title" x="540" y="797" text-anchor="middle" font-size="112">HACKATHON</text>
-    <text class="title" x="540" y="865" text-anchor="middle" font-size="34">BUILD AI THAT HAPPENS NOW</text>
-    <text class="label" x="64" y="1282" font-size="18">US$800 PRIZES</text>
-    <text class="label" x="1016" y="1282" text-anchor="end" font-size="18">LUMA.COM/REALTIME-HACKATHON</text>
-    ${crafterStationLogo(970, 58, 42, colors.particle)}
+    ${portalLogo(64, 58, 42)}
+    <text class="title" x="540" y="565" text-anchor="middle" font-size="132">THE</text>
+    <text class="title orange" x="540" y="681" text-anchor="middle" font-size="132">REALTIME</text>
+    <text class="title" x="540" y="797" text-anchor="middle" font-size="132">HACKATHON</text>
+    <text class="title" x="540" y="875" text-anchor="middle" font-size="44">BUILD AI THAT HAPPENS NOW</text>
+    <text class="label" x="64" y="1282" font-size="26">US$800 PRIZES</text>
+    <text class="label" x="1016" y="1282" text-anchor="end" font-size="26">AUG 07-09  /  36H</text>
+    ${crafterStationLogo(974, 58, 42, colors.gray)}
   `,
   { webp: true },
 );
@@ -314,6 +330,7 @@ const manifest = {
     "apple-touch-icon.png": "180x180",
     "icon-192.png": "192x192",
     "icon-512.png": "512x512",
+    "logo-portal.svg": "1014x1014",
   },
 };
 await writeFile(

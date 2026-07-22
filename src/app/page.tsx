@@ -27,6 +27,7 @@ import { IconLabel } from "@/components/ui/icon-label";
 import { KeyboardNavigation } from "./components/keyboard-navigation";
 import { ParticleCountdown } from "./components/particle-countdown";
 import { ParticleTrophy } from "./components/particle-trophy";
+import { PartnerLinks } from "./components/partner-links";
 import { SignalEngine } from "./components/signal-engine";
 import { TrackParticles } from "./components/track-particles";
 
@@ -139,6 +140,7 @@ export default function Home() {
 
       <main id="main-content">
         <section className="hero hero--landing" id="top">
+          <PartnerLinks />
           <SignalEngine />
 
           <div className="shell hero-landing__masthead">
@@ -189,6 +191,7 @@ export default function Home() {
               aria-labelledby={headingId}
               key={slideTracks[0].name}
             >
+              <PartnerLinks />
               <div className="shell missions-slide">
                 <div className="section-heading-row section-heading-row--missions">
                   <h2 id={headingId}>Pick a track</h2>
@@ -228,6 +231,7 @@ export default function Home() {
         })}
 
         <section className="portal-section" aria-labelledby="portal-title">
+          <PartnerLinks />
           <div className="shell">
             <div className="section-heading-row">
               <h2 id="portal-title">Use Portal Ship realtime</h2>
@@ -266,6 +270,7 @@ export default function Home() {
         </section>
 
         <section className="schedule-section" id="schedule">
+          <PartnerLinks />
           <div className="shell">
             <div className="schedule-heading">
               <div>
@@ -318,6 +323,7 @@ export default function Home() {
         </section>
 
         <section className="prizes-section" id="prizes" aria-label="Prizes">
+          <PartnerLinks />
           <ParticleTrophy />
           <dl className="prize-slide__awards">
             <div>
@@ -336,6 +342,7 @@ export default function Home() {
           id="judging"
           aria-labelledby="judging-title"
         >
+          <PartnerLinks />
           <div className="shell judging-slide">
             <header className="judging-slide__header">
               <h2 id="judging-title">Evaluation criteria</h2>
@@ -353,6 +360,7 @@ export default function Home() {
         </section>
 
         <section className="faq-section" id="faq">
+          <PartnerLinks />
           <div className="shell editorial-grid">
             <h2>FAQ</h2>
             <Accordion className="faq-list" defaultValue={[]}>
@@ -374,6 +382,7 @@ export default function Home() {
         </section>
 
         <section className="apply-section" id="apply">
+          <PartnerLinks />
           <div className="shell apply-section__inner">
             <h2>Build it live</h2>
             <div className="apply-section__action">
