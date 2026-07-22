@@ -12,41 +12,43 @@
   --black: #090909;
   --white: #ffffff;
 
-  /* Typography system: one role per level of the slide hierarchy. */
+  /* Four visible text styles: title, heading, body, and label. */
   --type-font: var(--font-geist-pixel), monospace;
-  --type-display-size: clamp(2.75rem, 7vw, 7rem);
-  --type-display-weight: 700;
-  --type-display-leading: 0.86;
-  --type-display-tracking: -0.075em;
-  --type-title-size: clamp(2.5rem, 5.5vw, 5.5rem);
+  --type-title-size: clamp(2rem, 5vw, 5rem);
   --type-title-weight: 700;
   --type-title-leading: 0.9;
-  --type-title-tracking: -0.065em;
+  --type-title-tracking: -0.06em;
   --type-heading-size: clamp(1.5rem, 2.5vw, 2.5rem);
   --type-heading-weight: 700;
   --type-heading-leading: 1;
-  --type-heading-tracking: -0.045em;
-  --type-subheading-size: clamp(1.05rem, 1.6vw, 1.3rem);
-  --type-subheading-weight: 600;
-  --type-subheading-leading: 1.3;
-  --type-subheading-tracking: -0.025em;
-  --type-value-size: clamp(1.75rem, 3.5vw, 3.5rem);
-  --type-value-weight: 700;
-  --type-value-leading: 0.95;
-  --type-value-tracking: -0.055em;
-  --type-body-large-size: clamp(1rem, 1.35vw, 1.2rem);
-  --type-body-size: 0.9375rem;
+  --type-heading-tracking: -0.04em;
+  --type-body-size: 1rem;
   --type-body-weight: 400;
   --type-body-leading: 1.5;
-  --type-body-tracking: -0.01em;
-  --type-label-size: 0.6875rem;
+  --type-body-tracking: 0;
+  --type-label-size: 0.75rem;
   --type-label-weight: 700;
   --type-label-leading: 1.25;
   --type-label-tracking: 0.08em;
-  --type-caption-size: 0.625rem;
-  --type-caption-weight: 700;
-  --type-caption-leading: 1.35;
-  --type-caption-tracking: 0.08em;
+
+  /* Existing component roles alias the four styles above. */
+  --type-display-size: var(--type-title-size);
+  --type-display-weight: var(--type-title-weight);
+  --type-display-leading: var(--type-title-leading);
+  --type-display-tracking: var(--type-title-tracking);
+  --type-subheading-size: var(--type-body-size);
+  --type-subheading-weight: var(--type-body-weight);
+  --type-subheading-leading: var(--type-body-leading);
+  --type-subheading-tracking: var(--type-body-tracking);
+  --type-value-size: var(--type-heading-size);
+  --type-value-weight: var(--type-heading-weight);
+  --type-value-leading: var(--type-heading-leading);
+  --type-value-tracking: var(--type-heading-tracking);
+  --type-body-large-size: var(--type-body-size);
+  --type-caption-size: var(--type-label-size);
+  --type-caption-weight: var(--type-label-weight);
+  --type-caption-leading: var(--type-label-leading);
+  --type-caption-tracking: var(--type-label-tracking);
 
   /* Text colors are semantic; slide palettes set the primary value. */
   --text-primary: var(--white);
@@ -354,7 +356,6 @@ h2 {
 .signal-engine__axis,
 .signal-engine__hint,
 .event-clock,
-.mission__index,
 .schedule-day__header,
 .schedule-day time,
 .apply-section small {
@@ -784,10 +785,6 @@ h2 {
 
 .mission:hover {
   background: var(--night);
-}
-
-.mission__index {
-  color: var(--signal);
 }
 
 .mission h3 {
@@ -1559,6 +1556,10 @@ h2 {
   --schedule-card: rgb(255 255 255 / 0.78);
 }
 
+.schedule-section > .shell {
+  min-width: 0;
+}
+
 .schedule-heading {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(22rem, 5fr);
@@ -1763,6 +1764,10 @@ h2 {
   font-weight: 620;
   letter-spacing: -0.015em;
   line-height: 1.3;
+}
+
+#main-content .schedule-section .schedule-day li span {
+  color: var(--schedule-ink);
 }
 
 @media (max-width: 48rem) {
@@ -2224,8 +2229,7 @@ h2 {
   box-shadow: inset 0.5rem 0 var(--signal-hover);
 }
 
-.mission:hover
-  :is(.mission__index, .mission__copy > p:last-child, .mission__prompt) {
+.mission:hover :is(.mission__copy > p:last-child, .mission__prompt) {
   color: var(--night);
 }
 
@@ -2539,15 +2543,6 @@ h2 {
   gap: clamp(3rem, 8vw, 9rem);
 }
 
-.hero-details__kicker {
-  margin-bottom: 1.25rem;
-  color: var(--signal);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .hero-details h2 {
   max-width: 9ch;
 }
@@ -2733,7 +2728,7 @@ h2 {
   min-height: 13rem;
   padding: 1.5rem;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto 1fr;
   align-items: start;
   gap: 1rem;
   border: 2px solid var(--rule);
@@ -2741,26 +2736,22 @@ h2 {
   box-shadow: 0.32rem 0.32rem 0 var(--hard-shadow);
 }
 
-.mission__index {
-  grid-column: 1 / -1;
-}
-
 .mission h3 {
   max-width: none;
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 1;
 }
 
 .mission__summary {
   max-width: 30rem;
   grid-column: 1;
-  grid-row: 3;
+  grid-row: 2;
   color: var(--muted);
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
-.mission:hover :is(.mission__index, .mission__summary) {
+.mission:hover .mission__summary {
   color: var(--night);
 }
 
@@ -2848,7 +2839,7 @@ h2 {
 
   .mission {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto 1fr;
   }
 
   .mission h3,
@@ -3320,6 +3311,15 @@ h2 {
   color: var(--black);
 }
 
+.countdown-slide > .site-footer {
+  border-top: 0;
+  background: transparent;
+}
+
+.countdown-slide > .site-footer a:hover {
+  color: var(--black);
+}
+
 @media (max-width: 48rem) {
   .countdown-slide__body {
     min-height: 0;
@@ -3565,4 +3565,138 @@ h2 {
     gap: 0.5rem;
     font-size: 0.68rem;
   }
+}
+
+/*
+ * Slide typography assignments. Component-specific role names above alias
+ * these four visible styles so hierarchy stays identical across every slide.
+ */
+#main-content > section {
+  --text-primary: var(--white);
+  --text-secondary: var(--gray);
+  --text-accent: var(--orange);
+}
+
+#main-content > section:nth-of-type(even) {
+  --text-primary: var(--black);
+}
+
+.hero-landing__title {
+  color: var(--text-primary);
+  font-family: var(--type-font);
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  letter-spacing: var(--type-display-tracking);
+  line-height: var(--type-display-leading);
+}
+
+#main-content > section h2 {
+  max-width: 14ch;
+  color: var(--text-primary);
+  font-family: var(--type-font);
+  font-size: var(--type-title-size);
+  font-weight: var(--type-title-weight);
+  letter-spacing: var(--type-title-tracking);
+  line-height: var(--type-title-leading);
+  text-shadow: none;
+  text-transform: none;
+  text-wrap: balance;
+}
+
+#main-content > section .schedule-heading h2 span {
+  color: inherit;
+}
+
+:is(
+    .signal-flow strong,
+    .mission h3,
+    .schedule-section .schedule-day__phase h3
+  ) {
+  color: var(--text-primary);
+  font-family: var(--type-font);
+  font-size: var(--type-heading-size);
+  font-weight: var(--type-heading-weight);
+  letter-spacing: var(--type-heading-tracking);
+  line-height: var(--type-heading-leading);
+  text-transform: none;
+}
+
+:is(
+    .judging__header h3,
+    .schedule-window strong,
+    [data-slot="accordion-trigger"]
+  ) {
+  font-family: var(--type-font);
+  font-size: var(--type-subheading-size);
+  font-weight: var(--type-subheading-weight);
+  letter-spacing: var(--type-subheading-tracking);
+  line-height: var(--type-subheading-leading);
+}
+
+.fact__value {
+  color: var(--text-primary);
+}
+
+:is(.fact__value, .prize-card strong) {
+  font-family: var(--type-font);
+  font-size: var(--type-value-size);
+  font-weight: var(--type-value-weight);
+  letter-spacing: var(--type-value-tracking);
+  line-height: var(--type-value-leading);
+  text-shadow: none;
+}
+
+:is(
+    .signal-flow li > span:last-child,
+    .mission__summary,
+    .judging__list li,
+    [data-slot="accordion-content"] > div
+  ),
+.schedule-section .schedule-day li span {
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  letter-spacing: var(--type-body-tracking);
+  line-height: var(--type-body-leading);
+}
+
+:is(.mission__summary, .schedule-section .schedule-day li span),
+#main-content > section [data-slot="accordion-content"] > div {
+  color: var(--text-secondary);
+}
+
+:is(
+    .schedule-heading__kicker,
+    .schedule-window span,
+    .schedule-window small,
+    .schedule-section .schedule-day__date,
+    .schedule-section .schedule-day__index,
+    .schedule-section .schedule-day time,
+    .judging__header p,
+    .judging__list strong
+  ) {
+  font-family: var(--type-font);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
+  text-transform: uppercase;
+}
+
+:is(.hero-landing__meta, .hero-landing__action small, .site-footer__bottom) {
+  font-family: var(--type-font);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+  line-height: var(--type-caption-leading);
+  text-transform: uppercase;
+}
+
+#main-content
+  :is([data-slot="button"], .hero-landing__cta, .apply-section__action > a) {
+  font-family: var(--type-font);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  line-height: var(--type-label-leading);
+  text-transform: uppercase;
 }

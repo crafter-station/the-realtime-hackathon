@@ -7,21 +7,18 @@ import { cn } from "@/lib/utils";
 const labelStyles =
   "font-mono [font-size:var(--type-label-size)] [font-weight:var(--type-label-weight)] [line-height:var(--type-label-leading)] [letter-spacing:var(--type-label-tracking)] uppercase";
 
-const labelVariants = cva(
-  labelStyles,
-  {
-    variants: {
-      tone: {
-        default: "text-current",
-        muted: "text-muted-foreground",
-        accent: "text-primary",
-      },
-    },
-    defaultVariants: {
-      tone: "default",
+const labelVariants = cva(labelStyles, {
+  variants: {
+    tone: {
+      default: "text-current",
+      muted: "text-muted-foreground",
+      accent: "text-primary",
     },
   },
-);
+  defaultVariants: {
+    tone: "default",
+  },
+});
 
 const iconLabelVariants = cva(
   "inline-flex min-w-0 items-center align-middle [&_[data-slot=icon-label-icon]]:pointer-events-none [&_[data-slot=icon-label-icon]]:shrink-0 [&_[data-slot=icon-label-icon]]:text-primary [&_[data-slot=icon-label-text]]:min-w-0",

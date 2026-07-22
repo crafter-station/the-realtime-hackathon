@@ -48,25 +48,21 @@ const eventFacts = [
 
 const missions = [
   {
-    id: "01",
     name: "CO-OP AI",
     description: "People and agents sharing one live workspace.",
     icon: Users,
   },
   {
-    id: "02",
     name: "LIVE SYSTEMS",
     description: "Products that act on changing data.",
     icon: Activity,
   },
   {
-    id: "03",
     name: "CROWD MODE",
     description: "Experiences shaped by the audience.",
     icon: RadioTower,
   },
   {
-    id: "04",
     name: "WILD SIGNAL",
     description: "Realtime experiments without a category.",
     icon: Sparkles,
@@ -221,14 +217,6 @@ export default function Home() {
         >
           <div className="shell hero-details__intro">
             <div>
-              <p
-                className={labelVariants({
-                  tone: "accent",
-                  className: "hero-details__kicker",
-                })}
-              >
-                39 HOURS / ONE WEEKEND
-              </p>
               <h2 id="event-details-title">Build it live. Ship by Sunday.</h2>
             </div>
           </div>
@@ -327,14 +315,6 @@ export default function Home() {
                 const Icon = mission.icon;
                 return (
                   <article className="mission" key={mission.name}>
-                    <span
-                      className={labelVariants({
-                        tone: "accent",
-                        className: "mission__index",
-                      })}
-                    >
-                      M-{mission.id}
-                    </span>
                     <h3>
                       <IconLabel appearance="inherit" icon={Icon} size="lg">
                         {mission.name}

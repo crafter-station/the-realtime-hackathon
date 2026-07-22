@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 const eventStart = new Date("2026-08-07T19:00:00-05:00").getTime();
 const eventEnd = new Date("2026-08-09T14:00:00-05:00").getTime();
-const digitParticles = 900;
-const colonParticles = 170;
+const digitParticles = 1350;
+const colonParticles = 255;
 const particleCount = digitParticles * 8 + colonParticles * 3;
 
 type ClockGroups = [string, string, string, string];
