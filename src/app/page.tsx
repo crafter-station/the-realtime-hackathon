@@ -3,7 +3,6 @@ import {
   ArrowUpIcon,
   Bell,
   CalendarDays,
-  Code2,
   Globe2,
   History,
   Megaphone,
@@ -76,21 +75,8 @@ const schedule = [
     icon: Radio,
     items: [
       ["19:00", "Kickoff"],
-      ["20:00", "Portal quick start"],
-      ["21:00", "Build opens"],
-    ],
-  },
-  {
-    day: "SAT",
-    date: "AUG 08",
-    isoDate: "2026-08-08",
-    title: "BUILD",
-    icon: Code2,
-    items: [
-      ["09:00", "Portal clinic"],
-      ["12:00", "Checkpoint"],
-      ["16:00", "Product + AI clinic"],
-      ["20:00", "Bug bash"],
+      ["20:00", "Portal Quick Start with Rodrigo"],
+      ["21:00", "Build window opens"],
     ],
   },
   {
@@ -101,9 +87,8 @@ const schedule = [
     icon: Rocket,
     items: [
       ["00:00", "Submissions open"],
-      ["10:00", "Code freeze"],
-      ["12:30", "Live finals"],
-      ["13:40", "Awards"],
+      ["10:00", "Submissions close"],
+      ["19:00", "Top five showcase and winners announcement, live on Discord"],
     ],
   },
 ];
@@ -287,6 +272,7 @@ export default function Home() {
                 <h2>
                   <span>39-hour</span> schedule
                 </h2>
+                <p className="eyebrow">All times in Lima / UTC-5</p>
               </div>
             </div>
 
