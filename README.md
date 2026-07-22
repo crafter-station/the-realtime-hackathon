@@ -152,5 +152,4 @@ regenerating every brand output.
 
 ## License
 
-No open-source license has been added to this repository. All rights are
-reserved by the project owners unless stated otherwise.
+This project is licensed under the [MIT License](./LICENSE).
