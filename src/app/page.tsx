@@ -24,6 +24,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { ExternalLinkIcon } from "@/components/ui/external-link-icon";
 import { IconLabel } from "@/components/ui/icon-label";
+import { eventSchedule } from "@/lib/event-schedule";
 import { KeyboardNavigation } from "./components/keyboard-navigation";
 import { ParticleCountdown } from "./components/particle-countdown";
 import { ParticleTrophy } from "./components/particle-trophy";
@@ -67,32 +68,10 @@ const portalCapabilities = [
   { label: "In-app alerts", icon: Bell },
 ];
 
-const schedule = [
-  {
-    day: "FRI",
-    date: "AUG 07",
-    isoDate: "2026-08-07",
-    title: "CONNECT",
-    icon: Radio,
-    items: [
-      ["19:00", "Kickoff"],
-      ["20:00", "Portal Quick Start with Rodrigo"],
-      ["21:00", "Build window opens"],
-    ],
-  },
-  {
-    day: "SUN",
-    date: "AUG 09",
-    isoDate: "2026-08-09",
-    title: "SHIP",
-    icon: Rocket,
-    items: [
-      ["00:00", "Submissions open"],
-      ["10:00", "Submissions close"],
-      ["19:00", "Top five showcase and winners announcement, live on Discord"],
-    ],
-  },
-];
+const scheduleIcons = {
+  CONNECT: Radio,
+  SHIP: Rocket,
+} as const;
 
 const judging = [
   { label: "Realtime + Portal", weight: 30 },
@@ -282,8 +261,8 @@ export default function Home() {
             </div>
 
             <div className="schedule-grid">
-              {schedule.map((day) => {
-                const Icon = day.icon;
+              {eventSchedule.map((day) => {
+                const Icon = scheduleIcons[day.title];
                 return (
                   <article className="content-box schedule-day" key={day.day}>
                     <header className="schedule-day__header">

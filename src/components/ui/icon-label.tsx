@@ -74,7 +74,7 @@ function IconLabel<T extends ElementType = "span">({
   children,
   ...props
 }: IconLabelProps<T>) {
-  const Component = as ?? "span";
+  const Component = (as ?? "span") as "span";
 
   return (
     <Component
