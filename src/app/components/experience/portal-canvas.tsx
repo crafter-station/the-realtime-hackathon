@@ -5,12 +5,12 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
-import { closeFactor, pathX, WireWorld } from "./wire-world";
+import { closeFactor, pathX, rideY, WireWorld } from "./wire-world";
 
 // Camera track: one long continuous ride (hero grid → curves → tunnel → end).
-const TRACK_START = 4;
-const TRACK_END = -180;
-const HAND_Z = -186.5;
+const TRACK_START = 9;
+const TRACK_END = -205;
+const HAND_Z = -211.5;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -99,7 +99,13 @@ function Rig() {
       4,
       cdt,
     );
-    camera.position.y = damp(camera.position.y, state.pointer.y * 0.25, 3, cdt);
+    // Ride centred in the tunnel while closed → symmetric view.
+    camera.position.y = damp(
+      camera.position.y,
+      rideY(camZ) + state.pointer.y * 0.25,
+      4,
+      cdt,
+    );
 
     // Yaw toward the path ahead + bank into the curve.
     const yaw = Math.atan2(ahead - cx, 6) * 0.6;
@@ -139,7 +145,7 @@ export function PortalCanvas() {
         camera={{ fov: 55, near: 0.1, far: 110, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
-        <fog attach="fog" args={["#0e0e10", 24, 82]} />
+        <fog attach="fog" args={["#0e0e10", 16, 62]} />
         <Starfield count={stars} />
         <WireWorld />
         <FinaleHand />
