@@ -6,6 +6,7 @@ import { PortalCanvas } from "./portal-canvas";
 import { scroll } from "./store";
 
 const REGISTER_URL = "https://luma.com/realtime-hackathon";
+const KICKOFF = new Date("2026-08-07T19:00:00-05:00").getTime();
 
 function detectQuality(): "high" | "lite" {
   if (typeof window === "undefined") return "high";
@@ -16,51 +17,19 @@ function detectQuality(): "high" | "lite" {
   return coarse || small || lowMem ? "lite" : "high";
 }
 
-const EDITORIAL: Array<{
-  label: string;
-  title: React.ReactNode;
-  body: React.ReactNode;
-}> = [
-  {
-    label: "The Brief",
-    title: (
-      <>
-        Build AI that <em>happens now</em>
-      </>
-    ),
-    body: "Not request–response. Realtime. Portal gives you channels, presence, live streaming, location and AI-agent execution — you bring the idea and ship it in one weekend.",
-  },
-  {
-    label: "What you can build",
-    title: (
-      <>
-        Five ways to go <em>live</em>
-      </>
-    ),
-    body: "Shared multiplayer rooms · live streaming to a crowd · real-time location · autonomous AI agents · or a wild realtime experiment of your own.",
-  },
-  {
-    label: "Prizes",
-    title: (
-      <>
-        <em>US$800</em> on the line
-      </>
-    ),
-    body: "First place US$500. Second place US$300. Judged on realtime + Portal, useful AI, execution, originality, UX and demo clarity.",
-  },
-  {
-    label: "The Format",
-    title: (
-      <>
-        39 hours, <em>Friday to Sunday</em>
-      </>
-    ),
-    body: "Online, teams of 1–4. Connect Friday, build all weekend, ship Sunday. August 7–9, 2026 · all times Lima / UTC-5.",
-  },
-];
+function clockParts(now: number): string {
+  const remaining = Math.max(0, KICKOFF - now);
+  const d = Math.floor(remaining / 86_400_000);
+  const h = Math.floor((remaining % 86_400_000) / 3_600_000);
+  const m = Math.floor((remaining % 3_600_000) / 60_000);
+  const s = Math.floor((remaining % 60_000) / 1000);
+  const p = (v: number) => String(v).padStart(2, "0");
+  return `${p(d)}:${p(h)}:${p(m)}:${p(s)}`;
+}
 
 export function Experience() {
   const [mounted, setMounted] = useState(false);
+  const [clock, setClock] = useState("--:--:--:--");
   const progressFill = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,6 +61,14 @@ export function Experience() {
     };
   }, []);
 
+  // Live countdown to kickoff.
+  useEffect(() => {
+    const update = () => setClock(clockParts(Date.now()));
+    update();
+    const interval = window.setInterval(update, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <>
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
@@ -113,7 +90,7 @@ export function Experience() {
       </header>
 
       <main className="xp-overlay" id="top">
-        {/* Hero — huge type framing the portal. */}
+        {/* 01 — HERO: title over the pale-black starfield. */}
         <section className="xp-hero">
           <div>
             <h1 className="xp-display">
@@ -123,36 +100,55 @@ export function Experience() {
           <div className="xp-herorow">
             <p className="xp-body">
               Build a live, multiplayer or agentic AI product with{" "}
-              <strong>Portal</strong> in one weekend. August 7–9, online. US$800
-              in prizes. <strong>Scroll to launch.</strong>
+              <strong>Portal</strong> in one weekend. August 7–9, online, teams
+              of 1–4. US$800 in prizes.{" "}
+              <strong>Scroll to enter another dimension.</strong>
             </p>
           </div>
         </section>
 
-        {/* Traversal — the camera flies through the portal across this gap. */}
-        <div className="xp-gap" aria-hidden />
+        {/* 02 — TUNNEL: pure fly-through; speed follows your scroll. */}
+        <div className="xp-gap--tunnel" aria-hidden />
 
-        {/* Editorial content on the other side (solid paper, covers the canvas). */}
-        <div className="xp-editorial" id="brief">
-          {EDITORIAL.map((s, i) => (
-            <section key={s.label} className="xp-section">
-              <p className="xp-label">{`0${i + 1} — ${s.label}`}</p>
-              <h2>{s.title}</h2>
-              <p className="xp-body">{s.body}</p>
-            </section>
-          ))}
+        {/* 03 — PRIZES, big. */}
+        <section className="xp-section xp-section--beat">
+          <p className="xp-label">Prizes</p>
+          <h2 className="xp-huge">US$800</h2>
+          <p className="xp-beat-line">
+            <strong>1st — US$500</strong> · <strong>2nd — US$300</strong> ·
+            cash, no strings
+          </p>
+        </section>
 
-          <section className="xp-section xp-finale">
-            <p className="xp-label">Aug 07–09 · Online · Teams 1–4</p>
-            <h2>
-              Enter the <em>build</em>
-            </h2>
-            <p className="xp-body">
-              Registration is free. Bring an idea, leave with a realtime
-              product.
-            </p>
-          </section>
-        </div>
+        {/* 04 — GRID: the mathematical approach. */}
+        <div className="xp-gap--grid" aria-hidden />
+
+        {/* 05 — COUNTDOWN, live. */}
+        <section className="xp-section xp-section--beat">
+          <p className="xp-label">Kickoff</p>
+          <p className="xp-clock">
+            {clock}
+            <small>
+              DAYS : HOURS : MINUTES : SECONDS — FRI AUG 07, 19:00 LIMA
+            </small>
+          </p>
+        </section>
+
+        {/* 06 — FINALE: the wire hand + giant register. */}
+        <section className="xp-section xp-finale">
+          <h2 className="xp-huge xp-huge--outline">Register</h2>
+          <p className="xp-beat-line">
+            Aug 07–09 · online · teams of 1–4 · free
+          </p>
+          <a
+            className="xp-register xp-register--giant"
+            href={REGISTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Register free →
+          </a>
+        </section>
       </main>
 
       <div className="xp-progress" aria-hidden>

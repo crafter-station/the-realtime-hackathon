@@ -4408,10 +4408,10 @@ h2 {
   --dur-fast: 160ms;
   --dur-ui: 260ms;
 
-  --paper: #0b0b0d; /* dark page */
-  --ink: #f4f2ee; /* warm off-white type */
-  --ink-2: #9a978f; /* secondary ink */
-  --orange: #ff4d00; /* Portal accent */
+  --paper: #0e0e10; /* pale/opaque black page */
+  --ink: #ffffff; /* white type */
+  --ink-2: #8e8e93; /* secondary ink */
+  --orange: #ffffff; /* strict B&W — accent is white */
   --card: #050506; /* deeper scene black */
   --sans: var(--font-geist-sans), "Inter", system-ui, sans-serif;
   --mono: var(--font-geist-pixel), ui-monospace, monospace;
@@ -4565,8 +4565,10 @@ html.xp body {
   max-width: 15ch;
 }
 .xp-display em {
+  /* B&W hierarchy: hollow/outlined word against the solid one. */
   font-style: normal;
-  color: var(--orange);
+  color: transparent;
+  -webkit-text-stroke: 2px #ffffff;
 }
 
 .xp-herorow {
@@ -4614,8 +4616,8 @@ html.xp body {
   height: 3.2rem;
   padding: 0 1.6rem;
   border-radius: 999px;
-  background: var(--orange);
-  color: #fff;
+  background: #ffffff;
+  color: #0e0e10;
   font-family: var(--sans);
   font-weight: 600;
   font-size: 0.95rem;
@@ -4625,7 +4627,7 @@ html.xp body {
 }
 @media (hover: hover) and (pointer: fine) {
   .xp-register:hover {
-    box-shadow: 0 10px 40px rgba(255, 77, 0, 0.35);
+    box-shadow: 0 10px 40px rgba(255, 255, 255, 0.25);
   }
 }
 .xp-register:active {
@@ -4690,11 +4692,87 @@ html.xp body {
 }
 .xp-section h2 em {
   font-style: normal;
-  color: var(--orange);
+  color: transparent;
+  -webkit-text-stroke: 1.5px #ffffff;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .xp-cue__center {
     animation: none;
   }
+}
+
+/* -- Journey beats (B&W dimension) ---------------------------------------- */
+
+/* Scroll room for the tunnel fly-through and the grid approach. */
+.xp-gap--tunnel {
+  height: 230svh;
+}
+.xp-gap--grid {
+  height: 170svh;
+}
+
+/* Giant beat typography (prizes / countdown). */
+.xp-huge {
+  margin: 0;
+  font-family: var(--font-anomaly), var(--sans);
+  font-weight: 400;
+  font-size: clamp(4rem, 16vw, 15rem);
+  line-height: 0.95;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+}
+.xp-huge--outline {
+  color: transparent;
+  -webkit-text-stroke: 2px #ffffff;
+}
+.xp-beat-line {
+  margin: 1.2rem 0 0;
+  font-family: var(--sans);
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.xp-beat-line strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Live countdown clock — pixel mono, tabular, enormous. */
+.xp-clock {
+  margin: 0;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.6rem, 11vw, 10rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+.xp-clock small {
+  display: block;
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+  letter-spacing: 0.28em;
+  color: var(--ink-2);
+}
+
+/* Finale: giant register. */
+.xp-finale {
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 2rem;
+}
+.xp-register--giant {
+  height: clamp(4rem, 8vh, 5.4rem);
+  padding: 0 clamp(2.4rem, 6vw, 4.5rem);
+  font-size: clamp(1.1rem, 2.4vw, 1.7rem);
+  letter-spacing: 0.06em;
+}
+
+/* Center prizes/countdown beats. */
+.xp-section--beat {
+  justify-items: center;
+  text-align: center;
 }
