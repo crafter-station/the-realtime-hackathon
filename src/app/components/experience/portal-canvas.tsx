@@ -95,9 +95,20 @@ function Portal() {
 
   return (
     <group position={[0, 0, 0]}>
+      {/* Hot event-horizon core — pushed above 1.0 so bloom catches it. */}
+      <mesh>
+        <sphereGeometry args={[0.16, 20, 20]} />
+        <meshBasicMaterial
+          color={new THREE.Color(1.8, 0.62, 0.14)}
+          toneMapped={false}
+        />
+      </mesh>
       <mesh ref={ring}>
-        <torusGeometry args={[2, 0.13, 24, 140]} />
-        <meshBasicMaterial color={ORANGE} toneMapped={false} />
+        <torusGeometry args={[2, 0.1, 24, 160]} />
+        <meshBasicMaterial
+          color={new THREE.Color(1.3, 0.36, 0.03)}
+          toneMapped={false}
+        />
       </mesh>
       <points ref={vortex} geometry={vortexGeo}>
         <pointsMaterial
@@ -105,13 +116,64 @@ function Portal() {
           sizeAttenuation
           color={ORANGE}
           transparent
-          opacity={0.75}
+          opacity={0.8}
           depthWrite={false}
           blending={THREE.AdditiveBlending}
           toneMapped={false}
         />
       </points>
     </group>
+  );
+}
+
+/** Hyperspace speed-lines that flash during the portal traversal. */
+function Warp() {
+  const lines = useRef<THREE.LineSegments>(null);
+  const material = useRef<THREE.LineBasicMaterial>(null);
+  const count = scroll.quality === "lite" ? 120 : 320;
+
+  const geometry = useMemo(() => {
+    const positions = new Float32Array(count * 6);
+    for (let i = 0; i < count; i += 1) {
+      const o = i * 6;
+      const a = Math.random() * Math.PI * 2;
+      const r = 1 + Math.random() * 12;
+      const x = Math.cos(a) * r;
+      const y = Math.sin(a) * r;
+      const z = -2 - Math.random() * 24;
+      const len = 2 + Math.random() * 6;
+      positions[o] = x;
+      positions[o + 1] = y;
+      positions[o + 2] = z;
+      positions[o + 3] = x;
+      positions[o + 4] = y;
+      positions[o + 5] = z + len;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return g;
+  }, [count]);
+
+  useFrame(() => {
+    // Peaks mid-traversal, silent otherwise.
+    const w = scroll.warp;
+    const flash = Math.sin(Math.min(w, 1) * Math.PI);
+    if (material.current) material.current.opacity = flash * 0.85;
+    if (lines.current) lines.current.visible = flash > 0.01;
+  });
+
+  return (
+    <lineSegments ref={lines} geometry={geometry} visible={false}>
+      <lineBasicMaterial
+        ref={material}
+        color={new THREE.Color(2, 0.7, 0.2)}
+        transparent
+        opacity={0}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+      />
+    </lineSegments>
   );
 }
 
@@ -180,7 +242,7 @@ function Rig() {
 
 export function PortalCanvas() {
   const starCount = scroll.quality === "lite" ? 1400 : 4200;
-  const bloomIntensity = scroll.quality === "lite" ? 0.7 : 1.25;
+  const bloomIntensity = scroll.quality === "lite" ? 0.8 : 1.15;
 
   return (
     <div className="xp-stage">
@@ -197,12 +259,13 @@ export function PortalCanvas() {
         <fog attach="fog" args={["#090909", 10, 90]} />
         <Starfield count={starCount} />
         <Portal />
+        <Warp />
         <Worlds />
         <Rig />
         <EffectComposer>
           <Bloom
             intensity={bloomIntensity}
-            luminanceThreshold={0.15}
+            luminanceThreshold={0.28}
             luminanceSmoothing={0.9}
             mipmapBlur
           />
