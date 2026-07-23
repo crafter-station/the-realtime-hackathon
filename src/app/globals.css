@@ -4408,11 +4408,11 @@ h2 {
   --dur-fast: 160ms;
   --dur-ui: 260ms;
 
-  --paper: #f4f2ee; /* warm off-white page */
-  --ink: #0a0a0a; /* near-black type */
-  --ink-2: #6f6c66; /* secondary ink */
+  --paper: #0b0b0d; /* dark page */
+  --ink: #f4f2ee; /* warm off-white type */
+  --ink-2: #9a978f; /* secondary ink */
   --orange: #ff4d00; /* Portal accent */
-  --card: #0e0e10; /* dark scene card */
+  --card: #050506; /* deeper scene black */
   --sans: var(--font-geist-sans), "Inter", system-ui, sans-serif;
   --mono: var(--font-geist-pixel), ui-monospace, monospace;
 }
@@ -4449,8 +4449,7 @@ html.xp body {
   align-items: center;
   justify-content: space-between;
   padding: clamp(1rem, 2.4vw, 1.6rem) clamp(1.1rem, 3vw, 2.2rem);
-  mix-blend-mode: difference; /* stays legible over light and dark scenes */
-  color: #fff;
+  color: var(--ink);
 }
 .xp-wordmark {
   font-family: var(--sans);
@@ -4481,12 +4480,12 @@ html.xp body {
 }
 .xp-pill--solid {
   background: var(--ink);
-  color: #fff;
+  color: var(--paper);
 }
 .xp-pill--ghost {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.28);
 }
 .xp-pill:active {
   transform: scale(0.97);
@@ -4536,7 +4535,7 @@ html.xp body {
   bottom: 0;
   z-index: 25;
   height: 2px;
-  background: rgba(10, 10, 10, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 .xp-progress__fill {
   height: 100%;
@@ -4638,9 +4637,7 @@ html.xp body {
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink);
-  mix-blend-mode: difference;
-  filter: invert(1);
+  color: var(--ink-2);
 }
 .xp-cue__center {
   animation: xp-bob 2.4s var(--ease-in-out) infinite;

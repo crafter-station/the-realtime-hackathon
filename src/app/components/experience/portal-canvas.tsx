@@ -8,11 +8,8 @@ import * as THREE from "three";
 import { scroll } from "./store";
 
 const ASTRONAUT_URL = "/models/astronaut.glb";
-
-const PAPER = new THREE.Color("#f4f2ee");
-const DARK = new THREE.Color("#0a0a0a");
 const ORANGE = new THREE.Color("#ff4d00");
-const RIM = new THREE.Color(1.6, 0.5, 0.08); // >1 so bloom catches the rim
+const RIM = new THREE.Color(1.5, 0.45, 0.06); // >1 so bloom catches the ring rim
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -21,40 +18,89 @@ function easeInOut(p: number) {
   return p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2;
 }
 
-/** The portal: a glossy orange ring around a dark opening (the far side). */
+/** Deep-space starfield. Streams past as the camera flies forward. */
+function Starfield({ count }: { count: number }) {
+  const points = useRef<THREE.Points>(null);
+  const geometry = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i += 1) {
+      positions[i * 3] = (Math.random() - 0.5) * 70;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 55;
+      positions[i * 3 + 2] = 4 - Math.random() * 60;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return g;
+  }, [count]);
+  useFrame((_, dt) => {
+    if (points.current) points.current.rotation.z += dt * 0.006;
+  });
+  return (
+    <points ref={points} geometry={geometry}>
+      <pointsMaterial
+        size={0.05}
+        sizeAttenuation
+        color="#ffffff"
+        transparent
+        opacity={0.85}
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+/** Earth seen through the portal — a dark globe with a bright atmosphere limb. */
+function Earth() {
+  return (
+    <group position={[0, -8.6, -15]}>
+      <mesh>
+        <sphereGeometry args={[7, 64, 64]} />
+        <meshStandardMaterial color="#0b1e44" roughness={1} metalness={0} />
+      </mesh>
+      {/* Atmosphere glow (back-side additive shell). */}
+      <mesh scale={1.06}>
+        <sphereGeometry args={[7, 64, 64]} />
+        <meshBasicMaterial
+          color={new THREE.Color(0.25, 0.55, 1.5)}
+          side={THREE.BackSide}
+          transparent
+          opacity={0.55}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** The portal ring — glossy orange, framing the astronaut and the view of space. */
 function Portal() {
   const ring = useRef<THREE.Mesh>(null);
   const rim = useRef<THREE.Mesh>(null);
   useFrame((s) => {
     const t = s.clock.elapsedTime;
-    if (ring.current) ring.current.rotation.z = t * 0.12;
+    if (ring.current) ring.current.rotation.z = t * 0.1;
     if (rim.current) {
       (rim.current.material as THREE.MeshBasicMaterial).opacity =
-        0.75 + Math.sin(t * 1.6) * 0.12;
+        0.7 + Math.sin(t * 1.6) * 0.12;
     }
   });
   return (
     <group>
-      {/* Dark opening = the other side, seen through the ring. */}
-      <mesh position={[0, 0, -0.2]}>
-        <circleGeometry args={[2.12, 72]} />
-        <meshBasicMaterial color={DARK} />
-      </mesh>
-      {/* Additive rim glow just inside the ring. */}
-      <mesh ref={rim} position={[0, 0, -0.05]}>
-        <ringGeometry args={[1.98, 2.16, 72]} />
+      <mesh ref={rim} position={[0, 0, -0.04]}>
+        <ringGeometry args={[1.98, 2.16, 96]} />
         <meshBasicMaterial
           color={RIM}
           toneMapped={false}
           transparent
-          opacity={0.8}
+          opacity={0.75}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
-      {/* Glossy physical ring. */}
       <mesh ref={ring}>
-        <torusGeometry args={[2.2, 0.15, 40, 200]} />
+        <torusGeometry args={[2.2, 0.15, 40, 220]} />
         <meshPhysicalMaterial
           color={ORANGE}
           roughness={0.16}
@@ -67,78 +113,19 @@ function Portal() {
   );
 }
 
-/** The other side: a small cluster of glossy objects, revealed once through. */
-function OtherSide() {
-  const grp = useRef<THREE.Group>(null);
-  const items = useMemo(() => {
-    const rng = (seed: number) => {
-      const x = Math.sin(seed * 91.7) * 43758.5;
-      return x - Math.floor(x);
-    };
-    return Array.from({ length: 9 }, (_, i) => ({
-      pos: [
-        (rng(i + 1) - 0.5) * 7,
-        (rng(i + 9) - 0.5) * 5,
-        -8 - rng(i + 3) * 6,
-      ] as [number, number, number],
-      scale: 0.5 + rng(i + 5) * 0.7,
-      kind: i % 3,
-      tint:
-        i % 4 === 0 ? ORANGE : i % 4 === 1 ? DARK : new THREE.Color("#e9e6df"),
-    }));
-  }, []);
-  useFrame((s, dt) => {
-    if (!grp.current) return;
-    for (let i = 0; i < grp.current.children.length; i += 1) {
-      const c = grp.current.children[i];
-      c.rotation.x += dt * 0.15;
-      c.rotation.y += dt * 0.2;
-    }
-    grp.current.position.y = Math.sin(s.clock.elapsedTime * 0.2) * 0.2;
-  });
-  return (
-    <group ref={grp}>
-      {items.map((it, i) => (
-        <mesh
-          // biome-ignore lint/suspicious/noArrayIndexKey: fixed cluster
-          key={i}
-          position={it.pos}
-          scale={it.scale}
-        >
-          {it.kind === 0 ? (
-            <torusKnotGeometry args={[0.5, 0.18, 90, 16]} />
-          ) : it.kind === 1 ? (
-            <icosahedronGeometry args={[0.7, 0]} />
-          ) : (
-            <capsuleGeometry args={[0.35, 0.6, 8, 16]} />
-          )}
-          <meshPhysicalMaterial
-            color={it.tint}
-            roughness={0.2}
-            metalness={0.1}
-            clearcoat={1}
-            clearcoatRoughness={0.25}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-/** The floating astronaut — the character framed inside the portal. */
+/** The floating astronaut — framed on the RIGHT inside the portal. */
 function Astronaut() {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(ASTRONAUT_URL);
   const { actions, names } = useAnimations(animations, group);
 
-  // Measure the real bounding box and fit the model to ~3.4 units tall, centered.
   const { scale, offset } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-    const s = 3.4 / (size.y || 1);
+    const s = 2.7 / (size.y || 1);
     return { scale: s, offset: center.clone().multiplyScalar(-s) };
   }, [scene]);
 
@@ -152,12 +139,13 @@ function Astronaut() {
 
   useFrame((s) => {
     if (group.current) {
-      group.current.rotation.y = Math.sin(s.clock.elapsedTime * 0.16) * 0.3;
+      group.current.rotation.y = Math.sin(s.clock.elapsedTime * 0.16) * 0.28;
     }
   });
 
+  // Positioned to the right, slightly in front of the ring plane.
   return (
-    <group ref={group} position={[0, -0.1, 0.8]}>
+    <group ref={group} position={[0.95, -0.1, 0.55]}>
       <group scale={scale} position={offset}>
         <primitive object={scene} />
       </group>
@@ -165,65 +153,64 @@ function Astronaut() {
   );
 }
 
-/** Scroll dollies the camera forward, through the portal, to the other side. */
+/** Scroll flies the camera forward, through the portal, out into space. */
 function Rig() {
-  const { camera, scene } = useThree();
+  const { camera } = useThree();
   useFrame((state, dt) => {
     const cdt = Math.min(dt, 0.05);
-    // Complete the through-portal traversal within the first ~30% of scroll,
-    // before the editorial content scrolls up and covers the canvas.
+    // Complete the fly-through within the first ~30% of scroll, before the
+    // editorial content scrolls up and covers the canvas.
     const p = Math.min(1, scroll.progress / 0.3);
-    // z: 7 (framing the portal) → -8 (among the other-side objects)
-    const targetZ = THREE.MathUtils.lerp(7, -8, easeInOut(p));
+    const targetZ = THREE.MathUtils.lerp(7, -10, easeInOut(p));
     camera.position.z = damp(camera.position.z, targetZ, 4, cdt);
     camera.position.x = damp(camera.position.x, state.pointer.x * 0.4, 3, cdt);
     camera.position.y = damp(camera.position.y, state.pointer.y * 0.3, 3, cdt);
-    camera.rotation.set(0, 0, 0); // face straight down -z; portal stays centered
-
-    // Background: warm paper in front of the portal, dark once through it.
-    // 0 while the camera is in front (z high), 1 once it has passed through.
-    const through =
-      1 - THREE.MathUtils.smoothstep(camera.position.z, -1.6, 1.6);
-    (scene.background as THREE.Color).copy(PAPER).lerp(DARK, through);
+    camera.rotation.set(0, 0, 0);
   });
   return null;
 }
 
 export function PortalCanvas() {
-  const bloom = scroll.quality === "lite" ? 0.5 : 0.85;
+  const bloom = scroll.quality === "lite" ? 0.6 : 0.95;
+  const stars = scroll.quality === "lite" ? 1600 : 4200;
   return (
     <div className="xp-stage">
       <Canvas
         dpr={scroll.quality === "lite" ? [1, 1.3] : [1, 1.8]}
         gl={{ antialias: true, powerPreference: "high-performance" }}
-        camera={{ fov: 50, near: 0.1, far: 60, position: [0, 0, 7] }}
+        camera={{ fov: 50, near: 0.1, far: 80, position: [0, 0, 7] }}
       >
-        <color attach="background" args={["#f4f2ee"]} />
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[5, 8, 6]} intensity={2.4} />
-        <directionalLight
-          position={[-6, -2, 4]}
-          intensity={0.8}
+        <color attach="background" args={["#060608"]} />
+        <ambientLight intensity={0.35} />
+        {/* Sun — a bright key that lights Earth's limb and the suit, and blooms. */}
+        <directionalLight position={[2.6, 3.4, -6]} intensity={3.2} />
+        <pointLight
+          position={[1.4, 0.4, 2.4]}
+          intensity={3}
+          distance={10}
           color="#ffd9c2"
         />
-        <pointLight
-          position={[0, 0, 3]}
-          intensity={6}
-          distance={12}
-          color="#ff8a4d"
-        />
+        <mesh position={[2.6, 3.4, -8]}>
+          <sphereGeometry args={[0.28, 24, 24]} />
+          <meshBasicMaterial
+            color={new THREE.Color(6, 5.2, 4.2)}
+            toneMapped={false}
+          />
+        </mesh>
+
+        <Starfield count={stars} />
+        <Earth />
         <Portal />
         {scroll.quality === "high" ? (
           <Suspense fallback={null}>
             <Astronaut />
           </Suspense>
         ) : null}
-        <OtherSide />
         <Rig />
         <EffectComposer>
           <Bloom
             intensity={bloom}
-            luminanceThreshold={0.6}
+            luminanceThreshold={0.7}
             luminanceSmoothing={0.9}
             mipmapBlur
           />
