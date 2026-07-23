@@ -6,8 +6,10 @@ import * as THREE from "three";
 import { scroll } from "./store";
 
 const RECT_COUNT = 24;
-const RECT_HALF_WIDTH = 3.6;
-const RECT_HALF_HEIGHT = 2.3;
+// Big enough that the camera flies INSIDE the tunnel — walls surround the
+// viewport instead of framing a small window ahead.
+const RECT_HALF_WIDTH = 13;
+const RECT_HALF_HEIGHT = 8.5;
 /** Fractions along each edge where an extra midpoint rail is added. */
 const EDGE_MIDPOINTS = [1 / 3, 2 / 3];
 
@@ -23,6 +25,7 @@ function clampedVelocityFactor() {
 /** Rectangular cross-sections + rails receding to a vanishing point. */
 export function WireTunnel({ zStart, zEnd }: { zStart: number; zEnd: number }) {
   const material = useRef<THREE.LineBasicMaterial>(null);
+  const railsMaterial = useRef<THREE.LineBasicMaterial>(null);
 
   const loopsGeometry = useMemo(() => {
     const positions = new Float32Array(RECT_COUNT * 4 * 2 * 3);
@@ -85,10 +88,16 @@ export function WireTunnel({ zStart, zEnd }: { zStart: number; zEnd: number }) {
   }, [zStart, zEnd]);
 
   useFrame((_, dt) => {
+    // Invisible at the hero; the tunnel's parts fade in once scrolling starts.
+    const reveal = THREE.MathUtils.smoothstep(scroll.progress, 0.03, 0.15);
+    const target =
+      THREE.MathUtils.lerp(0.4, 0.9, clampedVelocityFactor()) * reveal;
     const mat = material.current;
-    if (!mat) return;
-    const target = THREE.MathUtils.lerp(0.4, 0.9, clampedVelocityFactor());
-    mat.opacity = THREE.MathUtils.damp(mat.opacity, target, 4, dt);
+    if (mat) mat.opacity = THREE.MathUtils.damp(mat.opacity, target, 4, dt);
+    const rails = railsMaterial.current;
+    if (rails) {
+      rails.opacity = THREE.MathUtils.damp(rails.opacity, target, 4, dt);
+    }
   });
 
   return (
@@ -98,11 +107,16 @@ export function WireTunnel({ zStart, zEnd }: { zStart: number; zEnd: number }) {
           ref={material}
           color="#ffffff"
           transparent
-          opacity={0.5}
+          opacity={0}
         />
       </lineSegments>
       <lineSegments geometry={railsGeometry}>
-        <lineBasicMaterial color="#ffffff" transparent opacity={0.5} />
+        <lineBasicMaterial
+          ref={railsMaterial}
+          color="#ffffff"
+          transparent
+          opacity={0}
+        />
       </lineSegments>
     </group>
   );
