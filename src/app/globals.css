@@ -4785,8 +4785,9 @@ html.xp body {
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: clamp(1.6rem, 4vh, 3rem);
-  padding: 0 clamp(1.25rem, 5vw, 4rem);
+  gap: clamp(1.4rem, 3.5vh, 2.6rem);
+  /* Bottom padding lifts the whole stack above the grid horizon lines. */
+  padding: 0 clamp(1.25rem, 5vw, 4rem) clamp(7rem, 22vh, 14rem);
   text-align: center;
   pointer-events: none;
 }
