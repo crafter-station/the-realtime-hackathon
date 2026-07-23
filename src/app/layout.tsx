@@ -1,15 +1,27 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
+import { Geist } from "next/font/google";
 import localFont from "next/font/local";
-import { InteractionFeedback } from "./components/interaction-feedback";
-import { LoadingScreen } from "./components/loading-screen";
-import { TerminalChrome } from "./components/terminal-chrome";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
 const geistPixel = localFont({
   src: "./fonts/geist-pixel-latin.woff2",
   variable: "--font-geist-pixel",
+  display: "swap",
+});
+
+// Display face for the hero title.
+const anomalyNexus = localFont({
+  src: "./fonts/anomaly-nexus.otf",
+  variable: "--font-anomaly",
+  display: "swap",
+});
+
+// Clean neo-grotesque (Aeonik-adjacent) for the editorial display + body type.
+const geistSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
   display: "swap",
 });
 
@@ -99,14 +111,13 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistPixel.className,
+        geistSans.className,
+        geistSans.variable,
         geistPixel.variable,
+        anomalyNexus.variable,
       )}
     >
       <body className="min-h-full">
-        <LoadingScreen />
-        <TerminalChrome />
-        <InteractionFeedback />
         <script type="application/ld+json">
           {JSON.stringify(eventJsonLd)}
         </script>
