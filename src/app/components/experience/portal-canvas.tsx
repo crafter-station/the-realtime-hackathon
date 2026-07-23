@@ -66,14 +66,14 @@ function Mars() {
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-    const s = 15 / (Math.max(size.x, size.y, size.z) || 1);
+    const s = 16 / (Math.max(size.x, size.y, size.z) || 1);
     return { scale: s, offset: center.clone().multiplyScalar(-s) };
   }, [scene]);
   useFrame((_, dt) => {
     if (spin.current) spin.current.rotation.y += dt * 0.02;
   });
   return (
-    <group position={[0.5, -9.5, -15]}>
+    <group position={[0.6, -12, -17]}>
       <group ref={spin} scale={scale} position={offset}>
         <primitive object={scene} />
       </group>
@@ -132,7 +132,7 @@ function Astronaut() {
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-    const s = 2.7 / (size.y || 1);
+    const s = 2.15 / (size.y || 1);
     return { scale: s, offset: center.clone().multiplyScalar(-s) };
   }, [scene]);
 
@@ -155,9 +155,9 @@ function Astronaut() {
     }
   });
 
-  // Positioned to the right, slightly in front of the ring plane.
+  // Floating cleanly inside the ring, a touch right of centre — clear of the rim.
   return (
-    <group ref={group} position={[0.95, -0.1, 0.55]}>
+    <group ref={group} position={[0.45, -0.35, 0.6]}>
       <group scale={scale} position={offset}>
         <primitive object={scene} />
       </group>
