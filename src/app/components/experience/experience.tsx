@@ -27,21 +27,15 @@ function clockParts(now: number): string {
   return `${p(d)}:${p(h)}:${p(m)}:${p(s)}`;
 }
 
-// Scroll fraction across which the fly-into-the-H zoom happens.
-const ZOOM_END = 0.15;
-// How far we zoom: the H's white core must exceed the viewport, even at 4K.
-const ZOOM_MAX = 62;
+// Scroll fraction across which the hero copy rides along then fades away.
+const HERO_FADE_START = 0.02;
+const HERO_FADE_END = 0.09;
 
 export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
   const progressFill = useRef<HTMLDivElement>(null);
   const heroLayer = useRef<HTMLDivElement>(null);
-  const heroTitle = useRef<HTMLHeadingElement>(null);
-  const heroSub = useRef<HTMLDivElement>(null);
-  const hGlyph = useRef<HTMLSpanElement>(null);
-  const hPortal = useRef<HTMLSpanElement>(null);
-  const hProbe = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     scroll.quality = detectQuality();
@@ -53,52 +47,6 @@ export function Experience() {
     ).matches;
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
 
-    // Measure the H glyph's real ink box (canvas TextMetrics + baseline probe)
-    // so the zoom anchors on its true center and the white core sits exactly
-    // inside the glyph at any resolution.
-    const anchor = { ox: 0, oy: 0, tx: 0, ty: 0 };
-    const metricsCtx = document.createElement("canvas").getContext("2d");
-    const measure = () => {
-      const title = heroTitle.current;
-      const h = hGlyph.current;
-      const portal = hPortal.current;
-      const probe = hProbe.current;
-      if (!title || !h || !portal || !probe || !metricsCtx) return;
-      const prev = title.style.transform;
-      title.style.transform = "none";
-      const tr = title.getBoundingClientRect();
-      const hr = h.getBoundingClientRect();
-      const baselineY = probe.getBoundingClientRect().top;
-
-      // Ink extents of the glyph from the actual rendered font.
-      const cs = getComputedStyle(h);
-      metricsCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-      const m = metricsCtx.measureText("h");
-      const inkLeft = hr.left - m.actualBoundingBoxLeft;
-      const inkW = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
-      const inkTop = baselineY - m.actualBoundingBoxAscent;
-      const inkH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
-      title.style.transform = prev;
-
-      // White core: the middle column of the H, inside the ink box.
-      portal.style.left = `${inkLeft - hr.left + inkW * 0.27}px`;
-      portal.style.width = `${inkW * 0.46}px`;
-      portal.style.top = `${inkTop - hr.top + inkH * 0.06}px`;
-      portal.style.height = `${inkH * 0.86}px`;
-
-      // Zoom anchor = ink center.
-      const hx = inkLeft + inkW / 2;
-      const hy = inkTop + inkH / 2;
-      anchor.ox = hx - tr.left;
-      anchor.oy = hy - tr.top;
-      anchor.tx = window.innerWidth / 2 - hx;
-      anchor.ty = window.innerHeight / 2 - hy;
-      title.style.transformOrigin = `${anchor.ox}px ${anchor.oy}px`;
-    };
-    measure();
-    document.fonts?.ready?.then(() => measure()).catch(() => undefined);
-    window.addEventListener("resize", measure);
-
     let raf = 0;
     const loop = (time: number) => {
       lenis.raf(time);
@@ -108,27 +56,22 @@ export function Experience() {
         progressFill.current.style.transform = `scaleX(${scroll.progress})`;
       }
 
-      // Fly INTO the H: grow + bank + drift its hollow center to mid-viewport.
+      // Hero copy: hold, then drift up + fade as the ride begins.
       const layer = heroLayer.current;
-      const title = heroTitle.current;
-      const sub = heroSub.current;
-      if (layer && title && sub) {
-        const t = Math.min(1, Math.max(0, scroll.progress / ZOOM_END));
-        if (reduce) {
-          layer.style.opacity = String(1 - t);
-          layer.style.visibility = t >= 1 ? "hidden" : "visible";
-        } else {
-          const accel = t * t * (3 - 2 * t); // smoothstep
-          const s = Math.exp(Math.log(ZOOM_MAX) * accel ** 1.25);
-          const drift = Math.min(1, accel * 1.6);
-          const bank = Math.sin(accel * Math.PI) * -12;
-          title.style.transform = `translate3d(${anchor.tx * drift}px, ${
-            anchor.ty * drift
-          }px, 0) rotate(${bank}deg) scale(${s})`;
-          sub.style.opacity = String(Math.max(0, 1 - t * 4));
-          layer.style.opacity = t > 0.92 ? String(1 - (t - 0.92) / 0.08) : "1";
-          layer.style.visibility = t >= 1 ? "hidden" : "visible";
-        }
+      if (layer) {
+        const t = Math.min(
+          1,
+          Math.max(
+            0,
+            (scroll.progress - HERO_FADE_START) /
+              (HERO_FADE_END - HERO_FADE_START),
+          ),
+        );
+        layer.style.opacity = String(1 - t);
+        layer.style.transform = reduce
+          ? "none"
+          : `translate3d(0, ${t * -6}vh, 0)`;
+        layer.style.visibility = t >= 1 ? "hidden" : "visible";
       }
 
       raf = requestAnimationFrame(loop);
@@ -137,7 +80,6 @@ export function Experience() {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", measure);
       lenis.destroy();
       document.documentElement.classList.remove("xp");
     };
@@ -155,19 +97,10 @@ export function Experience() {
     <>
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
 
-      {/* 01 — HERO layer (fixed): scroll flies you INTO the hollow H. */}
+      {/* 01 — HERO layer (fixed over the grid horizon). */}
       <div ref={heroLayer} className="xp-heroLayer">
-        <h1 ref={heroTitle} className="xp-display">
-          The realtime{" "}
-          <em>
-            <span ref={hGlyph} className="xp-hGlyph">
-              <span ref={hPortal} className="xp-hPortal" aria-hidden />
-              <span ref={hProbe} className="xp-hProbe" aria-hidden />h
-            </span>
-            ackathon
-          </em>
-        </h1>
-        <div ref={heroSub} className="xp-heroSub">
+        <h1 className="xp-display">The realtime hackathon</h1>
+        <div className="xp-heroSub">
           <p className="xp-body">
             Build a live, multiplayer or agentic AI product with{" "}
             <strong>Portal</strong> in one weekend. August 7–9, online, teams of
@@ -186,13 +119,10 @@ export function Experience() {
       </div>
 
       <main className="xp-overlay" id="top">
-        {/* Scroll room for the fly-into-the-H zoom. */}
-        <div className="xp-gap--intro" aria-hidden />
+        {/* 02 — Ride the grid, into the curves. Long. */}
+        <div className="xp-gap--ride" aria-hidden />
 
-        {/* 02 — TUNNEL: pure fly-through; speed follows your scroll. */}
-        <div className="xp-gap--tunnel" aria-hidden />
-
-        {/* 03 — PRIZES, big. */}
+        {/* 03 — The curve closes: PRIZES appear. */}
         <section className="xp-section xp-section--beat">
           <p className="xp-label">Prizes</p>
           <h2 className="xp-huge">US$800</h2>
@@ -202,8 +132,8 @@ export function Experience() {
           </p>
         </section>
 
-        {/* 04 — GRID: the mathematical approach. */}
-        <div className="xp-gap--grid" aria-hidden />
+        {/* 04 — Through the tunnel. */}
+        <div className="xp-gap--tunnel" aria-hidden />
 
         {/* 05 — COUNTDOWN, live. */}
         <section className="xp-section xp-section--beat">

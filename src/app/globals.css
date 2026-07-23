@@ -4705,11 +4705,11 @@ html.xp body {
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
 /* Scroll room for the tunnel fly-through and the grid approach. */
-.xp-gap--tunnel {
-  height: 230svh;
+.xp-gap--ride {
+  height: 360svh;
 }
-.xp-gap--grid {
-  height: 170svh;
+.xp-gap--tunnel {
+  height: 260svh;
 }
 
 /* Giant beat typography (prizes / countdown). */
@@ -4791,10 +4791,13 @@ html.xp body {
   pointer-events: none;
 }
 .xp-heroLayer .xp-display {
-  max-width: none;
-  font-size: clamp(2.6rem, 8.2vw, 9rem);
-  /* No will-change/text-shadow: layer promotion freezes a stale raster of the
-     zoomed state when scrolling back (title showed cropped); re-raster instead. */
+  max-width: 14ch;
+  font-family: var(--sans);
+  font-weight: 750;
+  font-size: clamp(2.6rem, 7.4vw, 8rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
   text-shadow: none;
 }
 .xp-heroSub {
@@ -4810,26 +4813,4 @@ html.xp body {
 .xp-heroSub .xp-register {
   pointer-events: auto;
 }
-.xp-gap--intro {
-  height: 160svh;
-}
 
-/* The H holds the other dimension: a white core visible only through the
-   glyph's counters. The H itself gets a solid page-colored fill (same outline
-   look) so it masks the rect everywhere except its real holes. Vector = stays
-   razor-sharp at any zoom/resolution, 4K included. */
-.xp-hGlyph {
-  position: relative;
-  color: var(--paper);
-}
-.xp-hPortal {
-  /* The dimension inside the H: a void deeper than the page black. */
-  position: absolute;
-  z-index: -1;
-  background: #000000;
-}
-.xp-hProbe {
-  display: inline-block;
-  width: 0;
-  height: 0;
-}

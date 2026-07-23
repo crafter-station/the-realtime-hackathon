@@ -5,15 +5,12 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
-import { WireGrid, WireTunnel } from "./wire-tunnel";
+import { pathX, WireWorld } from "./wire-world";
 
-// Camera track: 6 (hero) → TRACK_END (finale). One continuous flight.
-const TRACK_START = 6;
-const TRACK_END = -120;
-// Scene layout along the track.
-const TUNNEL = { zStart: -10, zEnd: -52 } as const;
-const GRID = { zStart: -55, zEnd: -128 } as const;
-const HAND_Z = -126.5;
+// Camera track: one long continuous ride (hero grid → curves → tunnel → end).
+const TRACK_START = 4;
+const TRACK_END = -150;
+const HAND_Z = -156.5;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -25,9 +22,9 @@ function Starfield({ count }: { count: number }) {
   const geometry = useMemo(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i += 1) {
-      positions[i * 3] = (Math.random() - 0.5) * 70;
+      positions[i * 3] = (Math.random() - 0.5) * 80;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 55;
-      positions[i * 3 + 2] = 8 - Math.random() * 70;
+      positions[i * 3 + 2] = 8 - Math.random() * 80;
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -40,7 +37,7 @@ function Starfield({ count }: { count: number }) {
     const camZ = state.camera.position.z;
     const arr = geometry.attributes.position.array as Float32Array;
     for (let i = 2; i < arr.length; i += 3) {
-      if (arr[i] > camZ + 8) arr[i] -= 78;
+      if (arr[i] > camZ + 8) arr[i] -= 88;
     }
     geometry.attributes.position.needsUpdate = true;
   });
@@ -59,8 +56,8 @@ function Starfield({ count }: { count: number }) {
 }
 
 /**
- * Scroll = velocity. The camera flies the whole track across the full scroll;
- * scrolling faster adds real speed and a FOV kick — the dimension-shift rush.
+ * Scroll = velocity. The camera rides the curved path the whole way;
+ * faster scrolling adds real speed, banking and a FOV kick.
  */
 function Rig() {
   const { camera } = useThree();
@@ -74,15 +71,28 @@ function Rig() {
     const cdt = Math.min(dt, 0.05);
     const v = Math.min(Math.abs(scroll.velocity), 30);
 
-    // Base position from progress + a velocity surge pushing you deeper.
+    // Forward travel + a velocity surge pushing you deeper.
     const base = THREE.MathUtils.lerp(TRACK_START, TRACK_END, scroll.progress);
     const surge = reduce ? 0 : v * 0.12;
-    camera.position.z = damp(camera.position.z, base - surge, 4.2, cdt);
+    const camZ = damp(camera.position.z, base - surge, 4.2, cdt);
+    camera.position.z = camZ;
 
-    // Gentle pointer parallax.
-    camera.position.x = damp(camera.position.x, state.pointer.x * 0.35, 3, cdt);
+    // Follow the curved centerline; look slightly ahead so turns feel real.
+    const cx = pathX(camZ);
+    const ahead = pathX(camZ - 6);
+    camera.position.x = damp(
+      camera.position.x,
+      cx + state.pointer.x * 0.35,
+      4,
+      cdt,
+    );
     camera.position.y = damp(camera.position.y, state.pointer.y * 0.25, 3, cdt);
-    camera.rotation.set(0, 0, 0);
+
+    // Yaw toward the path ahead + bank into the curve.
+    const yaw = Math.atan2(ahead - cx, 6) * 0.6;
+    const bank = reduce ? 0 : (ahead - cx) * 0.035;
+    camera.rotation.set(0, damp(camera.rotation.y, yaw, 4, cdt), 0);
+    camera.rotation.z = damp(camera.rotation.z, bank, 4, cdt);
 
     // FOV kick with speed (skipped for reduced motion).
     const cam = camera as THREE.PerspectiveCamera;
@@ -96,23 +106,11 @@ function Rig() {
   return null;
 }
 
-/** Keeps the grid hidden until the camera leaves the tunnel (no horizon line
- *  slicing through the tunnel beat). */
-function GridGate({ children }: { children: React.ReactNode }) {
-  const group = useRef<THREE.Group>(null);
-  useFrame((state) => {
-    if (group.current) {
-      group.current.visible = state.camera.position.z < -38;
-    }
-  });
-  return <group ref={group}>{children}</group>;
-}
-
 /** Activates the finale hand once the journey is nearly complete. */
 function FinaleHand() {
   const [active, setActive] = useState(false);
   useFrame(() => {
-    const shouldBeActive = scroll.progress > 0.86;
+    const shouldBeActive = scroll.progress > 0.9;
     if (shouldBeActive !== active) setActive(shouldBeActive);
   });
   return <WireHand active={active} z={HAND_Z} />;
@@ -125,14 +123,11 @@ export function PortalCanvas() {
       <Canvas
         dpr={scroll.quality === "lite" ? [1, 1.3] : [1, 1.8]}
         gl={{ antialias: true, powerPreference: "high-performance" }}
-        camera={{ fov: 55, near: 0.1, far: 90, position: [0, 0, TRACK_START] }}
+        camera={{ fov: 55, near: 0.1, far: 110, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
         <Starfield count={stars} />
-        <WireTunnel zStart={TUNNEL.zStart} zEnd={TUNNEL.zEnd} />
-        <GridGate>
-          <WireGrid zStart={GRID.zStart} zEnd={GRID.zEnd} />
-        </GridGate>
+        <WireWorld />
         <FinaleHand />
         <Rig />
       </Canvas>
