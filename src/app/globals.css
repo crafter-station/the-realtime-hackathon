@@ -4554,6 +4554,8 @@ html.xp body {
 
 .xp-display {
   margin: 0;
+  color: #ffffff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
   font-family: var(--font-anomaly), var(--sans);
   font-weight: 400;
   font-size: clamp(3rem, 11vw, 11rem);
