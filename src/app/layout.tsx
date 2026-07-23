@@ -11,6 +11,13 @@ const geistPixel = localFont({
   display: "swap",
 });
 
+// Display face for the hero title.
+const anomalyNexus = localFont({
+  src: "./fonts/anomaly-nexus.otf",
+  variable: "--font-anomaly",
+  display: "swap",
+});
+
 // Clean neo-grotesque (Aeonik-adjacent) for the editorial display + body type.
 const geistSans = Geist({
   subsets: ["latin"],
@@ -107,6 +114,7 @@ export default function RootLayout({
         geistSans.className,
         geistSans.variable,
         geistPixel.variable,
+        anomalyNexus.variable,
       )}
     >
       <body className="min-h-full">
