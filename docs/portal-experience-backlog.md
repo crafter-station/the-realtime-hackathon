@@ -14,11 +14,11 @@
 - [x] Hero reveal: cinematic entrance fires after traversal (clip-path wipe).
 
 ## P1 — the five worlds (bespoke, not generic icosahedrons)
-- [ ] Multiplayer: a live network — nodes + animated connection lines, presence dots.
-- [ ] Live Streaming: expanding concentric waves / broadcast pulse to a crowd.
-- [ ] Real-Time Location: a wire globe / grid with moving location pings.
-- [ ] AI Agents: an autonomous swarm reacting to a signal (boids-ish).
-- [ ] Wild Signal: controlled chaos — glitch/instanced burst.
+- [x] Multiplayer: fibonacci-sphere node network + additive presence lines, rotating.
+- [x] Live Streaming: concentric broadcast rings rippling outward from a hot core.
+- [x] Real-Time Location: rotating wire globe + blinking location pings.
+- [x] AI Agents: orbiting particle swarm around a signal core.
+- [x] Wild Signal: glitching jitter burst of points.
 
 ## P1 — content & conversion
 - [ ] Tighten all copy to the brief voice; verify event facts vs `src/lib/`.

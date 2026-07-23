@@ -8,6 +8,8 @@ import { scroll } from "./store";
 
 const ORANGE = new THREE.Color("#ff4d00");
 const WHITE = new THREE.Color("#ffffff");
+// Above-1.0 orange so postprocessing bloom catches the key marks of each world.
+const BRIGHT = new THREE.Color(1.3, 0.42, 0.06);
 
 // How far the camera travels (in world units) across the full scroll.
 const TRACK_LEN = 88;
@@ -177,36 +179,285 @@ function Warp() {
   );
 }
 
-/** Glowing world nodes the camera flies past on the journey. */
-function Worlds() {
-  const group = useRef<THREE.Group>(null);
-  useFrame((state) => {
-    if (!group.current) return;
-    const t = state.clock.elapsedTime;
-    for (let i = 0; i < group.current.children.length; i += 1) {
-      const child = group.current.children[i];
-      child.rotation.x = t * 0.12 + i;
-      child.rotation.y = t * 0.16 + i;
+// Additive-orange material shared by the world marks (keeps them cohesive).
+const glowPoints = {
+  sizeAttenuation: true,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  toneMapped: false,
+} as const;
+
+function fibSphere(n: number, radius: number) {
+  const arr = new Float32Array(n * 3);
+  const pts: THREE.Vector3[] = [];
+  for (let i = 0; i < n; i += 1) {
+    const y = 1 - (i / (n - 1)) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const theta = i * 2.399963229; // golden angle
+    const v = new THREE.Vector3(
+      Math.cos(theta) * r,
+      y,
+      Math.sin(theta) * r,
+    ).multiplyScalar(radius);
+    pts.push(v);
+    arr[i * 3] = v.x;
+    arr[i * 3 + 1] = v.y;
+    arr[i * 3 + 2] = v.z;
+  }
+  return { arr, pts };
+}
+
+/** World 01 — Multiplayer: a live network of nodes wired by presence lines. */
+function NetworkWorld() {
+  const grp = useRef<THREE.Group>(null);
+  const { pointsGeo, lineGeo } = useMemo(() => {
+    const { arr, pts } = fibSphere(16, 1);
+    const pg = new THREE.BufferGeometry();
+    pg.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+    const linePos: number[] = [];
+    for (let i = 0; i < pts.length; i += 1) {
+      for (let j = i + 1; j < pts.length; j += 1) {
+        if (pts[i].distanceTo(pts[j]) < 0.98) {
+          linePos.push(
+            pts[i].x,
+            pts[i].y,
+            pts[i].z,
+            pts[j].x,
+            pts[j].y,
+            pts[j].z,
+          );
+        }
+      }
+    }
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(linePos), 3),
+    );
+    return { pointsGeo: pg, lineGeo: lg };
+  }, []);
+  useFrame((s) => {
+    if (!grp.current) return;
+    grp.current.rotation.y = s.clock.elapsedTime * 0.24;
+    grp.current.rotation.x = Math.sin(s.clock.elapsedTime * 0.3) * 0.18;
+  });
+  return (
+    <group ref={grp}>
+      <lineSegments geometry={lineGeo}>
+        <lineBasicMaterial
+          color={ORANGE}
+          transparent
+          opacity={0.35}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          toneMapped={false}
+        />
+      </lineSegments>
+      <points geometry={pointsGeo}>
+        <pointsMaterial size={0.14} color={BRIGHT} {...glowPoints} />
+      </points>
+    </group>
+  );
+}
+
+/** World 02 — Live Streaming: concentric broadcast waves rippling outward. */
+function WavesWorld() {
+  const rings = useRef<THREE.Mesh[]>([]);
+  const RINGS = 4;
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    for (let i = 0; i < rings.current.length; i += 1) {
+      const m = rings.current[i];
+      if (!m) continue;
+      const phase = (t * 0.42 + i / RINGS) % 1;
+      m.scale.setScalar(0.25 + phase * 1.8);
+      (m.material as THREE.MeshBasicMaterial).opacity =
+        (1 - phase) ** 1.4 * 0.8;
     }
   });
   return (
-    <group ref={group}>
-      {WORLD_Z.map((z, i) => (
+    <group rotation={[Math.PI / 2.3, 0, 0]}>
+      {Array.from({ length: RINGS }).map((_, i) => (
         <mesh
-          key={z}
-          position={[i % 2 === 0 ? 2.4 : -2.4, i % 2 === 0 ? 1 : -1, z]}
+          // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length ring set
+          key={i}
+          ref={(el) => {
+            if (el) rings.current[i] = el;
+          }}
         >
-          <icosahedronGeometry args={[0.9, 0]} />
+          <torusGeometry args={[1, 0.028, 10, 96]} />
           <meshBasicMaterial
-            color={ORANGE}
-            wireframe
-            toneMapped={false}
+            color={BRIGHT}
             transparent
-            opacity={0.85}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            toneMapped={false}
           />
         </mesh>
       ))}
+      <mesh rotation={[-Math.PI / 2.3, 0, 0]}>
+        <sphereGeometry args={[0.12, 16, 16]} />
+        <meshBasicMaterial
+          color={new THREE.Color(1.8, 0.6, 0.15)}
+          toneMapped={false}
+        />
+      </mesh>
     </group>
+  );
+}
+
+/** World 03 — Real-Time Location: a wire globe with blinking location pings. */
+function GlobeWorld() {
+  const grp = useRef<THREE.Group>(null);
+  const pings = useRef<THREE.Points>(null);
+  const pingGeo = useMemo(() => {
+    const { arr } = fibSphere(7, 1.02);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+    return g;
+  }, []);
+  useFrame((s) => {
+    if (grp.current) grp.current.rotation.y = s.clock.elapsedTime * 0.3;
+    if (pings.current) {
+      (pings.current.material as THREE.PointsMaterial).opacity =
+        0.5 + Math.sin(s.clock.elapsedTime * 4) * 0.5;
+    }
+  });
+  return (
+    <group ref={grp}>
+      <mesh>
+        <sphereGeometry args={[1, 18, 14]} />
+        <meshBasicMaterial
+          color={ORANGE}
+          wireframe
+          transparent
+          opacity={0.32}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+      <points ref={pings} geometry={pingGeo}>
+        <pointsMaterial size={0.17} color={BRIGHT} {...glowPoints} />
+      </points>
+    </group>
+  );
+}
+
+/** World 04 — AI Agents: an autonomous swarm orbiting a signal. */
+function SwarmWorld() {
+  const count = scroll.quality === "lite" ? 60 : 150;
+  const seed = useMemo(() => {
+    const s = new Float32Array(count * 3);
+    for (let i = 0; i < count; i += 1) {
+      s[i * 3] = 0.5 + Math.random() * 1;
+      s[i * 3 + 1] = Math.random() * Math.PI * 2;
+      s[i * 3 + 2] = 0.3 + Math.random() * 1.6;
+    }
+    return s;
+  }, [count]);
+  const geo = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(count * 3), 3),
+    );
+    return g;
+  }, [count]);
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    const pos = geo.attributes.position.array as Float32Array;
+    for (let i = 0; i < count; i += 1) {
+      const r = seed[i * 3];
+      const a = seed[i * 3 + 1] + t * seed[i * 3 + 2];
+      pos[i * 3] = Math.cos(a) * r;
+      pos[i * 3 + 1] = Math.sin(t * seed[i * 3 + 2] + i) * 0.7;
+      pos[i * 3 + 2] = Math.sin(a) * r;
+    }
+    geo.attributes.position.needsUpdate = true;
+  });
+  return (
+    <group>
+      <points geometry={geo}>
+        <pointsMaterial size={0.1} color={BRIGHT} {...glowPoints} />
+      </points>
+      <mesh>
+        <sphereGeometry args={[0.13, 16, 16]} />
+        <meshBasicMaterial
+          color={new THREE.Color(1.8, 0.6, 0.15)}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** World 05 — Wild Signal: controlled chaos, a glitching burst of points. */
+function GlitchWorld() {
+  const grp = useRef<THREE.Group>(null);
+  const count = scroll.quality === "lite" ? 50 : 120;
+  const base = useMemo(() => {
+    const b = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i += 1) b[i] = (Math.random() - 0.5) * 2.3;
+    return b;
+  }, [count]);
+  const geo = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(base.slice(), 3));
+    return g;
+  }, [base]);
+  useFrame((s) => {
+    const t = s.clock.elapsedTime;
+    const step = Math.floor(t * 9);
+    const pos = geo.attributes.position.array as Float32Array;
+    for (let i = 0; i < count; i += 1) {
+      const rnd = Math.sin(i * 12.9898 + step) * 43758.5453;
+      const jit = (rnd - Math.floor(rnd) - 0.5) * 0.34;
+      pos[i * 3] = base[i * 3] + jit;
+      pos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * 6 + i) * 0.12;
+      pos[i * 3 + 2] = base[i * 3 + 2] - jit;
+    }
+    geo.attributes.position.needsUpdate = true;
+    if (grp.current) grp.current.rotation.z = t * 0.1;
+  });
+  return (
+    <group ref={grp}>
+      <points geometry={geo}>
+        <pointsMaterial size={0.09} color={BRIGHT} {...glowPoints} />
+      </points>
+    </group>
+  );
+}
+
+// Each world sits on the right so it never fights the left-aligned copy.
+const WORLD_POS: Array<[number, number, number]> = [
+  [2.8, 0.3, WORLD_Z[0]],
+  [3.0, -0.5, WORLD_Z[1]],
+  [2.7, 0.6, WORLD_Z[2]],
+  [3.0, -0.3, WORLD_Z[3]],
+  [2.7, 0.3, WORLD_Z[4]],
+];
+
+/** The five Portal-capability worlds the camera flies past on the journey. */
+function Worlds() {
+  return (
+    <>
+      <group position={WORLD_POS[0]}>
+        <NetworkWorld />
+      </group>
+      <group position={WORLD_POS[1]}>
+        <WavesWorld />
+      </group>
+      <group position={WORLD_POS[2]}>
+        <GlobeWorld />
+      </group>
+      <group position={WORLD_POS[3]}>
+        <SwarmWorld />
+      </group>
+      <group position={WORLD_POS[4]}>
+        <GlitchWorld />
+      </group>
+    </>
   );
 }
 
