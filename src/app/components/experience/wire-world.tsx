@@ -49,6 +49,19 @@ function waveWindow(z: number): number {
   return smoothstep(-48, -72, z) * (1 - smoothstep(-118, -138, z));
 }
 
+/**
+ * How visible the floor is at (x, z). Inside a tunnel the floor is clipped to
+ * the tunnel's own width, so the wide grid never spills past the walls (that
+ * read as a second floor behind the tunnel). Fades out over ~3 units so the
+ * boundary is smooth, never a hard edge.
+ */
+export function floorVisibility(x: number, z: number): number {
+  const p = tunnelPresence(z);
+  if (p < 0.002) return 1;
+  const outside = smoothstep(HW - 3.2, HW + 0.4, Math.abs(x - pathX(z)));
+  return 1 - p * outside;
+}
+
 /** Rolling floor height — this is what makes the ride rise and fall. */
 export function floorY(x: number, z: number): number {
   const wave =
@@ -75,26 +88,38 @@ export function WireWorld() {
   // ---- Floor: undulating wire grid --------------------------------------
   const floorGeometry = useMemo(() => {
     const pos: number[] = [];
+    const col: number[] = [];
+    const seg = (ax: number, az: number, bx: number, bz: number) => {
+      const va = floorVisibility(ax, az);
+      const vb = floorVisibility(bx, bz);
+      if (va < 0.004 && vb < 0.004) return;
+      pos.push(ax, floorY(ax, az), az, bx, floorY(bx, bz), bz);
+      col.push(va, va, va, vb, vb, vb);
+    };
+
     const zCount = Math.floor((WORLD_Z_START - WORLD_Z_END) / STEP_Z);
     // Lines running along z.
     for (let x = -FLOOR_HW; x <= FLOOR_HW; x += STEP_X) {
       for (let k = 0; k < zCount; k += 1) {
         const z0 = WORLD_Z_START - k * STEP_Z;
-        const z1 = z0 - STEP_Z;
-        pos.push(x, floorY(x, z0), z0, x, floorY(x, z1), z1);
+        seg(x, z0, x, z0 - STEP_Z);
       }
     }
     // Lines running across x.
     for (let k = 0; k <= zCount; k += 1) {
       const z = WORLD_Z_START - k * STEP_Z;
       for (let x = -FLOOR_HW; x < FLOOR_HW; x += STEP_X) {
-        pos.push(x, floorY(x, z), z, x + STEP_X, floorY(x + STEP_X, z), z);
+        seg(x, z, x + STEP_X, z);
       }
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute(
       "position",
       new THREE.BufferAttribute(new Float32Array(pos), 3),
+    );
+    g.setAttribute(
+      "color",
+      new THREE.BufferAttribute(new Float32Array(col), 3),
     );
     return g;
   }, []);
@@ -113,7 +138,7 @@ export function WireWorld() {
     ) => {
       const ca = tunnelPresence(az);
       const cb = tunnelPresence(bz);
-      if (ca < 0.01 && cb < 0.01) return;
+      if (ca < 0.004 && cb < 0.004) return;
       pos.push(ax, ay, az, bx, by, bz);
       col.push(ca, ca, ca, cb, cb, cb);
     };
@@ -122,7 +147,7 @@ export function WireWorld() {
     // Cross-sections: up the left wall, across the ceiling, down the right.
     for (let k = 0; k <= zCount; k += 1) {
       const z = WORLD_Z_START - k * STEP_Z;
-      if (tunnelPresence(z) < 0.01) continue;
+      if (tunnelPresence(z) < 0.004) continue;
       const cx = pathX(z);
       const base = floorY(cx, z);
       const top = base + WALL_H;
@@ -163,7 +188,7 @@ export function WireWorld() {
       for (let k = 0; k < zCount; k += 1) {
         const z0 = WORLD_Z_START - k * STEP_Z;
         const z1 = z0 - STEP_Z;
-        if (tunnelPresence(z0) < 0.01 && tunnelPresence(z1) < 0.01) continue;
+        if (tunnelPresence(z0) < 0.004 && tunnelPresence(z1) < 0.004) continue;
         const x0 = pathX(z0) + (Math.abs(rx) <= 1 ? rx * HW : rx);
         const x1 = pathX(z1) + (Math.abs(rx) <= 1 ? rx * HW : rx);
         const y0 = floorY(pathX(z0), z0) + WALL_H * ry;
@@ -211,7 +236,7 @@ export function WireWorld() {
       <lineSegments geometry={floorGeometry}>
         <lineBasicMaterial
           ref={floorMat}
-          color="#ffffff"
+          vertexColors
           transparent
           opacity={0.32}
           depthWrite={false}

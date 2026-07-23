@@ -149,7 +149,7 @@ export function PortalCanvas() {
         camera={{ fov: 55, near: 0.1, far: 110, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
-        <fog attach="fog" args={["#0e0e10", 16, 62]} />
+        <fog attach="fog" args={["#0e0e10", 14, 50]} />
         <Starfield count={stars} />
         <WireWorld />
         <FinaleHand />
