@@ -9,8 +9,6 @@ import { scroll } from "./store";
 
 const ASTRONAUT_URL = "/models/astronaut.glb";
 const MARS_URL = "/models/mars.glb";
-const ORANGE = new THREE.Color("#ff4d00");
-const RIM = new THREE.Color(1.5, 0.45, 0.06); // >1 so bloom catches the ring rim
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -81,46 +79,7 @@ function Mars() {
   );
 }
 
-/** The portal ring — glossy orange, framing the astronaut and the view of space. */
-function Portal() {
-  const ring = useRef<THREE.Mesh>(null);
-  const rim = useRef<THREE.Mesh>(null);
-  useFrame((s) => {
-    const t = s.clock.elapsedTime;
-    if (ring.current) ring.current.rotation.z = t * 0.1;
-    if (rim.current) {
-      (rim.current.material as THREE.MeshBasicMaterial).opacity =
-        0.7 + Math.sin(t * 1.6) * 0.12;
-    }
-  });
-  return (
-    <group>
-      <mesh ref={rim} position={[0, 0, -0.04]}>
-        <ringGeometry args={[1.98, 2.16, 96]} />
-        <meshBasicMaterial
-          color={RIM}
-          toneMapped={false}
-          transparent
-          opacity={0.75}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-      <mesh ref={ring}>
-        <torusGeometry args={[2.2, 0.15, 40, 220]} />
-        <meshPhysicalMaterial
-          color={ORANGE}
-          roughness={0.16}
-          metalness={0.15}
-          clearcoat={1}
-          clearcoatRoughness={0.18}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-/** The floating astronaut — framed on the RIGHT inside the portal. */
+/** The floating astronaut, drifting in open space. */
 function Astronaut() {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(ASTRONAUT_URL);
@@ -215,7 +174,6 @@ export function PortalCanvas() {
         <Suspense fallback={null}>
           <Mars />
         </Suspense>
-        <Portal />
         {scroll.quality === "high" ? (
           <Suspense fallback={null}>
             <Astronaut />

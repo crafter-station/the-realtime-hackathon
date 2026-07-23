@@ -124,7 +124,7 @@ export function Experience() {
             <p className="xp-body">
               Build a live, multiplayer or agentic AI product with{" "}
               <strong>Portal</strong> in one weekend. August 7–9, online. US$800
-              in prizes. <strong>Scroll to step through the portal.</strong>
+              in prizes. <strong>Scroll to launch.</strong>
             </p>
           </div>
         </section>
@@ -154,12 +154,6 @@ export function Experience() {
           </section>
         </div>
       </main>
-
-      <div className="xp-cue" aria-hidden>
-        <span>{"RT//HACK"}</span>
-        <span className="xp-cue__center">Scroll to explore ↓</span>
-        <span>Aug 07–09</span>
-      </div>
 
       <div className="xp-progress" aria-hidden>
         <div ref={progressFill} className="xp-progress__fill" />
