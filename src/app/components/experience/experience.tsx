@@ -29,8 +29,8 @@ function clockParts(now: number): string {
 
 // Scroll fraction across which the fly-into-the-H zoom happens.
 const ZOOM_END = 0.15;
-// How far we zoom: the H's hollow counter must exceed the viewport.
-const ZOOM_MAX = 46;
+// How far we zoom: the H's white core must exceed the viewport, even at 4K.
+const ZOOM_MAX = 62;
 
 export function Experience() {
   const [mounted, setMounted] = useState(false);
@@ -40,6 +40,8 @@ export function Experience() {
   const heroTitle = useRef<HTMLHeadingElement>(null);
   const heroSub = useRef<HTMLDivElement>(null);
   const hGlyph = useRef<HTMLSpanElement>(null);
+  const hPortal = useRef<HTMLSpanElement>(null);
+  const hProbe = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     scroll.quality = detectQuality();
@@ -51,20 +53,42 @@ export function Experience() {
     ).matches;
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
 
-    // Measure the H glyph so the zoom scales/rotates around its hollow center
-    // and drifts it to the middle of the viewport.
+    // Measure the H glyph's real ink box (canvas TextMetrics + baseline probe)
+    // so the zoom anchors on its true center and the white core sits exactly
+    // inside the glyph at any resolution.
     const anchor = { ox: 0, oy: 0, tx: 0, ty: 0 };
+    const metricsCtx = document.createElement("canvas").getContext("2d");
     const measure = () => {
       const title = heroTitle.current;
       const h = hGlyph.current;
-      if (!title || !h) return;
+      const portal = hPortal.current;
+      const probe = hProbe.current;
+      if (!title || !h || !portal || !probe || !metricsCtx) return;
       const prev = title.style.transform;
       title.style.transform = "none";
       const tr = title.getBoundingClientRect();
       const hr = h.getBoundingClientRect();
+      const baselineY = probe.getBoundingClientRect().top;
+
+      // Ink extents of the glyph from the actual rendered font.
+      const cs = getComputedStyle(h);
+      metricsCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const m = metricsCtx.measureText("h");
+      const inkLeft = hr.left - m.actualBoundingBoxLeft;
+      const inkW = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+      const inkTop = baselineY - m.actualBoundingBoxAscent;
+      const inkH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
       title.style.transform = prev;
-      const hx = hr.left + hr.width / 2;
-      const hy = hr.top + hr.height / 2;
+
+      // White core: the middle column of the H, inside the ink box.
+      portal.style.left = `${inkLeft - hr.left + inkW * 0.27}px`;
+      portal.style.width = `${inkW * 0.46}px`;
+      portal.style.top = `${inkTop - hr.top + inkH * 0.06}px`;
+      portal.style.height = `${inkH * 0.86}px`;
+
+      // Zoom anchor = ink center.
+      const hx = inkLeft + inkW / 2;
+      const hy = inkTop + inkH / 2;
       anchor.ox = hx - tr.left;
       anchor.oy = hy - tr.top;
       anchor.tx = window.innerWidth / 2 - hx;
@@ -72,6 +96,7 @@ export function Experience() {
       title.style.transformOrigin = `${anchor.ox}px ${anchor.oy}px`;
     };
     measure();
+    document.fonts?.ready?.then(() => measure()).catch(() => undefined);
     window.addEventListener("resize", measure);
 
     let raf = 0;
@@ -135,7 +160,11 @@ export function Experience() {
         <h1 ref={heroTitle} className="xp-display">
           The realtime{" "}
           <em>
-            <span ref={hGlyph}>h</span>ackathon
+            <span ref={hGlyph} className="xp-hGlyph">
+              <span ref={hPortal} className="xp-hPortal" aria-hidden />
+              <span ref={hProbe} className="xp-hProbe" aria-hidden />h
+            </span>
+            ackathon
           </em>
         </h1>
         <div ref={heroSub} className="xp-heroSub">

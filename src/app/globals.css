@@ -4793,7 +4793,9 @@ html.xp body {
 .xp-heroLayer .xp-display {
   max-width: none;
   font-size: clamp(2.6rem, 8.2vw, 9rem);
-  will-change: transform;
+  /* No will-change/text-shadow: layer promotion freezes a stale raster of the
+     zoomed state when scrolling back (title showed cropped); re-raster instead. */
+  text-shadow: none;
 }
 .xp-heroSub {
   display: grid;
@@ -4810,4 +4812,23 @@ html.xp body {
 }
 .xp-gap--intro {
   height: 160svh;
+}
+
+/* The H holds the other dimension: a white core visible only through the
+   glyph's counters. The H itself gets a solid page-colored fill (same outline
+   look) so it masks the rect everywhere except its real holes. Vector = stays
+   razor-sharp at any zoom/resolution, 4K included. */
+.xp-hGlyph {
+  position: relative;
+  color: var(--paper);
+}
+.xp-hPortal {
+  position: absolute;
+  z-index: -1;
+  background: #ffffff;
+}
+.xp-hProbe {
+  display: inline-block;
+  width: 0;
+  height: 0;
 }
