@@ -58,8 +58,13 @@ function waveWindow(z: number): number {
 export function floorVisibility(x: number, z: number): number {
   const p = tunnelPresence(z);
   if (p < 0.002) return 1;
+  // Gate on presence, not presence itself: while the tunnel is still readable
+  // the outer floor stays fully hidden, otherwise you briefly see BOTH the
+  // walls and a second, wider floor behind them during the dissolve. It only
+  // fades in once the tunnel is down to a few percent.
+  const clip = smoothstep(0.02, 0.18, p);
   const outside = smoothstep(HW - 3.2, HW + 0.4, Math.abs(x - pathX(z)));
-  return 1 - p * outside;
+  return 1 - clip * outside;
 }
 
 /** Rolling floor height — this is what makes the ride rise and fall. */
