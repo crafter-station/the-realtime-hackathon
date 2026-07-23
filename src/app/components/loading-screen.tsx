@@ -2,103 +2,72 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const LABEL = "Ready?";
-const ORANGE: [number, number, number] = [255, 77, 0];
-const CHAR_MS = 160;
-const MIN_DURATION = 2600;
-const MAX_DURATION = 4200;
+const MIN_DURATION = 2900;
+const MAX_DURATION = 5200;
 const FADE_MS = 620;
 
-type Grid = {
-  cells: boolean[][];
-  rows: number;
-  cols: number;
-  /** Trimmed end column after each character, for a typewriter reveal. */
-  charEndCols: number[];
+// Boot-sequence pacing: each module lights up in turn, Pip-Boy style.
+const STEP_MS = 340;
+
+const TABS = ["BRIEF", "TRACKS", "STACK", "PRIZES", "LIVE"];
+const ACTIVE_TAB = "STACK";
+const SUBTABS = ["OVERVIEW", "REALTIME", "AGENTS"];
+const ACTIVE_SUBTAB = "REALTIME";
+
+// Event facts mirror the landing copy (Aug 7-9, online, 39h, teams 1-4, US$800).
+const PARAMS: Array<[string, string]> = [
+  ["EVENT", "AUG 07 - 09"],
+  ["MODE", "ONLINE / 39H"],
+  ["TEAMS", "1 - 4"],
+  ["PRIZE", "US$800"],
+];
+
+// Portal capabilities + AI as a SPECIAL-style stat list.
+const MODULES: Array<{ name: string; value: string; desc: string }> = [
+  {
+    name: "CHANNELS",
+    value: "08",
+    desc: "Realtime pub/sub channels that stream every state change to every connected client the instant it happens.",
+  },
+  {
+    name: "PRESENCE",
+    value: "06",
+    desc: "Live presence so you always know who is online, typing, and acting in the room right now.",
+  },
+  {
+    name: "BROADCAST",
+    value: "07",
+    desc: "Fan-out broadcast to push a single event to an entire room at once with no fan-out code of your own.",
+  },
+  {
+    name: "HISTORY",
+    value: "05",
+    desc: "Replayable event history so late joiners instantly catch up on everything they missed.",
+  },
+  {
+    name: "DIRECT SENDS",
+    value: "04",
+    desc: "Targeted direct sends to reach exactly one client without broadcasting to the whole channel.",
+  },
+  {
+    name: "AI AGENTS",
+    value: "09",
+    desc: "Autonomous agents that act on live signals and reshape the experience as it unfolds.",
+  },
+];
+
+const SUMMARY = {
+  name: "STACK ONLINE",
+  desc: "Realtime stack synced. Portal channels, presence, and AI agents are live — ready to build.",
 };
-
-/**
- * Sample the pixel font into a low-resolution on/off matrix so the loading
- * label reads like an LED dot-matrix panel. The Geist Pixel font is already
- * blocky, so sampling its coverage yields clean square cells.
- */
-function buildGrid(text: string, fontFamily: string, targetRows: number): Grid {
-  const off = document.createElement("canvas");
-  const octx = off.getContext("2d", { willReadFrequently: true });
-  if (!octx) return { cells: [], rows: 0, cols: 0, charEndCols: [] };
-
-  const fontSize = 220;
-  const font = `700 ${fontSize}px ${fontFamily}`;
-  octx.font = font;
-  const metrics = octx.measureText(text);
-  const ascent = Math.ceil(metrics.actualBoundingBoxAscent || fontSize * 0.72);
-  const descent = Math.ceil(metrics.actualBoundingBoxDescent || fontSize * 0.2);
-  const pad = 6;
-  const width = Math.ceil(metrics.width) + pad * 2;
-  const height = ascent + descent + pad * 2;
-
-  off.width = width;
-  off.height = height;
-  octx.font = font;
-  octx.textBaseline = "alphabetic";
-  octx.fillStyle = "#ffffff";
-  octx.fillText(text, pad, ascent + pad);
-
-  const textHeight = ascent + descent;
-  const step = textHeight / targetRows;
-  const cols = Math.round(width / step);
-  const rows = Math.round(height / step);
-  const data = octx.getImageData(0, 0, width, height).data;
-
-  // Cumulative end column of each character, for the typewriter reveal.
-  const rawEndCols: number[] = [];
-  let advance = pad;
-  for (const char of text) {
-    advance += octx.measureText(char).width;
-    rawEndCols.push(Math.round(advance / step));
-  }
-
-  const raw: boolean[][] = [];
-  for (let r = 0; r < rows; r += 1) {
-    const row: boolean[] = [];
-    for (let c = 0; c < cols; c += 1) {
-      const sx = Math.min(width - 1, Math.floor((c + 0.5) * step));
-      const sy = Math.min(height - 1, Math.floor((r + 0.5) * step));
-      row.push(data[(sy * width + sx) * 4 + 3] > 90);
-    }
-    raw.push(row);
-  }
-
-  // Trim empty rows/cols so the label centers cleanly.
-  let top = 0;
-  let bottom = raw.length - 1;
-  let left = 0;
-  let right = cols - 1;
-  const rowEmpty = (r: number) => raw[r].every((on) => !on);
-  const colEmpty = (c: number) => raw.every((row) => !row[c]);
-  while (top < bottom && rowEmpty(top)) top += 1;
-  while (bottom > top && rowEmpty(bottom)) bottom -= 1;
-  while (left < right && colEmpty(left)) left += 1;
-  while (right > left && colEmpty(right)) right -= 1;
-
-  const cells = raw
-    .slice(top, bottom + 1)
-    .map((row) => row.slice(left, right + 1));
-
-  const trimmedCols = cells[0]?.length ?? 0;
-  const charEndCols = rawEndCols.map((end) =>
-    Math.max(0, Math.min(trimmedCols, end - left)),
-  );
-
-  return { cells, rows: cells.length, cols: trimmedCols, charEndCols };
-}
 
 export function LoadingScreen() {
   const [mounted, setMounted] = useState(true);
   const [leaving, setLeaving] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [active, setActive] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  // Dismiss lifecycle: wait for a minimum beat plus the window load event,
+  // Dismiss lifecycle: minimum on-screen beat plus the window load event,
   // capped so a slow page never traps the visitor behind the overlay.
   useEffect(() => {
     if (!mounted) return;
@@ -113,8 +82,10 @@ export function LoadingScreen() {
     const loadedAt = performance.now();
     const scheduleLeave = () => {
       const elapsed = performance.now() - loadedAt;
-      const wait = Math.max(0, MIN_DURATION - elapsed);
-      leaveTimer = window.setTimeout(startLeaving, wait);
+      leaveTimer = window.setTimeout(
+        startLeaving,
+        Math.max(0, MIN_DURATION - elapsed),
+      );
     };
 
     const capTimer = window.setTimeout(startLeaving, MAX_DURATION);
@@ -143,220 +114,136 @@ export function LoadingScreen() {
     };
   }, [mounted]);
 
+  // Step the highlight through the module list and fill the boot bar.
   useEffect(() => {
     if (!mounted) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const root = rootRef.current;
+    const bar = root?.querySelector<HTMLElement>("[data-boot-fill]");
+    const pct = root?.querySelector<HTMLElement>("[data-boot-pct]");
 
-    let disposed = false;
+    const total = MODULES.length * STEP_MS;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reducedMotion) {
+      setActive(MODULES.length);
+      if (bar) bar.style.width = "100%";
+      if (pct) pct.textContent = "100%";
+      return;
+    }
+
     let frame = 0;
-    let bgCanvas: HTMLCanvasElement | null = null;
-    let grid: Grid | null = null;
-    let layout = { cell: 12, originX: 0, originY: 0 };
-
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let reducedMotion = motionQuery.matches;
-    let animStart = 0;
-
-    const draw = (timestamp: number) => {
-      if (!grid || !bgCanvas) return;
-      if (!animStart) animStart = timestamp;
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(bgCanvas, 0, 0);
-
-      const { cell } = layout;
-      const inner = cell * 0.82;
-      const inset = (cell - inner) / 2;
-      const t = timestamp * 0.001;
-      const [r, g, b] = ORANGE;
-
-      // Typewriter reveal: one character every CHAR_MS, then hold.
-      const charCount = grid.charEndCols.length;
-      const elapsed = timestamp - animStart;
-      const revealed = reducedMotion
-        ? charCount
-        : Math.min(charCount, Math.floor(elapsed / CHAR_MS));
-      const typing = revealed < charCount;
-      const revealCol = revealed > 0 ? grid.charEndCols[revealed - 1] : 0;
-
-      // Bright text cells (only the columns written so far) with a soft flicker.
-      ctx.save();
-      ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.85)`;
-      ctx.shadowBlur = reducedMotion ? cell * 0.5 : cell * 0.95;
-      for (let row = 0; row < grid.rows; row += 1) {
-        for (let col = 0; col < grid.cols; col += 1) {
-          if (!grid.cells[row][col]) continue;
-          if (col >= revealCol) continue;
-          const flicker = reducedMotion
-            ? 1
-            : 0.82 + 0.18 * Math.sin(t * 6 + row * 0.9 + col * 0.6);
-          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${Math.min(1, flicker)})`;
-          ctx.fillRect(
-            layout.originX + col * cell + inset,
-            layout.originY + row * cell + inset,
-            inner,
-            inner,
-          );
-        }
-      }
-
-      // Cursor block: rides the write head while typing, then blinks at the end.
-      const solidWhileTyping = typing;
-      const blink = solidWhileTyping || Math.floor(t / 0.53) % 2 === 0;
-      if (blink) {
-        const cursorCol = typing ? revealCol : grid.cols + 1;
-        const cursorPx = layout.originX + cursorCol * cell;
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.95)`;
-        const side = grid.rows * cell;
-        ctx.fillRect(
-          cursorPx + inset,
-          layout.originY + inset,
-          side - inset * 2,
-          side - inset * 2,
-        );
-      }
-      ctx.restore();
-    };
-
-    const buildBackground = (dpr: number) => {
-      const w = canvas.width;
-      const h = canvas.height;
-      const bg = document.createElement("canvas");
-      bg.width = w;
-      bg.height = h;
-      const bctx = bg.getContext("2d");
-      if (!bctx || !grid) return;
-
-      bctx.fillStyle = "#090909";
-      bctx.fillRect(0, 0, w, h);
-
-      // Faint radial bloom behind the label.
-      const cx = layout.originX + (grid.cols * layout.cell) / 2;
-      const cy = layout.originY + (grid.rows * layout.cell) / 2;
-      const bloom = bctx.createRadialGradient(
-        cx,
-        cy,
-        0,
-        cx,
-        cy,
-        Math.max(w, h) * 0.5,
-      );
-      const [r, g, b] = ORANGE;
-      bloom.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.1)`);
-      bloom.addColorStop(1, "rgba(255, 77, 0, 0)");
-      bctx.fillStyle = bloom;
-      bctx.fillRect(0, 0, w, h);
-
-      // Dim LED grid tiled to the label pitch so the panel is always visible.
-      const cell = layout.cell;
-      const inner = cell * 0.82;
-      const inset = (cell - inner) / 2;
-      const startX = layout.originX % cell;
-      const startY = layout.originY % cell;
-      bctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.05)`;
-      for (let y = startY - cell; y < h; y += cell) {
-        for (let x = startX - cell; x < w; x += cell) {
-          bctx.fillRect(x + inset, y + inset, inner, inner);
-        }
-      }
-
-      // Subtle scanlines for CRT texture.
-      bctx.fillStyle = "rgba(0, 0, 0, 0.28)";
-      for (let y = 0; y < h; y += Math.max(2, Math.floor(3 * dpr))) {
-        bctx.fillRect(0, y, w, 1);
-      }
-
-      bgCanvas = bg;
-    };
-
-    const relayout = () => {
-      if (!grid || grid.cols === 0) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      canvas.width = Math.floor(vw * dpr);
-      canvas.height = Math.floor(vh * dpr);
-
-      const cursorGap = 1;
-      const cursorCells = grid.rows;
-      const totalCols = grid.cols + cursorGap + cursorCells;
-      const maxCellW = (vw * dpr * 0.34) / totalCols;
-      const maxCellH = (vh * dpr * 0.18) / grid.rows;
-      const cell = Math.max(3, Math.min(maxCellW, maxCellH, 9 * dpr));
-
-      const blockW = totalCols * cell;
-      const blockH = grid.rows * cell;
-      const originX = (canvas.width - blockW) / 2;
-      const originY = (canvas.height - blockH) / 2;
-
-      layout = { cell, originX, originY };
-      buildBackground(dpr);
-    };
+    let start = 0;
 
     const tick = (timestamp: number) => {
-      draw(timestamp);
-      if (!reducedMotion) frame = window.requestAnimationFrame(tick);
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = Math.min(1, elapsed / total);
+      const index = Math.min(MODULES.length, Math.floor(elapsed / STEP_MS));
+
+      setActive(index);
+      if (bar) bar.style.width = `${Math.round(progress * 100)}%`;
+      if (pct) pct.textContent = `${Math.round(progress * 100)}%`;
+
+      if (progress < 1) frame = window.requestAnimationFrame(tick);
     };
 
-    const start = () => {
-      window.cancelAnimationFrame(frame);
-      if (reducedMotion) {
-        draw(performance.now());
-        return;
-      }
-      frame = window.requestAnimationFrame(tick);
-    };
-
-    const handleResize = () => {
-      relayout();
-      start();
-    };
-
-    const handleMotion = (event: MediaQueryListEvent) => {
-      reducedMotion = event.matches;
-      start();
-    };
-
-    const init = async () => {
-      try {
-        await document.fonts.ready;
-      } catch {
-        // Fall through with whatever font is available.
-      }
-      if (disposed) return;
-      const fontFamily =
-        getComputedStyle(document.body)
-          .getPropertyValue("--font-geist-pixel")
-          .trim() || "monospace";
-      grid = buildGrid(LABEL, fontFamily, 9);
-      relayout();
-      start();
-    };
-
-    void init();
-    window.addEventListener("resize", handleResize);
-    motionQuery.addEventListener("change", handleMotion);
-
-    return () => {
-      disposed = true;
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("resize", handleResize);
-      motionQuery.removeEventListener("change", handleMotion);
-    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
   }, [mounted]);
 
   if (!mounted) return null;
 
+  const done = active >= MODULES.length;
+  const focus = done ? SUMMARY : MODULES[Math.min(active, MODULES.length - 1)];
+
   return (
     <output
-      className={`loading-screen${leaving ? " loading-screen--leaving" : ""}`}
+      className={`splash${leaving ? " splash--leaving" : ""}`}
       aria-live="polite"
     >
-      <canvas ref={canvasRef} className="loading-screen__canvas" aria-hidden />
+      <div ref={rootRef} className="splash__panel">
+        <span className="splash__corner splash__corner--tl" aria-hidden />
+        <span className="splash__corner splash__corner--tr" aria-hidden />
+        <span className="splash__corner splash__corner--bl" aria-hidden />
+        <span className="splash__corner splash__corner--br" aria-hidden />
+
+        <div className="splash__tabs" aria-hidden>
+          <span className="splash__cog">✷</span>
+          <nav className="splash__tabrow">
+            {TABS.map((tab) => (
+              <span
+                className={`splash__tab${
+                  tab === ACTIVE_TAB ? " is-active" : ""
+                }`}
+                key={tab}
+              >
+                {tab}
+              </span>
+            ))}
+          </nav>
+          <span className="splash__signal">▚</span>
+        </div>
+
+        <div className="splash__subtabs" aria-hidden>
+          {SUBTABS.map((tab) => (
+            <span
+              className={`splash__subtab${
+                tab === ACTIVE_SUBTAB ? " is-active" : ""
+              }`}
+              key={tab}
+            >
+              {tab}
+            </span>
+          ))}
+          <span className="splash__mode">{"// BOOT SEQUENCE"}</span>
+        </div>
+
+        <div className="splash__body">
+          <ul className="splash__stats">
+            {MODULES.map((mod, i) => {
+              const state =
+                done || i < active ? "done" : i === active ? "active" : "idle";
+              return (
+                <li className={`splash__stat is-${state}`} key={mod.name}>
+                  <span className="splash__stat-name">{mod.name}</span>
+                  <span className="splash__stat-value">
+                    {state === "idle" ? "--" : mod.value}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="splash__detail">
+            <div className="splash__emblem" aria-hidden>
+              <span className="splash__emblem-ring" />
+              <span className="splash__emblem-core" />
+            </div>
+            <h3 className="splash__detail-title">{focus.name}</h3>
+            <p className="splash__detail-desc">{focus.desc}</p>
+          </div>
+        </div>
+
+        <div className="splash__status">
+          <span className="splash__status-slot">{"PORTAL // ONLINE"}</span>
+          <span className="splash__status-boot">
+            <span className="splash__status-label">
+              {done ? "SYSTEM READY" : "BOOT"}
+            </span>
+            <span className="splash__bar">
+              <span className="splash__bar-fill" data-boot-fill />
+            </span>
+            <span className="splash__status-pct" data-boot-pct>
+              0%
+            </span>
+          </span>
+          <span className="splash__status-slot splash__status-slot--right">
+            {PARAMS[0][1]}
+          </span>
+        </div>
+      </div>
       <span className="sr-only">Loading The Realtime Hackathon</span>
     </output>
   );
