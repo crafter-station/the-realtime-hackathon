@@ -6,196 +6,226 @@ import * as THREE from "three";
 import { scroll } from "./store";
 
 /**
- * One continuous parametric ribbon-world:
- * - starts as an infinite wire floor (the hero grid),
- * - the path bends through curves,
- * - then the floor's edges curl up and CLOSE around you into the rectangular
- *   wire tunnel (same tunnel language as before), which you fly through.
+ * The world is two independent line sets — no geometric morphing, which is what
+ * made the transitions messy:
  *
- * The floor is literally the tunnel's perimeter unrolled flat; closeFactor(z)
- * rolls it back up. Everything is one static merged geometry — the camera
- * does the traveling.
+ * 1. FLOOR — a wide wire grid that runs the whole journey. Flat inside the
+ *    tunnels, undulating (rolling hills) across the open stretch.
+ * 2. WALLS + CEILING — only present in the tunnel stretches. They fade in and
+ *    out *spatially* via baked vertex colours (fading to the page black), so
+ *    the tunnel simply dissolves and leaves you on the open floor.
  */
 
 // World extents (along -z).
 export const WORLD_Z_START = 10;
 export const WORLD_Z_END = -215;
 
-// Tunnel cross-section (matches the previous tunnel's feel).
+// Tunnel cross-section.
 const HW = 13; // half width
-const HH = 8.5; // half height
-const RECT_CY = 5.4; // rect center height so its floor stays underfoot
+const WALL_H = 16.4; // floor → ceiling
+const EYE_TUNNEL = WALL_H / 2; // eye height inside the tunnel (centred)
+const EYE_OPEN = 2.8; // eye height over the open floor
 const FLOOR_Y = -2.8;
-const FLAT_W = 58; // unrolled floor width
 
-const RING_STEP = 2.4;
-
-/**
- * Perimeter samples anchored ON the rectangle's corners, so the tunnel reads as
- * a crisp rectangle instead of a chamfered polygon. Each edge is subdivided in
- * proportion to its length.
- */
-const RING_U: number[] = (() => {
-  const P = 4 * HW + 4 * HH;
-  const c1 = HW / P;
-  const c2 = (HW + 2 * HH) / P;
-  const c3 = (3 * HW + 2 * HH) / P;
-  const c4 = (3 * HW + 4 * HH) / P;
-  const segments: Array<[number, number]> = [
-    [0, c1],
-    [c1, c2],
-    [c2, c3],
-    [c3, c4],
-    [c4, 1],
-  ];
-  const us: number[] = [];
-  for (const [a, b] of segments) {
-    const steps = Math.max(2, Math.round((b - a) * 48));
-    for (let i = 0; i < steps; i += 1) us.push(a + ((b - a) * i) / steps);
-  }
-  us.push(1);
-  return us;
-})();
+// Floor grid.
+const FLOOR_HW = 34;
+const STEP_X = 2.6;
+const STEP_Z = 2.6;
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 }
 
-/** Curved centerline: the path bends through S-curves mid-journey. */
-export function pathX(z: number): number {
-  // Window where the curves live (after the hero straight, before closing).
-  const w = smoothstep(-74, -88, z) * (1 - smoothstep(-112, -126, z));
-  return Math.sin((z + 74) * 0.11) * 6.5 * w;
-}
-
-/** 0 = flat floor, 1 = fully closed rectangular tunnel.
- *  The journey STARTS inside a closed tunnel, opens out to the flat plane,
- *  then closes again for the finale run. */
-export function closeFactor(z: number): number {
-  const opening = 1 - smoothstep(-44, -62, z);
-  const closing = smoothstep(-124, -146, z);
+/** 1 while inside a tunnel stretch, 0 out on the open floor. */
+export function tunnelPresence(z: number): number {
+  const opening = 1 - smoothstep(-28, -50, z); // the starting tunnel dissolves
+  const closing = smoothstep(-126, -148, z); // the finale tunnel forms
   return Math.max(opening, closing);
 }
 
-/** Perimeter walk of the tunnel rect, param u in [0,1], starting top-center
- *  going clockwise. The flat floor is this exact perimeter unrolled. */
-function rectPoint(u: number): [number, number] {
-  const P = 4 * HW + 4 * HH; // total perimeter
-  let d = u * P;
-  // top-center → top-right
-  if (d < HW) return [d, RECT_CY + HH];
-  d -= HW;
-  // right side, downward
-  if (d < 2 * HH) return [HW, RECT_CY + HH - d];
-  d -= 2 * HH;
-  // bottom, right → left
-  if (d < 2 * HW) return [HW - d, RECT_CY - HH];
-  d -= 2 * HW;
-  // left side, upward
-  if (d < 2 * HH) return [-HW, RECT_CY - HH + d];
-  d -= 2 * HH;
-  // top-left → top-center
-  return [-HW + d, RECT_CY + HH];
+/** Undulations only live on the open stretch; the floor is flat in tunnels. */
+function waveWindow(z: number): number {
+  return smoothstep(-48, -72, z) * (1 - smoothstep(-118, -138, z));
 }
 
-/**
- * Ride height: centered in the tunnel's cross-section while it is closed (so
- * the view is symmetric, vanishing point dead centre), just above the plane
- * once it opens out.
- */
+/** Rolling floor height — this is what makes the ride rise and fall. */
+export function floorY(x: number, z: number): number {
+  const wave =
+    Math.sin(z * 0.075) * 2.6 + Math.sin(z * 0.029 + x * 0.045) * 1.25;
+  return FLOOR_Y + wave * waveWindow(z);
+}
+
+/** Curved centreline: the path drifts side to side across the open floor. */
+export function pathX(z: number): number {
+  const w = smoothstep(-64, -80, z) * (1 - smoothstep(-100, -114, z));
+  return Math.sin((z + 64) * 0.1) * 6.5 * w;
+}
+
+/** Camera height: centred in the tunnel, riding just over the rolling floor. */
 export function rideY(z: number): number {
-  return RECT_CY * closeFactor(z);
-}
-
-function profilePoint(u: number, close: number): [number, number] {
-  const flatX = (u - 0.5) * FLAT_W;
-  const [rx, ry] = rectPoint(u);
-  return [
-    THREE.MathUtils.lerp(flatX, rx, close),
-    THREE.MathUtils.lerp(FLOOR_Y, ry, close),
-  ];
+  const p = tunnelPresence(z);
+  return floorY(pathX(z), z) + THREE.MathUtils.lerp(EYE_OPEN, EYE_TUNNEL, p);
 }
 
 export function WireWorld() {
-  const material = useRef<THREE.LineBasicMaterial>(null);
+  const floorMat = useRef<THREE.LineBasicMaterial>(null);
+  const shellMat = useRef<THREE.LineBasicMaterial>(null);
 
-  const geometry = useMemo(() => {
-    const rings: number[][] = [];
-    for (let z = WORLD_Z_START; z >= WORLD_Z_END; z -= RING_STEP) {
-      const close = closeFactor(z);
+  // ---- Floor: undulating wire grid --------------------------------------
+  const floorGeometry = useMemo(() => {
+    const pos: number[] = [];
+    const zCount = Math.floor((WORLD_Z_START - WORLD_Z_END) / STEP_Z);
+    // Lines running along z.
+    for (let x = -FLOOR_HW; x <= FLOOR_HW; x += STEP_X) {
+      for (let k = 0; k < zCount; k += 1) {
+        const z0 = WORLD_Z_START - k * STEP_Z;
+        const z1 = z0 - STEP_Z;
+        pos.push(x, floorY(x, z0), z0, x, floorY(x, z1), z1);
+      }
+    }
+    // Lines running across x.
+    for (let k = 0; k <= zCount; k += 1) {
+      const z = WORLD_Z_START - k * STEP_Z;
+      for (let x = -FLOOR_HW; x < FLOOR_HW; x += STEP_X) {
+        pos.push(x, floorY(x, z), z, x + STEP_X, floorY(x + STEP_X, z), z);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(pos), 3),
+    );
+    return g;
+  }, []);
+
+  // ---- Walls + ceiling: present only in the tunnel stretches -------------
+  const shellGeometry = useMemo(() => {
+    const pos: number[] = [];
+    const col: number[] = [];
+    const push = (
+      ax: number,
+      ay: number,
+      az: number,
+      bx: number,
+      by: number,
+      bz: number,
+    ) => {
+      const ca = tunnelPresence(az);
+      const cb = tunnelPresence(bz);
+      if (ca < 0.01 && cb < 0.01) return;
+      pos.push(ax, ay, az, bx, by, bz);
+      col.push(ca, ca, ca, cb, cb, cb);
+    };
+
+    const zCount = Math.floor((WORLD_Z_START - WORLD_Z_END) / STEP_Z);
+    // Cross-sections: up the left wall, across the ceiling, down the right.
+    for (let k = 0; k <= zCount; k += 1) {
+      const z = WORLD_Z_START - k * STEP_Z;
+      if (tunnelPresence(z) < 0.01) continue;
       const cx = pathX(z);
-      const ring: number[] = [];
-      for (const u of RING_U) {
-        const [x, y] = profilePoint(u, close);
-        ring.push(cx + x, y, z);
+      const base = floorY(cx, z);
+      const top = base + WALL_H;
+      const segs = 8;
+      // left wall
+      for (let i = 0; i < segs; i += 1) {
+        const y0 = base + (WALL_H * i) / segs;
+        const y1 = base + (WALL_H * (i + 1)) / segs;
+        push(cx - HW, y0, z, cx - HW, y1, z);
       }
-      rings.push(ring);
-    }
-
-    const positions: number[] = [];
-    // Cross-section lines (each ring's consecutive points).
-    const N = RING_U.length;
-    for (const ring of rings) {
-      for (let i = 0; i < N - 1; i += 1) {
-        positions.push(
-          ring[i * 3],
-          ring[i * 3 + 1],
-          ring[i * 3 + 2],
-          ring[(i + 1) * 3],
-          ring[(i + 1) * 3 + 1],
-          ring[(i + 1) * 3 + 2],
-        );
+      // right wall
+      for (let i = 0; i < segs; i += 1) {
+        const y0 = base + (WALL_H * i) / segs;
+        const y1 = base + (WALL_H * (i + 1)) / segs;
+        push(cx + HW, y0, z, cx + HW, y1, z);
+      }
+      // ceiling
+      const cSegs = 12;
+      for (let i = 0; i < cSegs; i += 1) {
+        const x0 = cx - HW + (2 * HW * i) / cSegs;
+        const x1 = cx - HW + (2 * HW * (i + 1)) / cSegs;
+        push(x0, top, z, x1, top, z);
       }
     }
-    // Longitudinal rails (point i of ring k → ring k+1). Skipped across the
-    // morph bands, where they would fan out into messy diagonals — there the
-    // cross-sections alone read the shape changing.
-    for (let k = 0; k < rings.length - 1; k += 1) {
-      const zk = WORLD_Z_START - k * RING_STEP;
-      const ck = closeFactor(zk);
-      const morphing = ck > 0.03 && ck < 0.97;
-      if (morphing) continue;
-      const a = rings[k];
-      const b = rings[k + 1];
-      for (let i = 0; i < N; i += 3) {
-        positions.push(
-          a[i * 3],
-          a[i * 3 + 1],
-          a[i * 3 + 2],
-          b[i * 3],
-          b[i * 3 + 1],
-          b[i * 3 + 2],
-        );
+    // Longitudinal rails along the walls and ceiling.
+    const rails: Array<[number, number]> = [
+      [-HW, 0],
+      [-HW, 0.5],
+      [-HW, 1],
+      [HW, 0],
+      [HW, 0.5],
+      [HW, 1],
+      [-0.5, 1],
+      [0, 1],
+      [0.5, 1],
+    ];
+    for (const [rx, ry] of rails) {
+      for (let k = 0; k < zCount; k += 1) {
+        const z0 = WORLD_Z_START - k * STEP_Z;
+        const z1 = z0 - STEP_Z;
+        if (tunnelPresence(z0) < 0.01 && tunnelPresence(z1) < 0.01) continue;
+        const x0 = pathX(z0) + (Math.abs(rx) <= 1 ? rx * HW : rx);
+        const x1 = pathX(z1) + (Math.abs(rx) <= 1 ? rx * HW : rx);
+        const y0 = floorY(pathX(z0), z0) + WALL_H * ry;
+        const y1 = floorY(pathX(z1), z1) + WALL_H * ry;
+        push(x0, y0, z0, x1, y1, z1);
       }
     }
 
     const g = new THREE.BufferGeometry();
     g.setAttribute(
       "position",
-      new THREE.BufferAttribute(new Float32Array(positions), 3),
+      new THREE.BufferAttribute(new Float32Array(pos), 3),
+    );
+    g.setAttribute(
+      "color",
+      new THREE.BufferAttribute(new Float32Array(col), 3),
     );
     return g;
   }, []);
 
   useFrame((_, dt) => {
-    const mat = material.current;
-    if (!mat) return;
     // Lines brighten with scroll speed — the dimension-travel rush.
     const v = THREE.MathUtils.clamp(Math.abs(scroll.velocity) * 0.05, 0, 1);
-    const target = THREE.MathUtils.lerp(0.3, 0.75, v);
-    mat.opacity = THREE.MathUtils.damp(mat.opacity, target, 4, dt);
+    const target = THREE.MathUtils.lerp(0.32, 0.78, v);
+    if (floorMat.current) {
+      floorMat.current.opacity = THREE.MathUtils.damp(
+        floorMat.current.opacity,
+        target,
+        4,
+        dt,
+      );
+    }
+    if (shellMat.current) {
+      shellMat.current.opacity = THREE.MathUtils.damp(
+        shellMat.current.opacity,
+        target,
+        4,
+        dt,
+      );
+    }
   });
 
   return (
-    <lineSegments geometry={geometry}>
-      <lineBasicMaterial
-        ref={material}
-        color="#ffffff"
-        transparent
-        opacity={0.3}
-        depthWrite={false}
-      />
-    </lineSegments>
+    <group>
+      <lineSegments geometry={floorGeometry}>
+        <lineBasicMaterial
+          ref={floorMat}
+          color="#ffffff"
+          transparent
+          opacity={0.32}
+          depthWrite={false}
+        />
+      </lineSegments>
+      <lineSegments geometry={shellGeometry}>
+        <lineBasicMaterial
+          ref={shellMat}
+          vertexColors
+          transparent
+          opacity={0.32}
+          depthWrite={false}
+        />
+      </lineSegments>
+    </group>
   );
 }

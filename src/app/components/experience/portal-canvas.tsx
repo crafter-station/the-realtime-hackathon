@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
-import { closeFactor, pathX, rideY, WireWorld } from "./wire-world";
+import { pathX, rideY, tunnelPresence, WireWorld } from "./wire-world";
 
 // Camera track: one long continuous ride (hero grid → curves → tunnel → end).
 const TRACK_START = 9;
@@ -43,7 +43,7 @@ function Starfield({ count }: { count: number }) {
     geometry.attributes.position.needsUpdate = true;
     // Stars dim while riding inside the closed tunnel.
     if (material.current) {
-      const inside = closeFactor(camZ);
+      const inside = tunnelPresence(camZ);
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
         THREE.MathUtils.lerp(0.7, 0.12, inside),
@@ -107,10 +107,14 @@ function Rig() {
       cdt,
     );
 
-    // Yaw toward the path ahead + bank into the curve.
-    const yaw = Math.atan2(ahead - cx, 6) * 0.6;
-    const bank = reduce ? 0 : (ahead - cx) * 0.035;
-    camera.rotation.set(0, damp(camera.rotation.y, yaw, 4, cdt), 0);
+    // Yaw toward the path ahead, bank into the curve, pitch with the slope.
+    camera.rotation.order = "YXZ";
+    const yaw = Math.atan2(ahead - cx, 6) * 0.32;
+    const bank = reduce ? 0 : (ahead - cx) * 0.012;
+    const slope = (rideY(camZ - 5) - rideY(camZ)) / 5;
+    const pitch = reduce ? 0 : Math.atan(slope) * 0.55;
+    camera.rotation.y = damp(camera.rotation.y, yaw, 4, cdt);
+    camera.rotation.x = damp(camera.rotation.x, pitch, 4, cdt);
     camera.rotation.z = damp(camera.rotation.z, bank, 4, cdt);
 
     // FOV kick with speed (skipped for reduced motion).
