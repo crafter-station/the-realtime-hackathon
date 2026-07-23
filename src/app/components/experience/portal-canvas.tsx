@@ -1,10 +1,13 @@
 "use client";
 
+import { useAnimations, useGLTF } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
-import { useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
+
+const ASTRONAUT_URL = "/models/astronaut.glb";
 
 const PAPER = new THREE.Color("#f4f2ee");
 const DARK = new THREE.Color("#0a0a0a");
@@ -122,6 +125,46 @@ function OtherSide() {
   );
 }
 
+/** The floating astronaut — the character framed inside the portal. */
+function Astronaut() {
+  const group = useRef<THREE.Group>(null);
+  const { scene, animations } = useGLTF(ASTRONAUT_URL);
+  const { actions, names } = useAnimations(animations, group);
+
+  // Measure the real bounding box and fit the model to ~3.4 units tall, centered.
+  const { scale, offset } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const s = 3.4 / (size.y || 1);
+    return { scale: s, offset: center.clone().multiplyScalar(-s) };
+  }, [scene]);
+
+  useEffect(() => {
+    const action = actions[names[0]];
+    action?.reset().fadeIn(0.5).play();
+    return () => {
+      action?.fadeOut(0.2);
+    };
+  }, [actions, names]);
+
+  useFrame((s) => {
+    if (group.current) {
+      group.current.rotation.y = Math.sin(s.clock.elapsedTime * 0.16) * 0.3;
+    }
+  });
+
+  return (
+    <group ref={group} position={[0, -0.1, 0.8]}>
+      <group scale={scale} position={offset}>
+        <primitive object={scene} />
+      </group>
+    </group>
+  );
+}
+
 /** Scroll dollies the camera forward, through the portal, to the other side. */
 function Rig() {
   const { camera, scene } = useThree();
@@ -139,7 +182,8 @@ function Rig() {
 
     // Background: warm paper in front of the portal, dark once through it.
     // 0 while the camera is in front (z high), 1 once it has passed through.
-    const through = 1 - THREE.MathUtils.smoothstep(camera.position.z, -1.6, 1.6);
+    const through =
+      1 - THREE.MathUtils.smoothstep(camera.position.z, -1.6, 1.6);
     (scene.background as THREE.Color).copy(PAPER).lerp(DARK, through);
   });
   return null;
@@ -169,6 +213,11 @@ export function PortalCanvas() {
           color="#ff8a4d"
         />
         <Portal />
+        {scroll.quality === "high" ? (
+          <Suspense fallback={null}>
+            <Astronaut />
+          </Suspense>
+        ) : null}
         <OtherSide />
         <Rig />
         <EffectComposer>
@@ -183,3 +232,5 @@ export function PortalCanvas() {
     </div>
   );
 }
+
+useGLTF.preload(ASTRONAUT_URL);
