@@ -1,6 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -11,10 +11,10 @@ const geistPixel = localFont({
   display: "swap",
 });
 
-// Display face for the hero title.
-const anomalyNexus = localFont({
-  src: "./fonts/anomaly-nexus.otf",
-  variable: "--font-anomaly",
+// Display face — geometric-technical, fits the wireframe world.
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space",
   display: "swap",
 });
 
@@ -114,7 +114,7 @@ export default function RootLayout({
         geistSans.className,
         geistSans.variable,
         geistPixel.variable,
-        anomalyNexus.variable,
+        spaceGrotesk.variable,
       )}
     >
       <body className="min-h-full">
