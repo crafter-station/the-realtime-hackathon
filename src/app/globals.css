@@ -4706,10 +4706,10 @@ html.xp body {
 
 /* Scroll room for the tunnel fly-through and the grid approach. */
 .xp-gap--ride {
-  height: 360svh;
+  height: 430svh;
 }
 .xp-gap--tunnel {
-  height: 260svh;
+  height: 280svh;
 }
 
 /* Giant beat typography (prizes / countdown). */

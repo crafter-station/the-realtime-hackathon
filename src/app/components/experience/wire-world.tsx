@@ -19,7 +19,7 @@ import { scroll } from "./store";
 
 // World extents (along -z).
 export const WORLD_Z_START = -4;
-export const WORLD_Z_END = -158;
+export const WORLD_Z_END = -190;
 
 // Tunnel cross-section (matches the previous tunnel's feel).
 const HW = 13; // half width
@@ -39,13 +39,13 @@ function smoothstep(edge0: number, edge1: number, x: number) {
 /** Curved centerline: the path bends through S-curves mid-journey. */
 export function pathX(z: number): number {
   // Window where the curves live (after the hero straight, before closing).
-  const w = smoothstep(-22, -34, z) * (1 - smoothstep(-56, -70, z));
-  return Math.sin((z + 24) * 0.11) * 6.5 * w;
+  const w = smoothstep(-44, -58, z) * (1 - smoothstep(-84, -98, z));
+  return Math.sin((z + 44) * 0.11) * 6.5 * w;
 }
 
 /** 0 = flat floor, 1 = fully closed rectangular tunnel. */
 export function closeFactor(z: number): number {
-  return smoothstep(-66, -88, z);
+  return smoothstep(-96, -118, z);
 }
 
 /** Perimeter walk of the tunnel rect, param u in [0,1], starting top-center

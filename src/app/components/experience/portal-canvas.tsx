@@ -9,8 +9,8 @@ import { pathX, WireWorld } from "./wire-world";
 
 // Camera track: one long continuous ride (hero grid → curves → tunnel → end).
 const TRACK_START = 4;
-const TRACK_END = -150;
-const HAND_Z = -156.5;
+const TRACK_END = -180;
+const HAND_Z = -186.5;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -45,6 +45,7 @@ function Starfield({ count }: { count: number }) {
     <points ref={points} geometry={geometry}>
       <pointsMaterial
         size={0.045}
+        fog={false}
         sizeAttenuation
         color="#ffffff"
         transparent
@@ -126,6 +127,7 @@ export function PortalCanvas() {
         camera={{ fov: 55, near: 0.1, far: 110, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
+        <fog attach="fog" args={["#0e0e10", 24, 82]} />
         <Starfield count={stars} />
         <WireWorld />
         <FinaleHand />
