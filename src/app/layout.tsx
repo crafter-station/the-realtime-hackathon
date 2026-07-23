@@ -1,5 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
+import { Geist } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,13 @@ import { cn } from "@/lib/utils";
 const geistPixel = localFont({
   src: "./fonts/geist-pixel-latin.woff2",
   variable: "--font-geist-pixel",
+  display: "swap",
+});
+
+// Clean neo-grotesque (Aeonik-adjacent) for the editorial display + body type.
+const geistSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
   display: "swap",
 });
 
@@ -96,7 +104,8 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistPixel.className,
+        geistSans.className,
+        geistSans.variable,
         geistPixel.variable,
       )}
     >

@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-geist-sans: var(--font-geist-pixel);
+  /* --font-geist-sans is provided by next/font (Geist); do not alias to pixel. */
   --font-geist-mono: var(--font-geist-pixel);
   --orange: #ff4d00;
   --gray: #8f8f8f;
@@ -4396,329 +4396,293 @@ h2 {
   }
 }
 
+
 /* ==========================================================================
-   PORTAL EXPERIENCE — scroll-driven WebGL landing (see docs/portal-experience-brief.md)
+   PORTAL EXPERIENCE — editorial 3D, Lusion-grounded (see docs/art-direction.md)
+   Light off-white page, black grotesque type, one hot orange, a glossy portal.
    ========================================================================== */
 
 :root {
-  /* Motion system (Emil Kowalski strong curves). */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-portal: cubic-bezier(0.32, 0.72, 0, 1);
   --dur-fast: 160ms;
-  --dur-ui: 240ms;
-  --dur-scene: 520ms;
+  --dur-ui: 260ms;
 
-  --xp-black: #090909;
-  --xp-orange: #ff4d00;
-  --xp-white: #ffffff;
-  --xp-gray: #8f8f8f;
+  --paper: #f4f2ee; /* warm off-white page */
+  --ink: #0a0a0a; /* near-black type */
+  --ink-2: #6f6c66; /* secondary ink */
+  --orange: #ff4d00; /* Portal accent */
+  --card: #0e0e10; /* dark scene card */
+  --sans: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  --mono: var(--font-geist-pixel), ui-monospace, monospace;
 }
 
-/* The experience owns the viewport; no page scrollbar chrome. */
 html.xp,
 html.xp body {
-  background: var(--xp-black);
+  background: var(--paper);
+  color: var(--ink);
 }
 html.xp body {
-  /* Lenis drives scroll; keep native scroll height via the spacer. */
   overflow-x: hidden;
+  font-family: var(--sans);
 }
 
-/* Fixed WebGL stage behind everything. */
+/* Fixed WebGL stage behind the editorial content. */
 .xp-stage {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(
-      circle at 50% 38%,
-      rgb(255 77 0 / 0.1),
-      transparent 60%
-    ),
-    var(--xp-black);
+  background: var(--paper);
 }
 .xp-stage canvas {
   display: block;
 }
 
-/* Scrollable content overlay above the stage — hidden until the visitor enters. */
-.xp-overlay {
-  position: relative;
-  z-index: 1;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 800ms var(--ease-out);
-}
-.xp-overlay[data-entered="true"] {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.xp-section {
-  position: relative;
-  min-height: 100svh;
-  display: grid;
-  align-content: center;
-  padding: clamp(1.5rem, 6vw, 5rem);
-  color: var(--xp-white);
-}
-
-.xp-eyebrow {
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: clamp(0.7rem, 1.4vw, 0.85rem);
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--xp-orange);
-}
-
-.xp-title {
-  margin: 0.4em 0 0;
-  max-width: 16ch;
-  font-family: var(--font-geist-pixel), monospace;
-  font-weight: 700;
-  font-size: clamp(2.6rem, 9vw, 8rem);
-  line-height: 0.92;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-  text-wrap: balance;
-}
-.xp-title em {
-  font-style: normal;
-  color: var(--xp-orange);
-}
-
-.xp-lead {
-  margin: 1.4rem 0 0;
-  max-width: 46ch;
-  font-size: clamp(1rem, 2vw, 1.35rem);
-  line-height: 1.5;
-  color: rgb(255 255 255 / 0.72);
-}
-
-.xp-cta-inline {
-  margin: 2rem 0 0;
-}
-
-/* Cinematic reveal — copy animates in as its section enters view.
-   Scoped to html.xp so content stays visible without JS (SEO / no-JS). */
-html.xp .xp-section .xp-eyebrow,
-html.xp .xp-section .xp-lead,
-html.xp .xp-section .xp-cta-inline {
-  opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 700ms var(--ease-out),
-    transform 700ms var(--ease-out);
-}
-html.xp .xp-section .xp-title {
-  opacity: 0;
-  clip-path: inset(0 0 108% 0);
-  transition:
-    opacity 200ms linear,
-    clip-path 820ms var(--ease-out);
-}
-.xp-section.is-revealed .xp-eyebrow {
-  transition-delay: 40ms;
-}
-.xp-section.is-revealed .xp-title {
-  transition-delay: 90ms;
-}
-.xp-section.is-revealed .xp-lead {
-  transition-delay: 220ms;
-}
-.xp-section.is-revealed .xp-cta-inline {
-  transition-delay: 300ms;
-}
-.xp-section.is-revealed .xp-eyebrow,
-.xp-section.is-revealed .xp-lead,
-.xp-section.is-revealed .xp-cta-inline {
-  opacity: 1;
-  transform: translateY(0);
-}
-.xp-section.is-revealed .xp-title {
-  opacity: 1;
-  clip-path: inset(0 0 -8% 0);
-}
-
-/* Enter gate. */
-.xp-gate {
+/* Top chrome: wordmark + pill nav, Lusion-style. */
+.xp-topbar {
   position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  gap: 2rem;
-  background: rgb(9 9 9 / 0.4);
-  transition:
-    opacity var(--dur-scene) var(--ease-out),
-    filter var(--dur-scene) var(--ease-out);
-}
-.xp-gate[data-leaving="true"] {
-  opacity: 0;
-  filter: blur(6px);
-  pointer-events: none;
-}
-.xp-gate__inner {
-  display: grid;
-  justify-items: center;
-  gap: 1.6rem;
-  text-align: center;
-}
-.xp-enter {
-  --scale: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 1rem 2.2rem;
-  border: 1px solid rgb(255 77 0 / 0.6);
-  background: rgb(255 77 0 / 0.08);
-  color: var(--xp-white);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: clamp(0.85rem, 1.6vw, 1.05rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    transform var(--dur-fast) var(--ease-out),
-    background var(--dur-ui) var(--ease-out),
-    border-color var(--dur-ui) var(--ease-out),
-    box-shadow var(--dur-ui) var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .xp-enter:hover {
-    background: rgb(255 77 0 / 0.16);
-    border-color: var(--xp-orange);
-    box-shadow: 0 0 40px rgb(255 77 0 / 0.35);
-  }
-}
-.xp-enter:active {
-  transform: scale(0.97);
-}
-.xp-enter__pulse {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: var(--xp-orange);
-  box-shadow: 0 0 12px var(--xp-orange);
-  animation: xp-pulse 1.8s var(--ease-in-out) infinite;
-}
-@keyframes xp-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.7);
-  }
-}
-
-/* Persistent register CTA. */
-.xp-cta {
-  position: fixed;
-  top: clamp(1rem, 3vw, 1.6rem);
-  right: clamp(1rem, 3vw, 1.6rem);
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(1rem, 2.4vw, 1.6rem) clamp(1.1rem, 3vw, 2.2rem);
+  mix-blend-mode: difference; /* stays legible over light and dark scenes */
+  color: #fff;
+}
+.xp-wordmark {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  letter-spacing: 0.02em;
+}
+.xp-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.xp-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  background: var(--xp-orange);
-  color: var(--xp-black);
-  font-family: var(--font-geist-pixel), monospace;
+  height: 2.6rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-ui) var(--ease-out);
+}
+.xp-pill--solid {
+  background: var(--ink);
+  color: #fff;
+}
+.xp-pill--ghost {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.xp-pill:active {
+  transform: scale(0.97);
+}
+.xp-pill__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+/* Content overlay. */
+.xp-overlay {
+  position: relative;
+  z-index: 1;
+}
+
+/* Editorial hero — huge type left, body column right, portal card center/bg. */
+.xp-hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(2rem, 5vw, 4rem);
+  padding: clamp(6rem, 14vh, 10rem) clamp(1.25rem, 5vw, 4rem)
+    clamp(3rem, 8vh, 6rem);
+}
+
+/* Traversal gap — scroll here flies the camera through the portal. */
+.xp-gap {
+  height: 150svh;
+}
+
+/* Everything past the portal sits on solid paper and covers the canvas. */
+.xp-editorial {
+  position: relative;
+  z-index: 2;
+  background: var(--paper);
+}
+
+/* Bottom scroll-progress bar. */
+.xp-progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  height: 2px;
+  background: rgba(10, 10, 10, 0.1);
+}
+.xp-progress__fill {
+  height: 100%;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.xp-display {
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 560;
+  font-size: clamp(3rem, 11vw, 11rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  max-width: 15ch;
+}
+.xp-display em {
+  font-style: normal;
+  color: var(--orange);
+}
+
+.xp-herorow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: end;
+}
+@media (min-width: 60rem) {
+  .xp-herorow {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
+.xp-body {
+  max-width: 44ch;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.xp-body strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.xp-label {
+  font-family: var(--mono);
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
+  color: var(--ink);
+}
+
+.xp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+.xp-register {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 3.2rem;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.95rem;
   transition:
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-ui) var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
-  .xp-cta:hover {
-    box-shadow: 0 0 32px rgb(255 77 0 / 0.5);
+  .xp-register:hover {
+    box-shadow: 0 10px 40px rgba(255, 77, 0, 0.35);
   }
 }
-.xp-cta:active {
+.xp-register:active {
   transform: scale(0.97);
 }
 
-/* Brand mark + sound toggle. */
-.xp-brand {
+/* Scroll cue + corner ticks. */
+.xp-cue {
   position: fixed;
-  top: clamp(1rem, 3vw, 1.6rem);
-  left: clamp(1rem, 3vw, 1.6rem);
-  z-index: 30;
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--xp-white);
+  left: 0;
+  right: 0;
+  bottom: clamp(1rem, 3vh, 2rem);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1.1rem, 3vw, 2.2rem);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  mix-blend-mode: difference;
+  filter: invert(1);
 }
-.xp-sound {
-  position: fixed;
-  bottom: clamp(1rem, 3vw, 1.6rem);
-  left: clamp(1rem, 3vw, 1.6rem);
-  z-index: 30;
-  width: 2.4rem;
-  height: 2.4rem;
+.xp-cue__center {
+  animation: xp-bob 2.4s var(--ease-in-out) infinite;
+}
+@keyframes xp-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+}
+
+/* Editorial content sections after the portal. */
+.xp-section {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
   display: grid;
-  place-items: center;
-  border: 1px solid rgb(255 255 255 / 0.25);
-  background: rgb(9 9 9 / 0.6);
-  color: var(--xp-white);
-  cursor: pointer;
-  transition:
-    transform var(--dur-fast) var(--ease-out),
-    border-color var(--dur-ui) var(--ease-out);
+  align-content: center;
+  gap: 1.4rem;
+  padding: clamp(4rem, 10vh, 8rem) clamp(1.25rem, 5vw, 4rem);
 }
-.xp-sound:active {
-  transform: scale(0.95);
+.xp-section h2 {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--sans);
+  font-weight: 560;
+  font-size: clamp(2.4rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
 }
-
-/* Scroll progress rail. */
-.xp-progress {
-  position: fixed;
-  right: clamp(1rem, 3vw, 1.6rem);
-  bottom: clamp(1rem, 3vw, 1.6rem);
-  z-index: 30;
-  width: 2px;
-  height: clamp(4rem, 12vh, 8rem);
-  background: rgb(255 255 255 / 0.14);
-  overflow: hidden;
-}
-.xp-progress__fill {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 0;
-  background: var(--xp-orange);
-  box-shadow: 0 0 10px var(--xp-orange);
-}
-
-/* SEO / no-JS fallback content lives in the DOM but is visually hidden once JS boots. */
-.xp-static {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+.xp-section h2 em {
+  font-style: normal;
+  color: var(--orange);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xp-enter__pulse {
+  .xp-cue__center {
     animation: none;
-  }
-  /* Keep the reveal as a gentle fade — no motion. */
-  html.xp .xp-section .xp-eyebrow,
-  html.xp .xp-section .xp-lead,
-  html.xp .xp-section .xp-cta-inline {
-    transform: none;
-    transition: opacity 320ms ease;
-  }
-  html.xp .xp-section .xp-title {
-    clip-path: none;
-    transition: opacity 320ms ease;
   }
 }
