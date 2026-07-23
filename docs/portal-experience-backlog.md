@@ -9,9 +9,9 @@
 - [x] Portal entry: hot event-horizon core + brighter ring, bloom threshold tuned
       so only the ring/core bloom (crisp orange, no haze). TODO: ENTER hover pull-in.
 - [x] Traversal: hyperspace speed-lines flash (peaks mid-warp) + bloom. TODO: settle polish, chromatic feel.
-- [ ] GSAP ScrollTrigger choreography: camera "arrives" and briefly frames each world
-      node; text reveals on enter (clip-path wipe + short stagger, Emil curves).
-- [ ] Hero title reveal: cinematic entrance after traversal (not a plain fade).
+- [x] Section text reveals on scroll-in: clip-path title wipe + staggered eyebrow/lead/CTA (IntersectionObserver + CSS, Emil curves, reduced-motion + no-JS safe).
+- [ ] Camera "arrives" and briefly frames each world node on scroll (dwell easing).
+- [x] Hero reveal: cinematic entrance fires after traversal (clip-path wipe).
 
 ## P1 — the five worlds (bespoke, not generic icosahedrons)
 - [ ] Multiplayer: a live network — nodes + animated connection lines, presence dots.

@@ -4495,6 +4495,51 @@ html.xp body {
   color: rgb(255 255 255 / 0.72);
 }
 
+.xp-cta-inline {
+  margin: 2rem 0 0;
+}
+
+/* Cinematic reveal — copy animates in as its section enters view.
+   Scoped to html.xp so content stays visible without JS (SEO / no-JS). */
+html.xp .xp-section .xp-eyebrow,
+html.xp .xp-section .xp-lead,
+html.xp .xp-section .xp-cta-inline {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+}
+html.xp .xp-section .xp-title {
+  opacity: 0;
+  clip-path: inset(0 0 108% 0);
+  transition:
+    opacity 200ms linear,
+    clip-path 820ms var(--ease-out);
+}
+.xp-section.is-revealed .xp-eyebrow {
+  transition-delay: 40ms;
+}
+.xp-section.is-revealed .xp-title {
+  transition-delay: 90ms;
+}
+.xp-section.is-revealed .xp-lead {
+  transition-delay: 220ms;
+}
+.xp-section.is-revealed .xp-cta-inline {
+  transition-delay: 300ms;
+}
+.xp-section.is-revealed .xp-eyebrow,
+.xp-section.is-revealed .xp-lead,
+.xp-section.is-revealed .xp-cta-inline {
+  opacity: 1;
+  transform: translateY(0);
+}
+.xp-section.is-revealed .xp-title {
+  opacity: 1;
+  clip-path: inset(0 0 -8% 0);
+}
+
 /* Enter gate. */
 .xp-gate {
   position: fixed;
@@ -4664,5 +4709,16 @@ html.xp body {
 @media (prefers-reduced-motion: reduce) {
   .xp-enter__pulse {
     animation: none;
+  }
+  /* Keep the reveal as a gentle fade — no motion. */
+  html.xp .xp-section .xp-eyebrow,
+  html.xp .xp-section .xp-lead,
+  html.xp .xp-section .xp-cta-inline {
+    transform: none;
+    transition: opacity 320ms ease;
+  }
+  html.xp .xp-section .xp-title {
+    clip-path: none;
+    transition: opacity 320ms ease;
   }
 }

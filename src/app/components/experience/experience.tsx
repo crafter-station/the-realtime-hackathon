@@ -143,7 +143,9 @@ export function Experience() {
     document.documentElement.classList.add("xp");
     setMounted(true);
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const lenis = new Lenis({
       smoothWheel: !reduce,
       lerp: reduce ? 1 : 0.09,
@@ -170,10 +172,34 @@ export function Experience() {
     };
   }, []);
 
+  // Reveal each section's copy as it scrolls into view (cinematic, once).
+  // Starts only after the visitor has entered — the hero then reveals on cue.
+  useEffect(() => {
+    if (!entered) return;
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>(".xp-section"),
+    );
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-revealed");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -22% 0px", threshold: 0.18 },
+    );
+    for (const s of sections) io.observe(s);
+    return () => io.disconnect();
+  }, [entered]);
+
   const enter = () => {
     if (entered || leaving) return;
     setLeaving(true);
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const proxy = { v: 0 };
     gsap.to(proxy, {
       v: 1,
@@ -234,25 +260,32 @@ export function Experience() {
       </div>
 
       <main className="xp-overlay" data-entered={entered}>
-        {SECTIONS.map((section) => (
-          <section key={section.id} id={section.id} className="xp-section">
-            <p className="xp-eyebrow">{section.eyebrow}</p>
-            <h1 className="xp-title">{section.title}</h1>
-            <p className="xp-lead">{section.lead}</p>
-            {(section.id === "hero" || section.id === "finale") && (
-              <p style={{ marginTop: "2rem" }}>
-                <a
-                  className="xp-enter"
-                  href={REGISTER_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Register free
-                </a>
-              </p>
-            )}
-          </section>
-        ))}
+        {SECTIONS.map((section) => {
+          const isHero = section.id === "hero";
+          return (
+            <section key={section.id} id={section.id} className="xp-section">
+              <p className="xp-eyebrow">{section.eyebrow}</p>
+              {isHero ? (
+                <h1 className="xp-title">{section.title}</h1>
+              ) : (
+                <h2 className="xp-title">{section.title}</h2>
+              )}
+              <p className="xp-lead">{section.lead}</p>
+              {(isHero || section.id === "finale") && (
+                <p className="xp-cta-inline">
+                  <a
+                    className="xp-enter"
+                    href={REGISTER_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Register free
+                  </a>
+                </p>
+              )}
+            </section>
+          );
+        })}
       </main>
     </>
   );
