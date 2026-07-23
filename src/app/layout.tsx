@@ -1,9 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { InteractionFeedback } from "./components/interaction-feedback";
-import { LoadingScreen } from "./components/loading-screen";
-import { TerminalChrome } from "./components/terminal-chrome";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -104,9 +101,6 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full">
-        <LoadingScreen />
-        <TerminalChrome />
-        <InteractionFeedback />
         <script type="application/ld+json">
           {JSON.stringify(eventJsonLd)}
         </script>
