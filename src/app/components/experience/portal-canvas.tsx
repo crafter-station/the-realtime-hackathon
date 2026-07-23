@@ -8,14 +8,12 @@ import * as THREE from "three";
 import { scroll } from "./store";
 
 const ASTRONAUT_URL = "/models/astronaut.glb";
+const MARS_URL = "/models/mars.glb";
 const ORANGE = new THREE.Color("#ff4d00");
 const RIM = new THREE.Color(1.5, 0.45, 0.06); // >1 so bloom catches the ring rim
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
-}
-function easeInOut(p: number) {
-  return p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2;
 }
 
 /** Deep-space starfield. Streams past as the camera flies forward. */
@@ -32,8 +30,17 @@ function Starfield({ count }: { count: number }) {
     g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     return g;
   }, [count]);
-  useFrame((_, dt) => {
-    if (points.current) points.current.rotation.z += dt * 0.006;
+  useFrame((state, dt) => {
+    const pts = points.current;
+    if (!pts) return;
+    pts.rotation.z += dt * 0.006;
+    // Recycle stars that fall behind the camera so space feels endless.
+    const camZ = state.camera.position.z;
+    const arr = geometry.attributes.position.array as Float32Array;
+    for (let i = 2; i < arr.length; i += 3) {
+      if (arr[i] > camZ + 5) arr[i] -= 74;
+    }
+    geometry.attributes.position.needsUpdate = true;
   });
   return (
     <points ref={points} geometry={geometry}>
@@ -46,6 +53,31 @@ function Starfield({ count }: { count: number }) {
         depthWrite={false}
       />
     </points>
+  );
+}
+
+/** Mars, low in the frame — a real textured globe peeking up from below. */
+function Mars() {
+  const spin = useRef<THREE.Group>(null);
+  const { scene } = useGLTF(MARS_URL);
+  const { scale, offset } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const s = 15 / (Math.max(size.x, size.y, size.z) || 1);
+    return { scale: s, offset: center.clone().multiplyScalar(-s) };
+  }, [scene]);
+  useFrame((_, dt) => {
+    if (spin.current) spin.current.rotation.y += dt * 0.02;
+  });
+  return (
+    <group position={[0.5, -9.5, -15]}>
+      <group ref={spin} scale={scale} position={offset}>
+        <primitive object={scene} />
+      </group>
+    </group>
   );
 }
 
@@ -92,7 +124,7 @@ function Portal() {
 function Astronaut() {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF(ASTRONAUT_URL);
-  const { actions, names } = useAnimations(animations, group);
+  const { actions } = useAnimations(animations, group);
 
   const { scale, offset } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
@@ -105,12 +137,17 @@ function Astronaut() {
   }, [scene]);
 
   useEffect(() => {
-    const action = actions[names[0]];
-    action?.reset().fadeIn(0.5).play();
+    const list = Object.values(actions).filter(Boolean);
+    for (const a of list) {
+      a?.reset()
+        .setLoop(THREE.LoopRepeat, Number.POSITIVE_INFINITY)
+        .fadeIn(0.5)
+        .play();
+    }
     return () => {
-      action?.fadeOut(0.2);
+      for (const a of list) a?.fadeOut(0.2);
     };
-  }, [actions, names]);
+  }, [actions]);
 
   useFrame((s) => {
     if (group.current) {
@@ -133,10 +170,10 @@ function Rig() {
   const { camera } = useThree();
   useFrame((state, dt) => {
     const cdt = Math.min(dt, 0.05);
-    // Complete the fly-through within the first ~30% of scroll, before the
-    // editorial content scrolls up and covers the canvas.
-    const p = Math.min(1, scroll.progress / 0.3);
-    const targetZ = THREE.MathUtils.lerp(7, -10, easeInOut(p));
+    // Keep flying forward through space across the WHOLE scroll — never cut away.
+    // Front-loaded so the portal pass happens early, then a steady drift.
+    const eased = 1 - (1 - scroll.progress) ** 2;
+    const targetZ = 7 - eased * 54;
     camera.position.z = damp(camera.position.z, targetZ, 4, cdt);
     camera.position.x = damp(camera.position.x, state.pointer.x * 0.4, 3, cdt);
     camera.position.y = damp(camera.position.y, state.pointer.y * 0.3, 3, cdt);
@@ -156,14 +193,15 @@ export function PortalCanvas() {
         camera={{ fov: 50, near: 0.1, far: 80, position: [0, 0, 7] }}
       >
         <color attach="background" args={["#060608"]} />
-        <ambientLight intensity={0.35} />
-        {/* Sun — a bright key that lights Earth's limb and the suit, and blooms. */}
-        <directionalLight position={[2.6, 3.4, -6]} intensity={3.2} />
+        <ambientLight intensity={0.4} />
+        {/* Sun — a bright neutral key that lights the suit and blooms. */}
+        <directionalLight position={[2.6, 3.4, -6]} intensity={3.4} />
+        {/* Cool fill so shadowed side of the suit reads as space-lit, not muddy. */}
         <pointLight
-          position={[1.4, 0.4, 2.4]}
-          intensity={3}
-          distance={10}
-          color="#ffd9c2"
+          position={[-2, 0.6, 3]}
+          intensity={1.6}
+          distance={12}
+          color="#cfe0ff"
         />
         <mesh position={[2.6, 3.4, -8]}>
           <sphereGeometry args={[0.28, 24, 24]} />
@@ -174,6 +212,9 @@ export function PortalCanvas() {
         </mesh>
 
         <Starfield count={stars} />
+        <Suspense fallback={null}>
+          <Mars />
+        </Suspense>
         <Portal />
         {scroll.quality === "high" ? (
           <Suspense fallback={null}>
@@ -195,3 +236,4 @@ export function PortalCanvas() {
 }
 
 useGLTF.preload(ASTRONAUT_URL);
+useGLTF.preload(MARS_URL);

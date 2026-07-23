@@ -4520,11 +4520,19 @@ html.xp body {
   height: 150svh;
 }
 
-/* Everything past the portal sits on solid paper and covers the canvas. */
+/* Content floats over the continuous space — never covers the canvas. */
 .xp-editorial {
   position: relative;
   z-index: 2;
-  background: var(--paper);
+  background: transparent;
+}
+/* Soft legibility scrim behind each floating section's copy. */
+.xp-editorial .xp-section {
+  background: radial-gradient(
+    120% 80% at 20% 50%,
+    rgba(6, 6, 8, 0.72),
+    rgba(6, 6, 8, 0) 70%
+  );
 }
 
 /* Bottom scroll-progress bar. */
@@ -4620,6 +4628,11 @@ html.xp body {
 }
 .xp-register:active {
   transform: scale(0.97);
+}
+.xp-register--sm {
+  height: 2.6rem;
+  padding: 0 1.2rem;
+  font-size: 0.82rem;
 }
 
 /* Scroll cue + corner ticks. */

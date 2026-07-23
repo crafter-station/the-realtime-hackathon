@@ -98,19 +98,16 @@ export function Experience() {
 
       <header className="xp-topbar">
         <a className="xp-wordmark" href="#top">
-          RT//HACK
+          {"RT//HACK"}
         </a>
         <nav className="xp-nav">
           <a
-            className="xp-pill xp-pill--solid"
+            className="xp-register xp-register--sm"
             href={REGISTER_URL}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Register <span className="xp-pill__dot" />
-          </a>
-          <a className="xp-pill xp-pill--ghost" href="#brief">
-            Explore
+            Register free →
           </a>
         </nav>
       </header>
@@ -119,7 +116,6 @@ export function Experience() {
         {/* Hero — huge type framing the portal. */}
         <section className="xp-hero">
           <div>
-            <p className="xp-label">Portal // The Realtime Hackathon</p>
             <h1 className="xp-display">
               The realtime <em>hackathon</em>
             </h1>
@@ -130,16 +126,6 @@ export function Experience() {
               <strong>Portal</strong> in one weekend. August 7–9, online. US$800
               in prizes. <strong>Scroll to step through the portal.</strong>
             </p>
-            <div className="xp-actions">
-              <a
-                className="xp-register"
-                href={REGISTER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Register free →
-              </a>
-            </div>
           </div>
         </section>
 
@@ -165,22 +151,12 @@ export function Experience() {
               Registration is free. Bring an idea, leave with a realtime
               product.
             </p>
-            <div className="xp-actions">
-              <a
-                className="xp-register"
-                href={REGISTER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Register free →
-              </a>
-            </div>
           </section>
         </div>
       </main>
 
       <div className="xp-cue" aria-hidden>
-        <span>RT//HACK</span>
+        <span>{"RT//HACK"}</span>
         <span className="xp-cue__center">Scroll to explore ↓</span>
         <span>Aug 07–09</span>
       </div>
