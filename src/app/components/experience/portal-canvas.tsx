@@ -49,31 +49,6 @@ function Starfield({ count }: { count: number }) {
   );
 }
 
-/** Earth seen through the portal — a dark globe with a bright atmosphere limb. */
-function Earth() {
-  return (
-    <group position={[0, -8.6, -15]}>
-      <mesh>
-        <sphereGeometry args={[7, 64, 64]} />
-        <meshStandardMaterial color="#0b1e44" roughness={1} metalness={0} />
-      </mesh>
-      {/* Atmosphere glow (back-side additive shell). */}
-      <mesh scale={1.06}>
-        <sphereGeometry args={[7, 64, 64]} />
-        <meshBasicMaterial
-          color={new THREE.Color(0.25, 0.55, 1.5)}
-          side={THREE.BackSide}
-          transparent
-          opacity={0.55}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </mesh>
-    </group>
-  );
-}
-
 /** The portal ring — glossy orange, framing the astronaut and the view of space. */
 function Portal() {
   const ring = useRef<THREE.Mesh>(null);
@@ -199,7 +174,6 @@ export function PortalCanvas() {
         </mesh>
 
         <Starfield count={stars} />
-        <Earth />
         <Portal />
         {scroll.quality === "high" ? (
           <Suspense fallback={null}>
