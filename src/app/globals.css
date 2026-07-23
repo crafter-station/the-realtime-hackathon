@@ -4823,9 +4823,10 @@ html.xp body {
   color: var(--paper);
 }
 .xp-hPortal {
+  /* The dimension inside the H: a void deeper than the page black. */
   position: absolute;
   z-index: -1;
-  background: #ffffff;
+  background: #000000;
 }
 .xp-hProbe {
   display: inline-block;
