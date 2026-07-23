@@ -209,7 +209,11 @@ export default function Home() {
           );
         })}
 
-        <section className="portal-section" aria-labelledby="portal-title">
+        <section
+          className="portal-section"
+          id="portal"
+          aria-labelledby="portal-title"
+        >
           <PartnerLinks />
           <div className="shell">
             <div className="section-heading-row">

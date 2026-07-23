@@ -4395,3 +4395,727 @@ h2 {
     transition: none;
   }
 }
+
+/* Boot splash — Pip-Boy style terminal menu in signal orange. */
+.splash {
+  --hud: #ff5c14;
+  --hud-dim: rgb(from #ff5c14 r g b / 0.45);
+  --hud-faint: rgb(from #ff5c14 r g b / 0.14);
+  --hud-glow: rgb(from #ff5c14 r g b / 0.55);
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.75rem, 3vw, 2rem);
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgb(from var(--hud) r g b / 0.08),
+      transparent 62%
+    ), var(--night);
+  color: var(--hud);
+  font-family: var(--font-geist-pixel), monospace;
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity 620ms ease;
+}
+
+.splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.28) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+.splash--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash__panel {
+  position: relative;
+  width: min(100%, 60rem);
+  padding: clamp(1rem, 3vw, 2.2rem) clamp(1.1rem, 4vw, 3rem);
+  border: 1px solid var(--hud-dim);
+  background: rgb(from var(--hud) r g b / 0.03);
+  box-shadow:
+    0 0 0 1px rgb(from var(--hud) r g b / 0.08),
+    0 0 60px rgb(from var(--hud) r g b / 0.12) inset;
+  font-size: clamp(0.75rem, 1.9vw, 1.15rem);
+  letter-spacing: 0.06em;
+}
+
+/* Corner brackets. */
+.splash__corner {
+  position: absolute;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 2px solid var(--hud);
+  box-shadow: 0 0 8px var(--hud-glow);
+}
+.splash__corner--tl {
+  top: -1px;
+  left: -1px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.splash__corner--tr {
+  top: -1px;
+  right: -1px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.splash__corner--bl {
+  bottom: -1px;
+  left: -1px;
+  border-right: 0;
+  border-top: 0;
+}
+.splash__corner--br {
+  bottom: -1px;
+  right: -1px;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* Tab bar. */
+.splash__tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  padding-bottom: 0.6em;
+  border-bottom: 1px solid var(--hud-dim);
+}
+
+.splash__cog,
+.splash__signal {
+  color: var(--hud-dim);
+  font-size: 1.1em;
+}
+
+.splash__tabrow {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: clamp(0.8em, 3vw, 2.4em);
+  font-weight: 700;
+}
+
+.splash__tab {
+  color: var(--hud-dim);
+}
+
+.splash__tab.is-active {
+  color: var(--night);
+  background: var(--hud);
+  padding: 0.05em 0.5em;
+  box-shadow: 0 0 12px var(--hud-glow);
+}
+
+.splash__subtabs {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4em;
+  margin-top: 0.7em;
+  font-size: 0.86em;
+}
+
+.splash__subtab {
+  color: var(--hud-faint);
+  font-weight: 700;
+}
+
+.splash__subtab.is-active {
+  color: var(--hud);
+  text-shadow: 0 0 10px var(--hud-glow);
+}
+
+.splash__mode {
+  margin-left: auto;
+  color: var(--hud-dim);
+  font-size: 0.9em;
+}
+
+/* Body: stat list + detail panel. */
+.splash__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(1rem, 4vw, 3rem);
+  margin: clamp(1rem, 3vw, 1.8rem) 0;
+}
+
+.splash__stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35em;
+}
+
+.splash__stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.3em 0.7em;
+  font-weight: 700;
+  color: var(--hud);
+}
+
+.splash__stat.is-idle {
+  color: var(--hud-dim);
+}
+
+.splash__stat.is-active {
+  color: var(--night);
+  background: var(--hud);
+  box-shadow: 0 0 16px var(--hud-glow);
+}
+
+.splash__stat.is-done .splash__stat-value {
+  color: var(--hud);
+}
+
+.splash__stat-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Detail panel. */
+.splash__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  border-left: 1px solid var(--hud-dim);
+  padding-left: clamp(1rem, 3vw, 2rem);
+}
+
+.splash__emblem {
+  position: relative;
+  width: 3.2em;
+  height: 3.2em;
+  align-self: flex-end;
+}
+
+.splash__emblem-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--hud);
+  border-radius: 50%;
+  box-shadow: 0 0 14px var(--hud-glow);
+  animation: splash-spin 4s linear infinite;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 35%,
+    50% 50%,
+    100% 65%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.splash__emblem-core {
+  position: absolute;
+  inset: 34%;
+  background: var(--hud);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--hud-glow);
+}
+
+.splash__detail-title {
+  margin: 0;
+  max-width: none;
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 12px var(--hud-glow);
+}
+
+.splash__detail-desc {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 0.82em;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgb(from var(--hud) r g b / 0.85);
+}
+
+/* Bottom status bar. */
+.splash__status {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(0.8em, 3vw, 2em);
+  padding-top: 0.7em;
+  border-top: 1px solid var(--hud-dim);
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+.splash__status-slot {
+  white-space: nowrap;
+  text-shadow: 0 0 8px var(--hud-glow);
+}
+
+.splash__status-slot--right {
+  text-align: right;
+}
+
+.splash__status-boot {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+}
+
+.splash__status-label {
+  white-space: nowrap;
+  font-size: 0.9em;
+}
+
+.splash__bar {
+  flex: 1;
+  height: 0.85em;
+  border: 1px solid var(--hud-dim);
+  background: var(--hud-faint);
+  overflow: hidden;
+}
+
+.splash__bar-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--hud) 0,
+    var(--hud) 4px,
+    rgb(from var(--hud) r g b / 0.5) 4px,
+    rgb(from var(--hud) r g b / 0.5) 8px
+  );
+  box-shadow: 0 0 10px var(--hud-glow);
+}
+
+.splash__status-pct {
+  min-width: 3.5ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes splash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .splash__body {
+    grid-template-columns: 1fr;
+  }
+  .splash__detail {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--hud-dim);
+    padding-top: 0.9em;
+  }
+  .splash__emblem {
+    display: none;
+  }
+  .splash__status {
+    grid-template-columns: 1fr;
+    gap: 0.6em;
+    text-align: center;
+  }
+  .splash__status-slot--right {
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash {
+    transition: opacity 200ms ease;
+  }
+  .splash__emblem-ring {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   CONSOLE REDESIGN — monochrome-orange terminal, two-column app shell.
+   Left = menu, right = the active screen. No page scroll between screens.
+   ========================================================================== */
+
+:root {
+  /* Monochrome orange phosphor palette. */
+  --orange: #ff5c14;
+  --white: #ff9c66;
+  --gray: #cf6f3c;
+  --black: #070707;
+  --paper: #ff9459;
+  --signal: #ff5c14;
+  --signal-hover: #ff8a48;
+  --text-primary: #ff9459;
+  --text-secondary: #cf6f3c;
+  --text-accent: #ff5c14;
+
+  /* Terminal chrome tokens. */
+  --term: #ff5c14;
+  --term-soft: #ff9459;
+  --term-dim: rgb(255 92 20 / 0.42);
+  --term-faint: rgb(255 92 20 / 0.12);
+  --term-glow: rgb(255 92 20 / 0.55);
+  --term-side-w: 15rem;
+  --term-status-h: 2.1rem;
+}
+
+body {
+  color: var(--paper);
+  overflow: hidden;
+}
+
+/* Force every slide dark — no alternating light panels. */
+#main-content > section,
+#main-content > section:nth-of-type(even) {
+  --slide-background: var(--night);
+  --slide-foreground: var(--paper);
+  --slide-mesh: var(--mesh-dark);
+  --text-primary: var(--paper);
+}
+#main-content > section:nth-of-type(even) .fact__value,
+#main-content > section:nth-of-type(even) .countdown-slide__heading h2,
+#main-content
+  > section:nth-of-type(even)
+  [data-slot="accordion-content"]
+  > div {
+  color: var(--paper);
+}
+
+/* Prize cards read as dark screens; the winner card is the bright highlight. */
+.prize-card {
+  background: var(--surface);
+  color: var(--paper);
+  border-color: var(--term-dim);
+}
+.prize-card--first {
+  background: var(--signal);
+  color: var(--night);
+  border-color: var(--signal);
+}
+
+/* -- Two-column app shell ------------------------------------------------- */
+
+/* Left menu sidebar. */
+.terminal-side {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: var(--term-status-h);
+  z-index: 90;
+  width: var(--term-side-w);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.9rem;
+  background: rgb(7 7 7 / 0.96);
+  border-right: 1px solid var(--term-dim);
+  font-family: var(--font-geist-pixel), monospace;
+  text-transform: uppercase;
+}
+
+.terminal-side__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.5rem 0.9rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--term-dim);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--term);
+  text-shadow: 0 0 8px var(--term-glow);
+}
+.terminal-side__cog {
+  color: var(--term-dim);
+}
+
+.terminal-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  flex: 1;
+}
+
+.terminal-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  background: transparent;
+  color: var(--term-dim);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease;
+}
+.terminal-menu__num {
+  font-size: 0.66rem;
+  color: var(--term-dim);
+  min-width: 1.4em;
+}
+.terminal-menu__item:hover {
+  color: var(--term);
+  background: var(--term-faint);
+}
+.terminal-menu__item.is-active {
+  color: var(--night);
+  background: var(--term);
+  box-shadow: 0 0 14px var(--term-glow);
+}
+.terminal-menu__item.is-active .terminal-menu__num {
+  color: var(--night);
+}
+.terminal-menu__item:focus-visible {
+  outline: 2px solid var(--term);
+  outline-offset: -2px;
+}
+
+.terminal-side__foot {
+  padding: 0.8rem 0.5rem 0;
+  margin-top: 0.9rem;
+  border-top: 1px solid var(--term-dim);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--term-dim);
+  line-height: 1.7;
+}
+
+/* Right content pane = the section deck, now a single-screen viewport. */
+#main-content {
+  position: fixed;
+  top: 0;
+  left: var(--term-side-w);
+  right: 0;
+  bottom: var(--term-status-h);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+#main-content > section:not(.screen-active) {
+  display: none;
+}
+
+#main-content > section.screen-active {
+  height: auto;
+  min-height: 100%;
+}
+
+/* The landing hero fills the pane. */
+.hero.hero--landing {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Bottom status bar spans the full width. */
+.terminal-statusbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  height: var(--term-status-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 clamp(0.7rem, 2vw, 1.4rem);
+  background: rgb(7 7 7 / 0.96);
+  border-top: 1px solid var(--term-dim);
+  font-family: var(--font-geist-pixel), monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--term);
+}
+.terminal-statusbar__slot {
+  white-space: nowrap;
+  text-shadow: 0 0 8px var(--term-glow);
+}
+.terminal-statusbar__slot--right {
+  text-align: right;
+}
+.terminal-statusbar__clock {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  justify-self: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px var(--term-glow);
+}
+.terminal-statusbar__dot {
+  width: 0.5em;
+  height: 0.5em;
+  background: var(--term);
+  box-shadow: 0 0 8px var(--term-glow);
+  animation: term-blink 1.4s steps(1) infinite;
+}
+
+/* Corner brackets framing the content pane. */
+.terminal-frame {
+  position: fixed;
+  top: 0.4rem;
+  left: calc(var(--term-side-w) + 0.4rem);
+  right: 0.4rem;
+  bottom: calc(var(--term-status-h) + 0.4rem);
+  z-index: 80;
+  pointer-events: none;
+}
+.terminal-frame__corner {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--term);
+  box-shadow: 0 0 8px var(--term-glow);
+}
+.terminal-frame__corner--tl {
+  top: 0;
+  left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+.terminal-frame__corner--tr {
+  top: 0;
+  right: 0;
+  border-left: 0;
+  border-bottom: 0;
+}
+.terminal-frame__corner--bl {
+  bottom: 0;
+  left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+.terminal-frame__corner--br {
+  bottom: 0;
+  right: 0;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* Scanlines over everything. */
+.terminal-scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.16) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* The old scroll-arrow nav is replaced by the menu. */
+.keyboard-navigation {
+  display: none;
+}
+
+@keyframes term-blink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  60.01%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+/* -- Responsive: collapse the sidebar into a top tab strip on narrow view -- */
+@media (max-width: 52rem) {
+  :root {
+    --term-side-w: 0px;
+    --term-top-h: 2.6rem;
+  }
+  .terminal-side {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    height: var(--term-top-h);
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.7rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--term-dim);
+  }
+  .terminal-side__brand {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+  .terminal-menu {
+    flex-direction: row;
+    flex: 1;
+    gap: 0.15rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .terminal-menu::-webkit-scrollbar {
+    display: none;
+  }
+  .terminal-menu__item {
+    flex-shrink: 0;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7rem;
+  }
+  .terminal-menu__num,
+  .terminal-side__foot {
+    display: none;
+  }
+  #main-content {
+    top: var(--term-top-h);
+    left: 0;
+  }
+  .terminal-frame {
+    top: calc(var(--term-top-h) + 0.4rem);
+    left: 0.4rem;
+  }
+  .terminal-statusbar {
+    grid-template-columns: 1fr auto;
+    font-size: 0.6rem;
+  }
+  .terminal-statusbar__slot--right {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-statusbar__dot {
+    animation: none;
+  }
+  #main-content {
+    scroll-behavior: auto;
+  }
+}

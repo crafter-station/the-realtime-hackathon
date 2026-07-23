@@ -60,7 +60,7 @@ export function TrackParticles({ variant }: { variant: TrackParticleVariant }) {
       const radii = new Float32Array(particleCount);
       const sizes = new Float32Array(particleCount);
       const baseColor = new THREE.Color(
-        variant === "cooperative" ? 0x090909 : 0xb8b8b8,
+        variant === "cooperative" ? 0xff5c14 : 0xff8a48,
       );
       const fullTurn = Math.PI * 2;
       let randomSeed = variant === "cooperative" ? 0x4a72c31d : 0x19d3e7b5;
