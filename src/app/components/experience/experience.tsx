@@ -27,10 +27,19 @@ function clockParts(now: number): string {
   return `${p(d)}:${p(h)}:${p(m)}:${p(s)}`;
 }
 
+// Scroll fraction across which the fly-into-the-H zoom happens.
+const ZOOM_END = 0.15;
+// How far we zoom: the H's hollow counter must exceed the viewport.
+const ZOOM_MAX = 46;
+
 export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
   const progressFill = useRef<HTMLDivElement>(null);
+  const heroLayer = useRef<HTMLDivElement>(null);
+  const heroTitle = useRef<HTMLHeadingElement>(null);
+  const heroSub = useRef<HTMLDivElement>(null);
+  const hGlyph = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     scroll.quality = detectQuality();
@@ -42,6 +51,29 @@ export function Experience() {
     ).matches;
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
 
+    // Measure the H glyph so the zoom scales/rotates around its hollow center
+    // and drifts it to the middle of the viewport.
+    const anchor = { ox: 0, oy: 0, tx: 0, ty: 0 };
+    const measure = () => {
+      const title = heroTitle.current;
+      const h = hGlyph.current;
+      if (!title || !h) return;
+      const prev = title.style.transform;
+      title.style.transform = "none";
+      const tr = title.getBoundingClientRect();
+      const hr = h.getBoundingClientRect();
+      title.style.transform = prev;
+      const hx = hr.left + hr.width / 2;
+      const hy = hr.top + hr.height / 2;
+      anchor.ox = hx - tr.left;
+      anchor.oy = hy - tr.top;
+      anchor.tx = window.innerWidth / 2 - hx;
+      anchor.ty = window.innerHeight / 2 - hy;
+      title.style.transformOrigin = `${anchor.ox}px ${anchor.oy}px`;
+    };
+    measure();
+    window.addEventListener("resize", measure);
+
     let raf = 0;
     const loop = (time: number) => {
       lenis.raf(time);
@@ -50,12 +82,37 @@ export function Experience() {
       if (progressFill.current) {
         progressFill.current.style.transform = `scaleX(${scroll.progress})`;
       }
+
+      // Fly INTO the H: grow + bank + drift its hollow center to mid-viewport.
+      const layer = heroLayer.current;
+      const title = heroTitle.current;
+      const sub = heroSub.current;
+      if (layer && title && sub) {
+        const t = Math.min(1, Math.max(0, scroll.progress / ZOOM_END));
+        if (reduce) {
+          layer.style.opacity = String(1 - t);
+          layer.style.visibility = t >= 1 ? "hidden" : "visible";
+        } else {
+          const accel = t * t * (3 - 2 * t); // smoothstep
+          const s = Math.exp(Math.log(ZOOM_MAX) * accel ** 1.25);
+          const drift = Math.min(1, accel * 1.6);
+          const bank = Math.sin(accel * Math.PI) * -12;
+          title.style.transform = `translate3d(${anchor.tx * drift}px, ${
+            anchor.ty * drift
+          }px, 0) rotate(${bank}deg) scale(${s})`;
+          sub.style.opacity = String(Math.max(0, 1 - t * 4));
+          layer.style.opacity = t > 0.92 ? String(1 - (t - 0.92) / 0.08) : "1";
+          layer.style.visibility = t >= 1 ? "hidden" : "visible";
+        }
+      }
+
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
       lenis.destroy();
       document.documentElement.classList.remove("xp");
     };
@@ -73,39 +130,35 @@ export function Experience() {
     <>
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
 
-      <header className="xp-topbar">
-        <a className="xp-wordmark" href="#top">
-          {"RT//HACK"}
-        </a>
-        <nav className="xp-nav">
+      {/* 01 — HERO layer (fixed): scroll flies you INTO the hollow H. */}
+      <div ref={heroLayer} className="xp-heroLayer">
+        <h1 ref={heroTitle} className="xp-display">
+          The realtime{" "}
+          <em>
+            <span ref={hGlyph}>h</span>ackathon
+          </em>
+        </h1>
+        <div ref={heroSub} className="xp-heroSub">
+          <p className="xp-body">
+            Build a live, multiplayer or agentic AI product with{" "}
+            <strong>Portal</strong> in one weekend. August 7–9, online, teams of
+            1–4. US$800 in prizes.{" "}
+            <strong>Scroll to enter another dimension.</strong>
+          </p>
           <a
-            className="xp-register xp-register--sm"
+            className="xp-register"
             href={REGISTER_URL}
             target="_blank"
             rel="noopener noreferrer"
           >
             Register free →
           </a>
-        </nav>
-      </header>
+        </div>
+      </div>
 
       <main className="xp-overlay" id="top">
-        {/* 01 — HERO: title over the pale-black starfield. */}
-        <section className="xp-hero">
-          <div>
-            <h1 className="xp-display">
-              The realtime <em>hackathon</em>
-            </h1>
-          </div>
-          <div className="xp-herorow">
-            <p className="xp-body">
-              Build a live, multiplayer or agentic AI product with{" "}
-              <strong>Portal</strong> in one weekend. August 7–9, online, teams
-              of 1–4. US$800 in prizes.{" "}
-              <strong>Scroll to enter another dimension.</strong>
-            </p>
-          </div>
-        </section>
+        {/* Scroll room for the fly-into-the-H zoom. */}
+        <div className="xp-gap--intro" aria-hidden />
 
         {/* 02 — TUNNEL: pure fly-through; speed follows your scroll. */}
         <div className="xp-gap--tunnel" aria-hidden />

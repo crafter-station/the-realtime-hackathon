@@ -89,7 +89,7 @@ export function WireTunnel({ zStart, zEnd }: { zStart: number; zEnd: number }) {
 
   useFrame((_, dt) => {
     // Invisible at the hero; the tunnel's parts fade in once scrolling starts.
-    const reveal = THREE.MathUtils.smoothstep(scroll.progress, 0.03, 0.15);
+    const reveal = THREE.MathUtils.smoothstep(scroll.progress, 0.12, 0.2);
     const target =
       THREE.MathUtils.lerp(0.4, 0.9, clampedVelocityFactor()) * reveal;
     const mat = material.current;

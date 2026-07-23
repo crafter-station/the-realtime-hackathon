@@ -4776,3 +4776,38 @@ html.xp body {
   justify-items: center;
   text-align: center;
 }
+
+/* -- Fly-into-the-H hero layer -------------------------------------------- */
+.xp-heroLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: clamp(1.6rem, 4vh, 3rem);
+  padding: 0 clamp(1.25rem, 5vw, 4rem);
+  text-align: center;
+  pointer-events: none;
+}
+.xp-heroLayer .xp-display {
+  max-width: none;
+  font-size: clamp(2.6rem, 8.2vw, 9rem);
+  will-change: transform;
+}
+.xp-heroSub {
+  display: grid;
+  justify-items: center;
+  gap: 1.6rem;
+  will-change: opacity;
+}
+.xp-heroSub .xp-body {
+  max-width: 52ch;
+  text-align: center;
+}
+.xp-heroSub .xp-register {
+  pointer-events: auto;
+}
+.xp-gap--intro {
+  height: 160svh;
+}
