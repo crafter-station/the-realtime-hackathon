@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
-import { pathX, WireWorld } from "./wire-world";
+import { closeFactor, pathX, WireWorld } from "./wire-world";
 
 // Camera track: one long continuous ride (hero grid → curves → tunnel → end).
 const TRACK_START = 4;
@@ -19,6 +19,7 @@ function damp(current: number, target: number, lambda: number, dt: number) {
 /** Sparse white starfield on the pale black; recycles to feel endless. */
 function Starfield({ count }: { count: number }) {
   const points = useRef<THREE.Points>(null);
+  const material = useRef<THREE.PointsMaterial>(null);
   const geometry = useMemo(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i += 1) {
@@ -40,10 +41,21 @@ function Starfield({ count }: { count: number }) {
       if (arr[i] > camZ + 8) arr[i] -= 88;
     }
     geometry.attributes.position.needsUpdate = true;
+    // Stars dim while riding inside the closed tunnel.
+    if (material.current) {
+      const inside = closeFactor(camZ);
+      material.current.opacity = THREE.MathUtils.damp(
+        material.current.opacity,
+        THREE.MathUtils.lerp(0.7, 0.12, inside),
+        3,
+        dt,
+      );
+    }
   });
   return (
     <points ref={points} geometry={geometry}>
       <pointsMaterial
+        ref={material}
         size={0.045}
         fog={false}
         sizeAttenuation

@@ -18,7 +18,7 @@ import { scroll } from "./store";
  */
 
 // World extents (along -z).
-export const WORLD_Z_START = -4;
+export const WORLD_Z_START = 10;
 export const WORLD_Z_END = -190;
 
 // Tunnel cross-section (matches the previous tunnel's feel).
@@ -43,9 +43,13 @@ export function pathX(z: number): number {
   return Math.sin((z + 44) * 0.11) * 6.5 * w;
 }
 
-/** 0 = flat floor, 1 = fully closed rectangular tunnel. */
+/** 0 = flat floor, 1 = fully closed rectangular tunnel.
+ *  The journey STARTS inside a closed tunnel, opens out to the flat plane,
+ *  then closes again for the finale run. */
 export function closeFactor(z: number): number {
-  return smoothstep(-96, -118, z);
+  const opening = 1 - smoothstep(-30, -46, z);
+  const closing = smoothstep(-96, -118, z);
+  return Math.max(opening, closing);
 }
 
 /** Perimeter walk of the tunnel rect, param u in [0,1], starting top-center
