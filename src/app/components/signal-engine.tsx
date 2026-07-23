@@ -51,7 +51,7 @@ export function SignalEngine() {
       const delays = new Float32Array(particleCount);
       const phases = new Float32Array(particleCount);
       const sizes = new Float32Array(particleCount);
-      const particleColor = new THREE.Color(0xb8b8b8);
+      const particleColor = new THREE.Color(0xff5c14);
       const target = new THREE.Vector3();
       const fullTurn = Math.PI * 2;
       let randomSeed = 0x2f6e2b1;
