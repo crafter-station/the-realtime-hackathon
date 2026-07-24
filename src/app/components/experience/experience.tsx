@@ -146,6 +146,16 @@ export function Experience() {
           </p>
         </section>
 
+        {/* 05.5 — Into the wormhole: the grid folds into the vortex. */}
+        <div className="xp-gap--wormhole" aria-hidden />
+        <section className="xp-section xp-section--beat">
+          <p className="xp-label">Another dimension</p>
+          <h2 className="xp-huge xp-huge--outline">Warp</h2>
+          <p className="xp-beat-line">
+            The grid folds into a wormhole. <strong>Keep falling.</strong>
+          </p>
+        </section>
+
         {/* 06 — FINALE: the wire hand + giant register. */}
         <section className="xp-section xp-finale">
           <h2 className="xp-huge xp-huge--outline">Register</h2>

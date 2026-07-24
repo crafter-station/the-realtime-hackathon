@@ -18,7 +18,17 @@ import { scroll } from "./store";
 
 // World extents (along -z).
 export const WORLD_Z_START = 10;
-export const WORLD_Z_END = -215;
+export const WORLD_Z_END = -286;
+
+// Wormhole stretch — a spiralling vortex that the flat grid folds into. Lives
+// past the (now much longer) closing tunnel; the camera flies straight down
+// its throat.
+export const WORM_Z_IN = -256; // rings begin fading in
+export const WORM_Z_FULL = -296; // fully present
+export const WORM_Z_START = -260; // first ring
+export const WORM_Z_END = -420; // black-hole throat
+export const WORM_RADIUS = 16; // mouth radius
+export const WORM_THROAT = 1.4; // throat radius (the dark core)
 
 // Tunnel cross-section.
 const HW = 13; // half width
@@ -40,13 +50,20 @@ function smoothstep(edge0: number, edge1: number, x: number) {
 /** 1 while inside a tunnel stretch, 0 out on the open floor. */
 export function tunnelPresence(z: number): number {
   const opening = 1 - smoothstep(-28, -50, z); // the starting tunnel dissolves
-  const closing = smoothstep(-126, -148, z); // the finale tunnel forms
+  // The finale tunnel forms, holds for a long ride, then dissolves again as it
+  // hands off to the wormhole (the walls collapse into the spinning vortex).
+  const closing = smoothstep(-95, -122, z) * (1 - smoothstep(-252, -278, z));
   return Math.max(opening, closing);
+}
+
+/** 0 → 1 as the flat grid folds into the spiralling wormhole. */
+export function wormholePresence(z: number): number {
+  return smoothstep(WORM_Z_IN, WORM_Z_FULL, z);
 }
 
 /** Undulations only live on the open stretch; the floor is flat in tunnels. */
 function waveWindow(z: number): number {
-  return smoothstep(-48, -72, z) * (1 - smoothstep(-118, -138, z));
+  return smoothstep(-48, -72, z) * (1 - smoothstep(-92, -112, z));
 }
 
 /**
@@ -56,15 +73,18 @@ function waveWindow(z: number): number {
  * boundary is smooth, never a hard edge.
  */
 export function floorVisibility(x: number, z: number): number {
+  // The grid vanishes entirely once the wormhole takes over — no flat floor
+  // showing through the vortex.
+  const w = wormholePresence(z);
   const p = tunnelPresence(z);
-  if (p < 0.002) return 1;
+  if (p < 0.002) return 1 - w;
   // Gate on presence, not presence itself: while the tunnel is still readable
   // the outer floor stays fully hidden, otherwise you briefly see BOTH the
   // walls and a second, wider floor behind them during the dissolve. It only
   // fades in once the tunnel is down to a few percent.
   const clip = smoothstep(0.02, 0.18, p);
   const outside = smoothstep(HW - 3.2, HW + 0.4, Math.abs(x - pathX(z)));
-  return 1 - clip * outside;
+  return (1 - clip * outside) * (1 - w);
 }
 
 /** Rolling floor height — this is what makes the ride rise and fall. */
@@ -76,8 +96,8 @@ export function floorY(x: number, z: number): number {
 
 /** Curved centreline: the path drifts side to side across the open floor. */
 export function pathX(z: number): number {
-  const w = smoothstep(-64, -80, z) * (1 - smoothstep(-100, -114, z));
-  return Math.sin((z + 64) * 0.1) * 6.5 * w;
+  const w = smoothstep(-58, -74, z) * (1 - smoothstep(-92, -108, z));
+  return Math.sin((z + 58) * 0.1) * 6.5 * w;
 }
 
 /** Camera height: centred in the tunnel, riding just over the rolling floor. */
