@@ -5,12 +5,20 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
-import { pathX, rideY, tunnelPresence, WireWorld } from "./wire-world";
+import {
+  pathX,
+  rideY,
+  tunnelPresence,
+  WireWorld,
+  wormholePresence,
+} from "./wire-world";
+import { WireWormhole } from "./wire-wormhole";
 
-// Camera track: one long continuous ride (hero grid → curves → tunnel → end).
+// Camera track: one long continuous ride (hero grid → curves → tunnel →
+// wormhole → end).
 const TRACK_START = 9;
-const TRACK_END = -205;
-const HAND_Z = -211.5;
+const TRACK_END = -360;
+const HAND_Z = -356;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -41,12 +49,15 @@ function Starfield({ count }: { count: number }) {
       if (arr[i] > camZ + 8) arr[i] -= 88;
     }
     geometry.attributes.position.needsUpdate = true;
-    // Stars dim while riding inside the closed tunnel.
+    // Stars dim inside the closed tunnel, then blaze back up around the
+    // wormhole — deep space, dense starfield.
     if (material.current) {
       const inside = tunnelPresence(camZ);
+      const worm = wormholePresence(camZ);
+      const base = THREE.MathUtils.lerp(0.7, 0.12, inside);
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
-        THREE.MathUtils.lerp(0.7, 0.12, inside),
+        THREE.MathUtils.lerp(base, 0.92, worm),
         3,
         dt,
       );
@@ -152,6 +163,7 @@ export function PortalCanvas() {
         <fog attach="fog" args={["#0e0e10", 14, 50]} />
         <Starfield count={stars} />
         <WireWorld />
+        <WireWormhole />
         <FinaleHand />
         <Rig />
       </Canvas>
