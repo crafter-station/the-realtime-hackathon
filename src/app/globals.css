@@ -4396,7 +4396,6 @@ h2 {
   }
 }
 
-
 /* ==========================================================================
    PORTAL EXPERIENCE — editorial 3D, Lusion-grounded (see docs/art-direction.md)
    Light off-white page, black grotesque type, one hot orange, a glossy portal.
@@ -4708,7 +4707,99 @@ html.xp body {
    tunnel owns most of this: it holds for ~340svh, then takes ~225svh to open
    out into the plain. */
 .xp-gap--ride {
-  height: 914svh;
+  height: 620svh;
+}
+
+/* -- The jump to hyperspace ------------------------------------------------
+   These heights are what `warpAmount()` in store.ts is calibrated against:
+   its four thresholds are these boundaries over the total scrollable height.
+   Change a height here and the streaks drift out of step with the copy. */
+
+/* 3 · 2 · 1 — one screen-and-a-bit each, so each numeral gets its own beat.
+   The numeral is sticky rather than centred in its section: a section taller
+   than the viewport would otherwise park its content near the top of the
+   window and scroll it off, and the beat is supposed to *hold* while you keep
+   scrolling, then hand over to the next. */
+.xp-count {
+  display: block;
+  min-height: 110svh;
+  padding: 0;
+}
+.xp-count__n {
+  position: sticky;
+  top: 0;
+  display: grid;
+  place-content: center;
+  height: 100svh;
+  margin: 0;
+  font-family: var(--font-space), var(--sans);
+  font-weight: 700;
+  font-size: clamp(7rem, 22vw, 18rem);
+  line-height: 0.9;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+/* The punch itself: no copy, just the streaks reaching full stretch. */
+.xp-gap--jump {
+  height: 110svh;
+}
+/* One card per slot, alternating sides of the vanishing point. Sticky for the
+   same reason as the numerals: each card holds its screen, then hands over. */
+.xp-trackSlot {
+  display: block;
+  min-height: 125svh;
+  padding: 0;
+}
+.xp-trackCard {
+  max-width: min(30rem, 84vw);
+  padding: 1.5rem 1.6rem 1.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(10, 10, 12, 0.72);
+  backdrop-filter: blur(6px);
+}
+.xp-trackCard__head {
+  display: flex;
+  gap: 1.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.xp-trackCard__n {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.78rem;
+}
+.xp-trackCard__copy {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+.xp-trackSlot .xp-trackCard {
+  position: sticky;
+  top: 26vh;
+  margin: 0 clamp(1.25rem, 5vw, 4rem);
+}
+.xp-trackSlot--left .xp-trackCard {
+  margin-right: auto;
+}
+.xp-trackSlot--right .xp-trackCard {
+  margin-left: auto;
+}
+/* Room to drop back out of hyperspace before the grid returns. */
+.xp-gap--jumpOut {
+  height: 140svh;
+}
+.xp-beat-line--wide {
+  max-width: 26ch;
 }
 /* A long ride down the wire tunnel before it collapses into the wormhole. */
 .xp-gap--tunnel {
@@ -4820,4 +4911,3 @@ html.xp body {
 .xp-heroSub .xp-register {
   pointer-events: auto;
 }
-

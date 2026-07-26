@@ -3,7 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { scroll } from "./store";
+import { scroll, warpAmount } from "./store";
 
 /**
  * The world is two line sets:
@@ -21,15 +21,15 @@ import { scroll } from "./store";
 
 // World extents (along -z).
 export const WORLD_Z_START = 10;
-export const WORLD_Z_END = -366;
+export const WORLD_Z_END = -600;
 
 // Wormhole stretch — the spiralling vortex the cone empties into. Its mouth is
 // exactly the cone's closed radius, sitting on the same axis, so the handover
 // is a crossfade between two surfaces that already coincide.
-export const WORM_Z_IN = -336; // rings begin fading in (= CONE_JOIN)
-export const WORM_Z_FULL = -376; // fully present
-export const WORM_Z_START = -336; // first ring
-export const WORM_Z_END = -500; // black-hole throat
+export const WORM_Z_IN = -580; // rings begin fading in (= CONE_JOIN)
+export const WORM_Z_FULL = -620; // fully present
+export const WORM_Z_START = -580; // first ring
+export const WORM_Z_END = -760; // black-hole throat
 export const WORM_THROAT = 1.4; // throat radius (the dark core)
 
 // Tunnel cross-section.
@@ -72,9 +72,9 @@ const FLOOR_HW = (FLOOR_COLS / 2) * STEP_X; // 41.6
  * onto the wormhole's axis, and the vortex takes over from a surface that is
  * already in the identical place.
  */
-const CONE_START = -180; // the plane's edges start lifting
-const CONE_WRAPPED = -250; // closed into a tube
-const CONE_JOIN = -336; // tube sits on the wormhole axis (= WORM_Z_IN)
+const CONE_START = -430; // the plane's edges start lifting
+const CONE_WRAPPED = -520; // closed into a tube
+const CONE_JOIN = -580; // tube sits on the wormhole axis (= WORM_Z_IN)
 export const WORM_RADIUS = FLOOR_HW / Math.PI; // ≈13.4, the closed-tube radius
 
 function smoothstep(edge0: number, edge1: number, x: number) {
@@ -161,7 +161,7 @@ export function wormholePresence(z: number): number {
  * begins to curl (rolling hills wrapped around you read as a dented pipe).
  */
 function waveWindow(z: number): number {
-  return smoothstep(-128, -150, z) * (1 - smoothstep(-162, -180, z));
+  return smoothstep(-128, -145, z) * (1 - smoothstep(-412, -430, z));
 }
 
 /**
@@ -354,7 +354,10 @@ export function WireWorld() {
   useFrame((_, dt) => {
     // Lines brighten with scroll speed — the dimension-travel rush.
     const v = THREE.MathUtils.clamp(Math.abs(scroll.velocity) * 0.05, 0, 1);
-    const target = THREE.MathUtils.lerp(0.32, 0.78, v);
+    // ...and the whole world drops away for the jump, leaving only the streaks.
+    const target =
+      THREE.MathUtils.lerp(0.32, 0.78, v) *
+      (1 - warpAmount(scroll.progress) ** 0.6);
     if (floorMat.current) {
       floorMat.current.opacity = THREE.MathUtils.damp(
         floorMat.current.opacity,

@@ -3,16 +3,17 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { scroll } from "./store";
+import { scroll, warpAmount } from "./store";
 import { WireHand } from "./wire-hand";
+import { WireWarp } from "./wire-warp";
 import { enclosure, rideY, WireWorld, wormholePresence } from "./wire-world";
 import { WireWormhole } from "./wire-wormhole";
 
 // Camera track: one long continuous ride (hero grid → curves → tunnel →
 // wormhole → end).
 const TRACK_START = 9;
-const TRACK_END = -440;
-const HAND_Z = -436;
+const TRACK_END = -662;
+const HAND_Z = -658;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -49,9 +50,12 @@ function Starfield({ count }: { count: number }) {
       const inside = enclosure(camZ);
       const worm = wormholePresence(camZ);
       const base = THREE.MathUtils.lerp(0.7, 0.12, inside);
+      // The streak field replaces the starfield outright during the jump —
+      // two star layers at once just reads as noise.
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
-        THREE.MathUtils.lerp(base, 0.92, worm),
+        THREE.MathUtils.lerp(base, 0.92, worm) *
+          (1 - warpAmount(scroll.progress)),
         3,
         dt,
       );
@@ -148,6 +152,7 @@ export function PortalCanvas() {
         <fog attach="fog" args={["#0e0e10", 14, 50]} />
         <Starfield count={stars} />
         <WireWorld />
+        <WireWarp />
         <WireWormhole />
         <FinaleHand />
         <Rig />

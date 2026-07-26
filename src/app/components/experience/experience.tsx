@@ -31,6 +31,34 @@ function clockParts(now: number): string {
 const HERO_FADE_START = 0.02;
 const HERO_FADE_END = 0.09;
 
+/**
+ * The four tracks, revealed one card at a time while you fly through the
+ * streak field. Sides alternate so the cards never stack over the vanishing
+ * point, which is where the eye is already pinned.
+ */
+const TRACKS = [
+  {
+    name: "CO-OP AI",
+    copy: "People and agents sharing one live workspace.",
+    side: "left",
+  },
+  {
+    name: "LIVE SYSTEMS",
+    copy: "Products that act on changing data.",
+    side: "right",
+  },
+  {
+    name: "CROWD MODE",
+    copy: "Experiences shaped by the audience.",
+    side: "left",
+  },
+  {
+    name: "WILD SIGNAL",
+    copy: "Realtime experiments without a category.",
+    side: "right",
+  },
+] as const;
+
 export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
@@ -121,6 +149,45 @@ export function Experience() {
       <main className="xp-overlay" id="top">
         {/* 02 — Ride the grid, into the curves. Long. */}
         <div className="xp-gap--ride" aria-hidden />
+
+        {/* 02.5 — The jump: count down, punch into hyperspace, meet the
+            tracks in the streaks. */}
+        <section className="xp-section xp-section--beat">
+          <p className="xp-label">Hold on</p>
+          <p className="xp-beat-line xp-beat-line--wide">
+            You are about to enter <strong>another dimension</strong>.
+          </p>
+        </section>
+        {[3, 2, 1].map((n) => (
+          <section className="xp-section xp-count" key={n}>
+            <p className="xp-count__n">{n}</p>
+          </section>
+        ))}
+        <div className="xp-gap--jump" aria-hidden />
+
+        <section className="xp-section xp-section--beat xp-tracksIntro">
+          <p className="xp-label">Four tracks</p>
+          <p className="xp-beat-line">
+            Pick one, or ignore them all. <strong>Ship something live.</strong>
+          </p>
+        </section>
+        {TRACKS.map((track, i) => (
+          <section
+            className={`xp-section xp-trackSlot xp-trackSlot--${track.side}`}
+            key={track.name}
+          >
+            <article className="xp-trackCard">
+              <p className="xp-trackCard__head">
+                <span>{track.name}</span>
+                <span className="xp-trackCard__n">
+                  [{String(i + 1).padStart(2, "0")}]
+                </span>
+              </p>
+              <p className="xp-trackCard__copy">{track.copy}</p>
+            </article>
+          </section>
+        ))}
+        <div className="xp-gap--jumpOut" aria-hidden />
 
         {/* 03 — The curve closes: PRIZES appear. */}
         <section className="xp-section xp-section--beat">

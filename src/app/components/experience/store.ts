@@ -22,3 +22,30 @@ export const scroll = {
 };
 
 export type ScrollState = typeof scroll;
+
+/**
+ * The jump to hyperspace, in scroll-progress space rather than world z.
+ *
+ * The streaks are WebGL and the track cards are DOM, so the one thing that has
+ * to agree between them is *scroll position* — tying the effect to progress
+ * keeps it in sync with the overlay by construction. These four numbers are the
+ * section boundaries in `globals.css` divided by the total scrollable height;
+ * if the `--jump` / `--cards` gaps change, change these with them.
+ */
+const JUMP_IN = 0.242; // "3" — streaks begin stretching
+const JUMP_FULL = 0.389; // past "1", fully in hyperspace
+const JUMP_HOLD = 0.591; // last track card
+const JUMP_OUT = 0.638; // back out, the wire world returns
+
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+/** 0 → 1 → 0 across the hyperspace beat. */
+export function warpAmount(progress: number): number {
+  return (
+    smoothstep(JUMP_IN, JUMP_FULL, progress) *
+    (1 - smoothstep(JUMP_HOLD, JUMP_OUT, progress))
+  );
+}
