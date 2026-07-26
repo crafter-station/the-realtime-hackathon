@@ -270,19 +270,20 @@ export function WireWorld() {
         push(x0, top, z, x1, top, z);
       }
     }
-    // Longitudinal rails along the walls and ceiling, as fractions of the
-    // cross-section so they splay outward with it instead of pinching together.
-    const rails: Array<[number, number]> = [
-      [-1, 0],
-      [-1, 0.5],
-      [-1, 1],
-      [1, 0],
-      [1, 0.5],
-      [1, 1],
-      [-0.04, 1],
-      [0, 1],
-      [0.04, 1],
-    ];
+    // Longitudinal rails, as fractions of the cross-section so they splay
+    // outward with it instead of pinching together. Spaced off the same STEP_X
+    // the floor grid uses, so ceiling and walls read as the same wireframe as
+    // the ground rather than as bare nested rectangles. The ceiling owns both
+    // top corners; the walls stop one rung short to avoid drawing them twice.
+    const rails: Array<[number, number]> = [];
+    const ceilSpans = Math.round((2 * HW) / STEP_X);
+    for (let i = 0; i <= ceilSpans; i += 1) {
+      rails.push([(2 * i) / ceilSpans - 1, 1]);
+    }
+    const wallSpans = Math.round(WALL_H / STEP_X);
+    for (let i = 0; i < wallSpans; i += 1) {
+      rails.push([-1, i / wallSpans], [1, i / wallSpans]);
+    }
     for (const [rx, ry] of rails) {
       for (let k = 0; k < zCount; k += 1) {
         const z0 = WORLD_Z_START - k * STEP_Z;
