@@ -5,13 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
-import {
-  enclosure,
-  pathX,
-  rideY,
-  WireWorld,
-  wormholePresence,
-} from "./wire-world";
+import { enclosure, rideY, WireWorld, wormholePresence } from "./wire-world";
 import { WireWormhole } from "./wire-wormhole";
 
 // Camera track: one long continuous ride (hero grid → curves → tunnel →
@@ -101,15 +95,9 @@ function Rig() {
     const camZ = damp(camera.position.z, base - surge, 4.2, cdt);
     camera.position.z = camZ;
 
-    // Follow the curved centerline; look slightly ahead so turns feel real.
-    const cx = pathX(camZ);
-    const ahead = pathX(camZ - 6);
-    camera.position.x = damp(
-      camera.position.x,
-      cx + state.pointer.x * 0.35,
-      4,
-      cdt,
-    );
+    // The run is dead straight down the centreline — only mouse parallax
+    // shifts you off it.
+    camera.position.x = damp(camera.position.x, state.pointer.x * 0.35, 4, cdt);
     // Ride centred in the tunnel while closed → symmetric view.
     camera.position.y = damp(
       camera.position.y,
@@ -118,15 +106,12 @@ function Rig() {
       cdt,
     );
 
-    // Yaw toward the path ahead, bank into the curve, pitch with the slope.
+    // No yaw or bank without a curve to lean into; pitch still follows the
+    // slope of the rolling floor.
     camera.rotation.order = "YXZ";
-    const yaw = Math.atan2(ahead - cx, 6) * 0.32;
-    const bank = reduce ? 0 : (ahead - cx) * 0.012;
     const slope = (rideY(camZ - 5) - rideY(camZ)) / 5;
     const pitch = reduce ? 0 : Math.atan(slope) * 0.55;
-    camera.rotation.y = damp(camera.rotation.y, yaw, 4, cdt);
     camera.rotation.x = damp(camera.rotation.x, pitch, 4, cdt);
-    camera.rotation.z = damp(camera.rotation.z, bank, 4, cdt);
 
     // FOV kick with speed (skipped for reduced motion).
     const cam = camera as THREE.PerspectiveCamera;

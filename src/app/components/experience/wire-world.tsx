@@ -144,7 +144,7 @@ export function floorVisibility(x: number, z: number): number {
   // has released on its own and this gate never gets to pop.
   const clip = smoothstep(0.02, 0.18, p);
   const hw = tunnelHW(z);
-  const outside = smoothstep(hw - 3.2, hw + 0.4, Math.abs(x - pathX(z)));
+  const outside = smoothstep(hw - 3.2, hw + 0.4, Math.abs(x));
   return (1 - clip * outside) * (1 - w);
 }
 
@@ -153,12 +153,6 @@ export function floorY(x: number, z: number): number {
   const wave =
     Math.sin(z * 0.075) * 2.6 + Math.sin(z * 0.029 + x * 0.045) * 1.25;
   return FLOOR_Y + wave * waveWindow(z);
-}
-
-/** Curved centreline: the path drifts side to side across the open floor. */
-export function pathX(z: number): number {
-  const w = smoothstep(-138, -154, z) * (1 - smoothstep(-172, -188, z));
-  return Math.sin((z + 138) * 0.1) * 6.5 * w;
 }
 
 /**
@@ -172,9 +166,7 @@ export function rideY(z: number): number {
     1 - smoothstep(EYE_DROP_START, EYE_DROP_END, z),
     closingPresence(z),
   );
-  return (
-    floorY(pathX(z), z) + THREE.MathUtils.lerp(EYE_OPEN, EYE_TUNNEL, settle)
-  );
+  return floorY(0, z) + THREE.MathUtils.lerp(EYE_OPEN, EYE_TUNNEL, settle);
 }
 
 export function WireWorld() {
@@ -244,8 +236,7 @@ export function WireWorld() {
     for (let k = 0; k <= zCount; k += 1) {
       const z = WORLD_Z_START - k * STEP_Z;
       if (tunnelPresence(z) < 0.004) continue;
-      const cx = pathX(z);
-      const base = floorY(cx, z);
+      const base = floorY(0, z);
       const hw = tunnelHW(z);
       const wallH = tunnelWallH(z);
       const top = base + wallH;
@@ -254,19 +245,19 @@ export function WireWorld() {
       for (let i = 0; i < segs; i += 1) {
         const y0 = base + (wallH * i) / segs;
         const y1 = base + (wallH * (i + 1)) / segs;
-        push(cx - hw, y0, z, cx - hw, y1, z);
+        push(-hw, y0, z, -hw, y1, z);
       }
       // right wall
       for (let i = 0; i < segs; i += 1) {
         const y0 = base + (wallH * i) / segs;
         const y1 = base + (wallH * (i + 1)) / segs;
-        push(cx + hw, y0, z, cx + hw, y1, z);
+        push(hw, y0, z, hw, y1, z);
       }
       // ceiling
       const cSegs = 12;
       for (let i = 0; i < cSegs; i += 1) {
-        const x0 = cx - hw + (2 * hw * i) / cSegs;
-        const x1 = cx - hw + (2 * hw * (i + 1)) / cSegs;
+        const x0 = -hw + (2 * hw * i) / cSegs;
+        const x1 = -hw + (2 * hw * (i + 1)) / cSegs;
         push(x0, top, z, x1, top, z);
       }
     }
@@ -289,10 +280,10 @@ export function WireWorld() {
         const z0 = WORLD_Z_START - k * STEP_Z;
         const z1 = z0 - STEP_Z;
         if (tunnelPresence(z0) < 0.004 && tunnelPresence(z1) < 0.004) continue;
-        const x0 = pathX(z0) + rx * tunnelHW(z0);
-        const x1 = pathX(z1) + rx * tunnelHW(z1);
-        const y0 = floorY(pathX(z0), z0) + tunnelWallH(z0) * ry;
-        const y1 = floorY(pathX(z1), z1) + tunnelWallH(z1) * ry;
+        const x0 = rx * tunnelHW(z0);
+        const x1 = rx * tunnelHW(z1);
+        const y0 = floorY(0, z0) + tunnelWallH(z0) * ry;
+        const y1 = floorY(0, z1) + tunnelWallH(z1) * ry;
         push(x0, y0, z0, x1, y1, z1);
       }
     }
