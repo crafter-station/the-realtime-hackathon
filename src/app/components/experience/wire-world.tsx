@@ -6,30 +6,30 @@ import * as THREE from "three";
 import { scroll } from "./store";
 
 /**
- * The world is two independent line sets — no geometric morphing, which is what
- * made the transitions messy:
+ * The world is two line sets:
  *
  * 1. FLOOR — a wide wire grid that runs the whole journey. Flat inside the
- *    tunnels, undulating (rolling hills) across the open stretch.
- * 2. WALLS + CEILING — only present in the tunnel stretches. They fade in and
- *    out *spatially* via baked vertex colours (fading to the page black). The
- *    opening tunnel additionally dilates on its way out, so it opens into the
- *    plain rather than dissolving in front of you; the finale one keeps its
- *    shape because it collapses into the wormhole instead.
+ *    opening tunnel, undulating (rolling hills) across the open stretch, and
+ *    then it *curls*: the plane's edges lift and wrap around the ride until
+ *    they meet overhead, closing into a cone that feeds the wormhole. There is
+ *    no second tunnel arriving as a separate object — the ground you are on
+ *    becomes the cone, so you fly through the inside of it.
+ * 2. WALLS + CEILING — only the opening tunnel. They fade *spatially* via
+ *    baked vertex colours, and dilate on the way out so the tunnel opens into
+ *    the plain rather than dissolving in front of you.
  */
 
 // World extents (along -z).
 export const WORLD_Z_START = 10;
 export const WORLD_Z_END = -366;
 
-// Wormhole stretch — a spiralling vortex that the flat grid folds into. Lives
-// past the (now much longer) closing tunnel; the camera flies straight down
-// its throat.
-export const WORM_Z_IN = -336; // rings begin fading in
+// Wormhole stretch — the spiralling vortex the cone empties into. Its mouth is
+// exactly the cone's closed radius, sitting on the same axis, so the handover
+// is a crossfade between two surfaces that already coincide.
+export const WORM_Z_IN = -336; // rings begin fading in (= CONE_JOIN)
 export const WORM_Z_FULL = -376; // fully present
-export const WORM_Z_START = -340; // first ring
+export const WORM_Z_START = -336; // first ring
 export const WORM_Z_END = -500; // black-hole throat
-export const WORM_RADIUS = 16; // mouth radius
 export const WORM_THROAT = 1.4; // throat radius (the dark core)
 
 // Tunnel cross-section.
@@ -54,45 +54,81 @@ const FADE_END = -128; // gone
 const EYE_DROP_START = -64; // camera starts sinking toward floor level
 const EYE_DROP_END = -118;
 
-// Floor grid. Wide enough that the dilated tunnel walls never outrun it.
-const FLOOR_HW = 42;
+// Floor grid. Wide enough that the dilated tunnel walls never outrun it, and
+// an exact whole number of columns — the two edges have to land on the same
+// point once the plane wraps, or the finished tube carries a seam up top.
 const STEP_X = 2.6;
 const STEP_Z = 2.6;
+const FLOOR_COLS = 32; // columns across the full width (even, so x = 0 exists)
+const FLOOR_HW = (FLOOR_COLS / 2) * STEP_X; // 41.6
+
+/**
+ * The cone. Rather than a second tunnel arriving as its own object, the plane
+ * you are already riding rolls up around you: every point at lateral distance
+ * x swings through an angle x/R about a line that stays directly overhead, so
+ * the centreline never moves and the two far edges climb until they meet at
+ * the top. That closes at R = FLOOR_HW / π — the radius whose half-circumference
+ * is exactly the plane's half-width. Past that the finished tube glides down
+ * onto the wormhole's axis, and the vortex takes over from a surface that is
+ * already in the identical place.
+ */
+const CONE_START = -180; // the plane's edges start lifting
+const CONE_WRAPPED = -250; // closed into a tube
+const CONE_JOIN = -336; // tube sits on the wormhole axis (= WORM_Z_IN)
+export const WORM_RADIUS = FLOOR_HW / Math.PI; // ≈13.4, the closed-tube radius
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 }
 
-/** The starting tunnel: solid, then dilating, then finally faded out. */
+/** The starting tunnel — the only walls-and-ceiling stretch left. */
 function openingPresence(z: number): number {
   return 1 - smoothstep(FADE_START, FADE_END, z);
 }
 
-/**
- * The finale tunnel: forms, holds for a long ride, then dissolves as it hands
- * off to the wormhole (the walls collapse into the spinning vortex).
- */
-function closingPresence(z: number): number {
-  return smoothstep(-175, -202, z) * (1 - smoothstep(-332, -358, z));
-}
-
-/** 1 while inside a tunnel stretch, 0 out on the open floor. */
+/** 1 while inside the tunnel, 0 out on the open floor. */
 export function tunnelPresence(z: number): number {
-  return Math.max(openingPresence(z), closingPresence(z));
+  return openingPresence(z);
+}
+
+/** Cross-section dilation as the opening tunnel splays out into the plain. */
+function flare(z: number): number {
+  return 1 + smoothstep(FLARE_START, FLARE_END, z) * (FLARE_MAX - 1);
+}
+
+/** 0 flat plane → 1 fully wrapped tube. */
+function coneWrap(z: number): number {
+  return smoothstep(CONE_START, CONE_WRAPPED, z);
 }
 
 /**
- * Cross-section dilation. Only the opening tunnel flares — the finale one keeps
- * its shape, because it hands off to the wormhole instead of to open ground.
- * The two stretches never overlap in z, so the share is a clean 1 or 0
- * anywhere geometry actually gets drawn.
+ * Height of the curling surface's axis. While wrapping it is the geometric
+ * centre of the arc (FLOOR_Y + R), which is what keeps the centreline pinned to
+ * the old floor height; once closed it glides down to y = 0 to meet the vortex.
  */
-function flare(z: number): number {
-  const o = openingPresence(z);
-  const c = closingPresence(z);
-  const share = o + c > 1e-4 ? o / (o + c) : 0;
-  return 1 + share * smoothstep(FLARE_START, FLARE_END, z) * (FLARE_MAX - 1);
+function coneAxisY(z: number): number {
+  const w = coneWrap(z);
+  if (w < 1e-4) return FLOOR_Y;
+  const r = WORM_RADIUS / w;
+  return THREE.MathUtils.lerp(
+    FLOOR_Y + r,
+    0,
+    smoothstep(CONE_WRAPPED, CONE_JOIN, z),
+  );
+}
+
+/**
+ * Where a point of the flat grid ends up once the plane has curled. Returns the
+ * bent (x, y); at w → 0 it collapses back to the flat plane exactly, so the
+ * floor geometry can pipe every vertex through this unconditionally.
+ */
+function bendPoint(x: number, z: number): readonly [number, number] {
+  const w = coneWrap(z);
+  if (w < 1e-4) return [x, floorY(x, z)];
+  const r = WORM_RADIUS / w;
+  const theta = (x / FLOOR_HW) * Math.PI * w; // = x / r
+  return [Math.sin(theta) * r, coneAxisY(z) - Math.cos(theta) * r];
 }
 
 /** Tunnel half-width at z — grows as the opening tunnel splays outward. */
@@ -119,9 +155,13 @@ export function wormholePresence(z: number): number {
   return smoothstep(WORM_Z_IN, WORM_Z_FULL, z);
 }
 
-/** Undulations only live on the open stretch; the floor is flat in tunnels. */
+/**
+ * Undulations only live on the open stretch: the floor is flat inside the
+ * tunnel, and flat again before CONE_START so the plane is level when it
+ * begins to curl (rolling hills wrapped around you read as a dented pipe).
+ */
 function waveWindow(z: number): number {
-  return smoothstep(-128, -152, z) * (1 - smoothstep(-172, -192, z));
+  return smoothstep(-128, -150, z) * (1 - smoothstep(-162, -180, z));
 }
 
 /**
@@ -131,8 +171,7 @@ function waveWindow(z: number): number {
  * boundary is smooth, never a hard edge.
  */
 export function floorVisibility(x: number, z: number): number {
-  // The grid vanishes entirely once the wormhole takes over — no flat floor
-  // showing through the vortex.
+  // The grid hands over to the vortex, which by then occupies the same surface.
   const w = wormholePresence(z);
   const p = tunnelPresence(z);
   if (p < 0.002) return 1 - w;
@@ -162,18 +201,26 @@ export function floorY(x: number, z: number): number {
  * instant as the dissolve and reads as a lurch.
  */
 export function rideY(z: number): number {
-  const settle = Math.max(
-    1 - smoothstep(EYE_DROP_START, EYE_DROP_END, z),
-    closingPresence(z),
-  );
-  return floorY(0, z) + THREE.MathUtils.lerp(EYE_OPEN, EYE_TUNNEL, settle);
+  const settle = 1 - smoothstep(EYE_DROP_START, EYE_DROP_END, z);
+  const open =
+    floorY(0, z) + THREE.MathUtils.lerp(EYE_OPEN, EYE_TUNNEL, settle);
+  const w = coneWrap(z);
+  if (w < 1e-4) return open;
+  // Rise off the plane onto the tube's axis as it closes overhead. Chased only
+  // once the wrap is well underway — early on the arc's centre is hundreds of
+  // units up (a nearly flat plane is an arc of a nearly infinite circle), and
+  // following it from the start would fire the camera into the sky.
+  return THREE.MathUtils.lerp(open, coneAxisY(z), smoothstep(0.3, 1, w));
 }
 
 export function WireWorld() {
   const floorMat = useRef<THREE.LineBasicMaterial>(null);
   const shellMat = useRef<THREE.LineBasicMaterial>(null);
 
-  // ---- Floor: undulating wire grid --------------------------------------
+  // ---- Floor: undulating wire grid, curling into the cone ----------------
+  // Every vertex goes through bendPoint, so the same grid is the plain, the
+  // curl and the cone. The lines along z become the cone's longitudinal rails
+  // and the lines across x become its rings — no second object, no crossfade.
   const floorGeometry = useMemo(() => {
     const pos: number[] = [];
     const col: number[] = [];
@@ -181,23 +228,27 @@ export function WireWorld() {
       const va = floorVisibility(ax, az);
       const vb = floorVisibility(bx, bz);
       if (va < 0.004 && vb < 0.004) return;
-      pos.push(ax, floorY(ax, az), az, bx, floorY(bx, bz), bz);
+      const [x0, y0] = bendPoint(ax, az);
+      const [x1, y1] = bendPoint(bx, bz);
+      pos.push(x0, y0, az, x1, y1, bz);
       col.push(va, va, va, vb, vb, vb);
     };
 
     const zCount = Math.floor((WORLD_Z_START - WORLD_Z_END) / STEP_Z);
-    // Lines running along z.
-    for (let x = -FLOOR_HW; x <= FLOOR_HW; x += STEP_X) {
+    const colX = (i: number) => -FLOOR_HW + i * STEP_X;
+    // Lines running along z — the cone's longitudinal rails once wrapped. The
+    // last column is skipped: wrapped, it lands on top of the first one.
+    for (let i = 0; i < FLOOR_COLS; i += 1) {
       for (let k = 0; k < zCount; k += 1) {
         const z0 = WORLD_Z_START - k * STEP_Z;
-        seg(x, z0, x, z0 - STEP_Z);
+        seg(colX(i), z0, colX(i), z0 - STEP_Z);
       }
     }
-    // Lines running across x.
+    // Lines running across x — the cone's rings once wrapped.
     for (let k = 0; k <= zCount; k += 1) {
       const z = WORLD_Z_START - k * STEP_Z;
-      for (let x = -FLOOR_HW; x < FLOOR_HW; x += STEP_X) {
-        seg(x, z, x + STEP_X, z);
+      for (let i = 0; i < FLOOR_COLS; i += 1) {
+        seg(colX(i), z, colX(i + 1), z);
       }
     }
     const g = new THREE.BufferGeometry();
