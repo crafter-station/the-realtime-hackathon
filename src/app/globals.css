@@ -4704,9 +4704,11 @@ html.xp body {
 
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
-/* Scroll room for the tunnel fly-through and the grid approach. */
+/* Scroll room for the tunnel fly-through and the grid approach. The opening
+   tunnel owns most of this: it holds for ~340svh, then takes ~225svh to open
+   out into the plain. */
 .xp-gap--ride {
-  height: 560svh;
+  height: 914svh;
 }
 /* A long ride down the wire tunnel before it collapses into the wormhole. */
 .xp-gap--tunnel {

@@ -6,9 +6,9 @@ import * as THREE from "three";
 import { scroll } from "./store";
 import { WireHand } from "./wire-hand";
 import {
+  enclosure,
   pathX,
   rideY,
-  tunnelPresence,
   WireWorld,
   wormholePresence,
 } from "./wire-world";
@@ -17,8 +17,8 @@ import { WireWormhole } from "./wire-wormhole";
 // Camera track: one long continuous ride (hero grid → curves → tunnel →
 // wormhole → end).
 const TRACK_START = 9;
-const TRACK_END = -360;
-const HAND_Z = -356;
+const TRACK_END = -440;
+const HAND_Z = -436;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -52,7 +52,7 @@ function Starfield({ count }: { count: number }) {
     // Stars dim inside the closed tunnel, then blaze back up around the
     // wormhole — deep space, dense starfield.
     if (material.current) {
-      const inside = tunnelPresence(camZ);
+      const inside = enclosure(camZ);
       const worm = wormholePresence(camZ);
       const base = THREE.MathUtils.lerp(0.7, 0.12, inside);
       material.current.opacity = THREE.MathUtils.damp(
