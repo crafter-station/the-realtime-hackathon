@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://hack.useportal.co">
-    <img src="./public/brand-assets/icon-192.png" width="96" height="96" alt="The Realtime Hackathon logo" />
+    <img src="./public/brand-assets/web/icons/portal-192.png" width="96" height="96" alt="The Realtime Hackathon logo" />
   </a>
 
   <h1>The Realtime Hackathon</h1>
@@ -140,12 +140,12 @@ lists, private meeting links, signature images, or API keys.
 
 ## Brand Assets
 
-Generated campaign artwork is stored in
-[`public/brand-assets/`](./public/brand-assets/). Platform post images are grouped
-under [`social/`](./public/brand-assets/social/), videos under
-[`video/`](./public/brand-assets/video/), and web, email, favicon, and app-icon
-assets remain at the root. Their dimensions and palette are recorded in
-[`public/brand-assets/assets.json`](./public/brand-assets/assets.json).
+The complete creative handoff is stored in
+[`public/brand-assets/`](./public/brand-assets/). Share that one folder with
+designers and content creators. Its [asset guide](./public/brand-assets/README.md)
+separates reusable brand files, web artwork, email artwork, social stills,
+social videos, and editable source portraits. Dimensions are recorded in
+[`manifest.json`](./public/brand-assets/manifest.json).
 
 Asset generation uses **Geist Pixel Square** and `fontconfig`. Install
 `fontconfig` first (`brew install fontconfig` on macOS, or use your Linux
@@ -157,6 +157,14 @@ bun run font:setup
 
 `bun run brand:generate` overwrites the complete tracked asset set. Run it only
 when intentionally regenerating every brand output.
+
+Judge announcement artwork can be regenerated independently after updating the
+transparent portraits in
+`public/brand-assets/sources/portraits/judges/`:
+
+```bash
+bun run brand:generate:judges
+```
 
 ## License
 

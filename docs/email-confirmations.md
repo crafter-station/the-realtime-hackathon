@@ -34,7 +34,9 @@ bun run email:dev
 
 Open [http://localhost:3001](http://localhost:3001). The sidebar contains the mentor and judge variants.
 
-The previews use production images from `https://the-realtime-hackathon.vercel.app/brand-assets/`.
+The previews use production images from the nested brand, web, and email
+folders under
+`https://the-realtime-hackathon.vercel.app/brand-assets/`.
 
 ## Export The Email HTML
 

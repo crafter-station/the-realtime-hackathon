@@ -23,7 +23,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - `bun run email:export` deletes and recreates ignored `.email-output/`. Export email HTML before `bun run letter:generate -- --role <mentor|judge> --name '<name>'`, or the export will remove generated letters.
 - Email templates intentionally load deployed PNGs from `https://the-realtime-hackathon.vercel.app/brand-assets/`; `emails/email-assets.test.tsx` enforces that contract.
-- Run `bun run font:setup` before `bun run brand:generate`; it installs the pinned `Geist Pixel Square` release and requires `fontconfig`. Asset generation overwrites tracked assets in `public/brand-assets/`, `src/app/`, `public/og.png`, and `emails/static/`; run it only when regenerating the complete asset set.
+- `public/brand-assets/` is the complete creative handoff. Its `README.md` documents the brand, web, email, social, video, and source folders.
+- Run `bun run font:setup` before `bun run brand:generate`; it installs the pinned `Geist Pixel Square` release and requires `fontconfig`. Asset generation overwrites tracked assets in `public/brand-assets/`, `src/app/`, and `emails/static/`; run it only when regenerating the complete asset set.
 
 ## Email Operations
 

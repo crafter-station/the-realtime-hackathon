@@ -75,7 +75,7 @@ export function RoleConfirmationEmail({
           fontFamily="Geist Pixel"
           fallbackFontFamily="monospace"
           webFont={{
-            url: assetUrl(assetBaseUrl, "geist-pixel-latin.woff2"),
+            url: assetUrl(assetBaseUrl, "brand/fonts/geist-pixel-latin.woff2"),
             format: "woff2",
           }}
           fontWeight={400}
@@ -91,7 +91,7 @@ export function RoleConfirmationEmail({
             <Row>
               <Column style={brandColumn}>
                 <Img
-                  src={assetUrl(assetBaseUrl, "icon-64.png")}
+                  src={assetUrl(assetBaseUrl, "web/icons/portal-64.png")}
                   width="28"
                   height="28"
                   alt="Portal"
@@ -102,7 +102,10 @@ export function RoleConfirmationEmail({
               <Column align="right" style={brandColumnRight}>
                 <Text style={brandNameRight}>CRAFTER STATION</Text>
                 <Img
-                  src={assetUrl(assetBaseUrl, "crafter-station-icon-64.png")}
+                  src={assetUrl(
+                    assetBaseUrl,
+                    "brand/logos/crafter-station-64.png",
+                  )}
                   width="20"
                   height="20"
                   alt="Crafter Station"
@@ -113,7 +116,7 @@ export function RoleConfirmationEmail({
           </Section>
 
           <Img
-            src={assetUrl(assetBaseUrl, "email-signal.png")}
+            src={assetUrl(assetBaseUrl, "email/signal.png")}
             width="600"
             height="180"
             alt="A particle signal forming in realtime"

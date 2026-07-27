@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "The Realtime Hackathon",
     images: [
       {
-        url: "/og.png",
+        url: "/brand-assets/web/open-graph/event.png",
         width: 1200,
         height: 630,
         alt: "The Realtime Hackathon by Portal — Build AI that happens now. August 7–9, online.",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     title: "The Realtime Hackathon — Build AI that happens now.",
     description:
       "AI + realtime + Portal. Build Friday, ship Sunday — August 7–9, 2026.",
-    images: ["/og.png"],
+    images: ["/brand-assets/web/open-graph/event.png"],
   },
   category: "technology",
 };
@@ -82,7 +82,7 @@ const eventJsonLd = {
   endDate: "2026-08-09T19:00:00-05:00",
   eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
   eventStatus: "https://schema.org/EventScheduled",
-  image: "https://hack.useportal.co/og.png",
+  image: "https://hack.useportal.co/brand-assets/web/open-graph/event.png",
   location: {
     "@type": "VirtualLocation",
     url: "https://hack.useportal.co",

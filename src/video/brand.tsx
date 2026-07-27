@@ -33,7 +33,7 @@ export const MOTION = {
 
 void loadFont({
   family: FONT_FAMILY,
-  url: staticFile("brand-assets/geist-pixel-latin.woff2"),
+  url: staticFile("brand-assets/brand/fonts/geist-pixel-latin.woff2"),
   format: "woff2",
 });
 
@@ -66,11 +66,11 @@ export function PartnerMarks({ opacity = 0.62 }: { opacity?: number }) {
       }}
     >
       <Img
-        src={staticFile("brand-assets/logo-portal.svg")}
+        src={staticFile("brand-assets/brand/logos/portal.svg")}
         style={{ height: 48, objectFit: "cover", width: 48 }}
       />
       <Img
-        src={staticFile("brand-assets/crafter-station-icon-dark.svg")}
+        src={staticFile("brand-assets/brand/logos/crafter-station.svg")}
         style={{ height: 44, width: 44 }}
       />
     </div>

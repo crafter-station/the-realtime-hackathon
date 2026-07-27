@@ -39,13 +39,17 @@ const portalLogo = path.join(
   process.cwd(),
   "public",
   "brand-assets",
-  "icon-64.png",
+  "web",
+  "icons",
+  "portal-64.png",
 );
 const crafterLogo = path.join(
   process.cwd(),
   "public",
   "brand-assets",
-  "crafter-station-icon-64.png",
+  "brand",
+  "logos",
+  "crafter-station-64.png",
 );
 const signatureFont = path.join(
   process.cwd(),

@@ -5,7 +5,20 @@ import sharp from "sharp";
 
 const root = process.cwd();
 const outputDirectory = path.join(root, "public", "brand-assets");
-const socialOutputDirectory = path.join(outputDirectory, "social");
+const brandDirectory = path.join(outputDirectory, "brand");
+const logoDirectory = path.join(brandDirectory, "logos");
+const fontDirectory = path.join(brandDirectory, "fonts");
+const artworkDirectory = path.join(brandDirectory, "artwork");
+const emailDirectory = path.join(outputDirectory, "email");
+const iconDirectory = path.join(outputDirectory, "web", "icons");
+const socialEventDirectory = path.join(
+  outputDirectory,
+  "social",
+  "static",
+  "event",
+);
+const webOpenGraphDirectory = path.join(outputDirectory, "web", "open-graph");
+const webListingDirectory = path.join(outputDirectory, "web", "listings");
 const appDirectory = path.join(root, "src", "app");
 const emailStaticDirectory = path.join(root, "emails", "static");
 const fontFamily = "Geist Pixel Square";
@@ -30,7 +43,7 @@ const colors = {
 };
 
 const portalLogoSource = await readFile(
-  path.join(outputDirectory, "logo-portal.svg"),
+  path.join(logoDirectory, "portal.svg"),
   "utf8",
 );
 const portalLogoData = Buffer.from(
@@ -210,30 +223,38 @@ async function render(name, width, height, content, options = {}) {
   return png;
 }
 
-await mkdir(outputDirectory, { recursive: true });
-await mkdir(socialOutputDirectory, { recursive: true });
-await mkdir(emailStaticDirectory, { recursive: true });
+await Promise.all(
+  [
+    artworkDirectory,
+    emailDirectory,
+    emailStaticDirectory,
+    fontDirectory,
+    iconDirectory,
+    logoDirectory,
+    socialEventDirectory,
+    webListingDirectory,
+    webOpenGraphDirectory,
+  ].map((directory) => mkdir(directory, { recursive: true })),
+);
 
 const particlePng = await sharp(particleArtwork())
   .png({ compressionLevel: 9 })
   .toBuffer();
-await writeFile(path.join(outputDirectory, "particle-torus.png"), particlePng);
+await writeFile(path.join(artworkDirectory, "particle-torus.png"), particlePng);
 const particleData = particlePng.toString("base64");
 
 await sharp(particlePng)
   .resize(1_200, 360, { fit: "cover", position: "centre" })
   .png({ compressionLevel: 9 })
-  .toFile(path.join(outputDirectory, "email-signal.png"));
+  .toFile(path.join(emailDirectory, "signal.png"));
 
-await sharp(
-  await readFile(path.join(outputDirectory, "crafter-station-icon-dark.svg")),
-)
+await sharp(await readFile(path.join(logoDirectory, "crafter-station.svg")))
   .resize(64, 64)
   .png({ compressionLevel: 9 })
-  .toFile(path.join(outputDirectory, "crafter-station-icon-64.png"));
+  .toFile(path.join(logoDirectory, "crafter-station-64.png"));
 
-const og = await render(
-  "og-image",
+await render(
+  "web/open-graph/event",
   1_200,
   630,
   `
@@ -250,10 +271,9 @@ const og = await render(
   `,
   { webp: true },
 );
-await writeFile(path.join(root, "public", "og.png"), og);
 
 await render(
-  "luma-square",
+  "web/listings/luma-event-square",
   1_080,
   1_080,
   `
@@ -270,7 +290,7 @@ await render(
 );
 
 await render(
-  "social/linkedin-post",
+  "social/static/event/linkedin-feed-4x5",
   1_080,
   1_350,
   `
@@ -289,7 +309,7 @@ await render(
 );
 
 await render(
-  "social/x-post",
+  "social/static/event/x-feed-4x5",
   1_200,
   1_500,
   `
@@ -308,7 +328,7 @@ await render(
 );
 
 await render(
-  "social/instagram-post",
+  "social/static/event/instagram-feed-4x5",
   1_080,
   1_350,
   `
@@ -333,60 +353,75 @@ for (const size of iconSizes) {
     .png({ compressionLevel: 9 })
     .toBuffer();
   icons.set(size, png);
-  const name = size === 180 ? "apple-touch-icon" : `icon-${size}`;
-  await writeFile(path.join(outputDirectory, `${name}.png`), png);
+  const name = size === 180 ? "apple-touch-icon" : `portal-${size}`;
+  await writeFile(path.join(iconDirectory, `${name}.png`), png);
 }
 
 const favicon = createIco(
   [16, 32, 64].map((size) => ({ size, buffer: icons.get(size) })),
 );
-await writeFile(path.join(outputDirectory, "favicon.ico"), favicon);
+await writeFile(path.join(iconDirectory, "favicon.ico"), favicon);
 await writeFile(path.join(appDirectory, "favicon.ico"), favicon);
 await writeFile(path.join(appDirectory, "icon.png"), icons.get(512));
 await writeFile(path.join(appDirectory, "apple-icon.png"), icons.get(180));
 await copyFile(
   path.join(appDirectory, "fonts", "geist-pixel-latin.woff2"),
-  path.join(outputDirectory, "geist-pixel-latin.woff2"),
+  path.join(fontDirectory, "geist-pixel-latin.woff2"),
 );
 
 for (const fileName of [
-  "crafter-station-icon-64.png",
-  "email-signal.png",
-  "geist-pixel-latin.woff2",
-  "icon-64.png",
+  "brand/fonts/geist-pixel-latin.woff2",
+  "brand/logos/crafter-station-64.png",
+  "email/signal.png",
+  "web/icons/portal-64.png",
 ]) {
-  await copyFile(
-    path.join(outputDirectory, fileName),
-    path.join(emailStaticDirectory, fileName),
-  );
+  const destination = path.join(emailStaticDirectory, fileName);
+  await mkdir(path.dirname(destination), { recursive: true });
+  await copyFile(path.join(outputDirectory, fileName), destination);
 }
 
 const manifest = {
   palette: colors,
   files: {
-    "og-image.png": "1200x630",
-    "og-image.webp": "1200x630",
-    "luma-square.png": "1080x1080",
-    "luma-square.webp": "1080x1080",
-    "social/linkedin-post.png": "1080x1350",
-    "social/linkedin-post.webp": "1080x1350",
-    "social/x-post.png": "1200x1500",
-    "social/x-post.webp": "1200x1500",
-    "social/instagram-post.png": "1080x1350",
-    "social/instagram-post.webp": "1080x1350",
-    "particle-torus.png": "1600x1600",
-    "email-signal.png": "1200x360",
-    "crafter-station-icon-64.png": "64x64",
-    "geist-pixel-latin.woff2": "Geist Pixel Latin web font",
-    "favicon.ico": "16x16, 32x32, 64x64",
-    "apple-touch-icon.png": "180x180",
-    "icon-192.png": "192x192",
-    "icon-512.png": "512x512",
-    "logo-portal.svg": "1014x1014",
+    "brand/artwork/particle-torus.png": "1600x1600",
+    "brand/fonts/geist-pixel-latin.woff2": "Geist Pixel Latin web font",
+    "brand/logos/crafter-station-64.png": "64x64",
+    "brand/logos/crafter-station.svg": "1024x1024",
+    "brand/logos/portal.svg": "1014x1014",
+    "email/signal.png": "1200x360",
+    "social/static/event/instagram-feed-4x5.png": "1080x1350",
+    "social/static/event/instagram-feed-4x5.webp": "1080x1350",
+    "social/static/event/linkedin-feed-4x5.png": "1080x1350",
+    "social/static/event/linkedin-feed-4x5.webp": "1080x1350",
+    "social/static/event/x-feed-4x5.png": "1200x1500",
+    "social/static/event/x-feed-4x5.webp": "1200x1500",
+    "social/static/judges/arturo-barrantes-linkedin-4x5.png": "1080x1350",
+    "social/static/judges/arturo-barrantes-linkedin-4x5.webp": "1080x1350",
+    "social/static/judges/maria-cristina-ruelas-linkedin-4x5.png": "1080x1350",
+    "social/static/judges/maria-cristina-ruelas-linkedin-4x5.webp": "1080x1350",
+    "social/static/judges/victor-galvez-linkedin-4x5.png": "1080x1350",
+    "social/static/judges/victor-galvez-linkedin-4x5.webp": "1080x1350",
+    "social/video/instagram/event-poster-4x5.mp4": "1080x1350",
+    "social/video/instagram/schedule-4x5.mp4": "1080x1350",
+    "sources/portraits/judges/arturo-barrantes.png": "Judge portrait source",
+    "sources/portraits/judges/maria-cristina-ruelas.png":
+      "Judge portrait source",
+    "sources/portraits/judges/victor-galvez.png": "Judge portrait source",
+    "web/icons/apple-touch-icon.png": "180x180",
+    "web/icons/favicon.ico": "16x16, 32x32, 64x64",
+    "web/icons/portal-16.png": "16x16",
+    "web/icons/portal-32.png": "32x32",
+    "web/icons/portal-64.png": "64x64",
+    "web/icons/portal-192.png": "192x192",
+    "web/icons/portal-512.png": "512x512",
+    "web/listings/luma-event-square.png": "1080x1080",
+    "web/listings/luma-event-square.webp": "1080x1080",
+    "web/open-graph/event.png": "1200x630",
+    "web/open-graph/event.webp": "1200x630",
   },
 };
 await writeFile(
-  path.join(outputDirectory, "assets.json"),
+  path.join(outputDirectory, "manifest.json"),
   `${JSON.stringify(manifest, null, 2)}\n`,
 );
 
