@@ -1,6 +1,8 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import * as fontkit from "fontkit";
 import sharp from "sharp";
 
 const root = process.cwd();
@@ -23,6 +25,8 @@ const appDirectory = path.join(root, "src", "app");
 const emailStaticDirectory = path.join(root, "emails", "static");
 const fontFamily = "Geist Pixel Square";
 const fontFullName = fontFamily;
+const expectedFontChecksum =
+  "c1fbf7316997c1749857708998958e8ca0343416b3f8d2c7156d634a9520e997";
 
 const resolvedFontFamily = execFileSync("fc-match", [
   "--format=%{fullname}",
@@ -33,6 +37,19 @@ if (resolvedFontFamily !== fontFullName) {
     `Install the project font with \`bun run font:setup\` before generating assets.`,
   );
 }
+const fontPath = execFileSync("fc-match", [
+  "--format=%{file}",
+  fontFamily,
+]).toString();
+const fontBuffer = await readFile(fontPath);
+if (
+  createHash("sha256").update(fontBuffer).digest("hex") !== expectedFontChecksum
+) {
+  throw new Error(
+    "The installed Geist Pixel Square file does not match the pinned project font. Run `bun run font:setup`.",
+  );
+}
+const font = fontkit.create(fontBuffer);
 
 const colors = {
   black: "#090909",
@@ -54,18 +71,52 @@ const portalLogoData = Buffer.from(
 ).toString("base64");
 
 function svgDocument(width, height, content, extraStyles = "") {
+  if (content.includes("<text")) {
+    throw new Error(
+      "Brand artwork must convert text to Geist Pixel glyph paths before rendering.",
+    );
+  }
+
   return Buffer.from(`
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <style>
-        text { font-family: "${fontFamily}"; font-style: normal; font-weight: 400; }
-        .title { fill: ${colors.white}; font-weight: 700; letter-spacing: -0.075em; }
-        .label { fill: ${colors.particle}; font-weight: 700; letter-spacing: 0.12em; }
-        .orange { fill: ${colors.orange}; }
         ${extraStyles}
       </style>
       ${content}
     </svg>
   `);
+}
+
+function textPath(
+  text,
+  { anchor = "start", fill, letterSpacing = 0, size, x, y },
+) {
+  const run = font.layout(text);
+  const scale = size / font.unitsPerEm;
+  const tracking = size * letterSpacing;
+  const textWidth = run.positions.reduce(
+    (width, position, index) =>
+      width +
+      position.xAdvance * scale +
+      (index === run.positions.length - 1 ? 0 : tracking),
+    0,
+  );
+  let cursor =
+    anchor === "middle"
+      ? x - textWidth / 2
+      : anchor === "end"
+        ? x - textWidth
+        : x;
+
+  return run.glyphs
+    .map((glyph, index) => {
+      const position = run.positions[index];
+      const glyphX = cursor + position.xOffset * scale;
+      const glyphY = y - position.yOffset * scale;
+      cursor += position.xAdvance * scale + tracking;
+      return `<path d="${glyph.path.toSVG()}" fill="${fill}" transform="translate(${glyphX.toFixed(3)} ${glyphY.toFixed(3)}) scale(${scale.toFixed(6)} ${(-scale).toFixed(6)})"/>`;
+    })
+    .join("");
 }
 
 function seededRandom(seed) {
@@ -261,12 +312,12 @@ await render(
     ${background(1_200, 630)}
     ${imageTag(particleData, 318, 12, 600, 0.94)}
     ${portalLogo(65, 48, 34)}
-    <text class="title" x="600" y="225" text-anchor="middle" font-size="82">THE</text>
-    <text class="title orange" x="600" y="309" text-anchor="middle" font-size="82">REALTIME</text>
-    <text class="title" x="600" y="393" text-anchor="middle" font-size="82">HACKATHON</text>
-    <text class="title" x="600" y="465" text-anchor="middle" font-size="33">BUILD AI THAT HAPPENS NOW</text>
-    <text class="label" x="65" y="571" font-size="18">US$800 PRIZES</text>
-    <text class="label" x="1135" y="571" text-anchor="end" font-size="18">AUG 07-09  /  36H</text>
+    ${textPath("THE", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 82, x: 600, y: 225 })}
+    ${textPath("REALTIME", { anchor: "middle", fill: colors.orange, letterSpacing: -0.075, size: 82, x: 600, y: 309 })}
+    ${textPath("HACKATHON", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 82, x: 600, y: 393 })}
+    ${textPath("BUILD AI THAT HAPPENS NOW", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 33, x: 600, y: 465 })}
+    ${textPath("US$800 PRIZES", { fill: colors.particle, letterSpacing: 0.12, size: 18, x: 65, y: 571 })}
+    ${textPath("AUG 07-09  /  36H", { anchor: "end", fill: colors.particle, letterSpacing: 0.12, size: 18, x: 1_135, y: 571 })}
     ${crafterStationLogo(1_101, 48, 34, colors.gray)}
   `,
   { webp: true },
@@ -280,10 +331,10 @@ await render(
     ${background(1_080, 1_080)}
     ${imageTag(particleData, 98, 65, 940, 0.68)}
     ${portalLogo(56, 48, 48)}
-    <text class="title" x="540" y="420" text-anchor="middle" font-size="112">THE</text>
-    <text class="title orange" x="540" y="545" text-anchor="middle" font-size="112">REALTIME</text>
-    <text class="title" x="540" y="670" text-anchor="middle" font-size="112">HACKATHON</text>
-    <text class="label" x="540" y="938" text-anchor="middle" font-size="32">AUG 07-09</text>
+    ${textPath("THE", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 112, x: 540, y: 420 })}
+    ${textPath("REALTIME", { anchor: "middle", fill: colors.orange, letterSpacing: -0.075, size: 112, x: 540, y: 545 })}
+    ${textPath("HACKATHON", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 112, x: 540, y: 670 })}
+    ${textPath("AUG 07-09", { anchor: "middle", fill: colors.particle, letterSpacing: 0.12, size: 32, x: 540, y: 938 })}
     ${crafterStationLogo(976, 48, 48, colors.gray)}
   `,
   { webp: true },
@@ -297,12 +348,12 @@ await render(
     ${background(1_080, 1_350)}
     ${imageTag(particleData, 100, 202, 936, 0.98)}
     ${portalLogo(64, 58, 42)}
-    <text class="title" x="540" y="565" text-anchor="middle" font-size="132">THE</text>
-    <text class="title orange" x="540" y="681" text-anchor="middle" font-size="132">REALTIME</text>
-    <text class="title" x="540" y="797" text-anchor="middle" font-size="132">HACKATHON</text>
-    <text class="title" x="540" y="875" text-anchor="middle" font-size="44">BUILD AI THAT HAPPENS NOW</text>
-    <text class="label" x="64" y="1282" font-size="26">US$800 PRIZES</text>
-    <text class="label" x="1016" y="1282" text-anchor="end" font-size="26">AUG 07-09  /  36H</text>
+    ${textPath("THE", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 132, x: 540, y: 565 })}
+    ${textPath("REALTIME", { anchor: "middle", fill: colors.orange, letterSpacing: -0.075, size: 132, x: 540, y: 681 })}
+    ${textPath("HACKATHON", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 132, x: 540, y: 797 })}
+    ${textPath("BUILD AI THAT HAPPENS NOW", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 44, x: 540, y: 875 })}
+    ${textPath("US$800 PRIZES", { fill: colors.particle, letterSpacing: 0.12, size: 26, x: 64, y: 1_282 })}
+    ${textPath("AUG 07-09  /  36H", { anchor: "end", fill: colors.particle, letterSpacing: 0.12, size: 26, x: 1_016, y: 1_282 })}
     ${crafterStationLogo(974, 58, 42, colors.gray)}
   `,
   { webp: true },
@@ -316,12 +367,12 @@ await render(
     ${background(1_200, 1_500)}
     ${imageTag(particleData, 111, 224, 1_040, 0.98)}
     ${portalLogo(71, 64, 47)}
-    <text class="title" x="600" y="628" text-anchor="middle" font-size="147">THE</text>
-    <text class="title orange" x="600" y="757" text-anchor="middle" font-size="147">REALTIME</text>
-    <text class="title" x="600" y="886" text-anchor="middle" font-size="147">HACKATHON</text>
-    <text class="title" x="600" y="972" text-anchor="middle" font-size="49">BUILD AI THAT HAPPENS NOW</text>
-    <text class="label" x="71" y="1424" font-size="29">US$800 PRIZES</text>
-    <text class="label" x="1129" y="1424" text-anchor="end" font-size="29">AUG 07-09  /  36H</text>
+    ${textPath("THE", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 147, x: 600, y: 628 })}
+    ${textPath("REALTIME", { anchor: "middle", fill: colors.orange, letterSpacing: -0.075, size: 147, x: 600, y: 757 })}
+    ${textPath("HACKATHON", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 147, x: 600, y: 886 })}
+    ${textPath("BUILD AI THAT HAPPENS NOW", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 49, x: 600, y: 972 })}
+    ${textPath("US$800 PRIZES", { fill: colors.particle, letterSpacing: 0.12, size: 29, x: 71, y: 1_424 })}
+    ${textPath("AUG 07-09  /  36H", { anchor: "end", fill: colors.particle, letterSpacing: 0.12, size: 29, x: 1_129, y: 1_424 })}
     ${crafterStationLogo(1_082, 64, 47, colors.gray)}
   `,
   { webp: true },
@@ -335,12 +386,12 @@ await render(
     ${background(1_080, 1_350)}
     ${imageTag(particleData, 100, 202, 936, 0.98)}
     ${portalLogo(64, 58, 42)}
-    <text class="title" x="540" y="565" text-anchor="middle" font-size="132">THE</text>
-    <text class="title orange" x="540" y="681" text-anchor="middle" font-size="132">REALTIME</text>
-    <text class="title" x="540" y="797" text-anchor="middle" font-size="132">HACKATHON</text>
-    <text class="title" x="540" y="875" text-anchor="middle" font-size="44">BUILD AI THAT HAPPENS NOW</text>
-    <text class="label" x="64" y="1282" font-size="26">US$800 PRIZES</text>
-    <text class="label" x="1016" y="1282" text-anchor="end" font-size="26">AUG 07-09  /  36H</text>
+    ${textPath("THE", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 132, x: 540, y: 565 })}
+    ${textPath("REALTIME", { anchor: "middle", fill: colors.orange, letterSpacing: -0.075, size: 132, x: 540, y: 681 })}
+    ${textPath("HACKATHON", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 132, x: 540, y: 797 })}
+    ${textPath("BUILD AI THAT HAPPENS NOW", { anchor: "middle", fill: colors.white, letterSpacing: -0.075, size: 44, x: 540, y: 875 })}
+    ${textPath("US$800 PRIZES", { fill: colors.particle, letterSpacing: 0.12, size: 26, x: 64, y: 1_282 })}
+    ${textPath("AUG 07-09  /  36H", { anchor: "end", fill: colors.particle, letterSpacing: 0.12, size: 26, x: 1_016, y: 1_282 })}
     ${crafterStationLogo(974, 58, 42, colors.gray)}
   `,
   { webp: true },
