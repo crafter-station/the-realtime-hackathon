@@ -13,11 +13,17 @@ files stay together.
 | `email/` | Artwork made specifically for confirmation emails |
 | `social/static/` | Ready-to-post still images grouped by campaign |
 | `social/video/` | Ready-to-post rendered videos grouped by platform |
-| `sources/` | Editable inputs such as transparent judge portraits |
+| `sources/` | Canonical logo masters and editable portrait inputs |
 
 `manifest.json` is the machine-readable asset index with dimensions. PNG files
 are the default handoff format. WebP files are optimized web alternatives. SVG
 files are the preferred scalable logo sources.
+
+The event wordmark, Portal mark, and Crafter Station mark are available in
+`brand/logos/` as transparent SVG, PNG, and WebP files. Use the `dark` variants
+in dark mode and the `light` variants in light mode.
+
+The files in `sources/logos/` are generator inputs, not publishing assets.
 
 ## Naming
 

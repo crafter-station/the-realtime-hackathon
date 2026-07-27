@@ -20,7 +20,7 @@ describe("invitation email assets", () => {
       expect(imageSources).toHaveLength(3);
       expect(imageSources).toEqual([
         "https://the-realtime-hackathon.vercel.app/brand-assets/web/icons/portal-64.png",
-        "https://the-realtime-hackathon.vercel.app/brand-assets/brand/logos/crafter-station-64.png",
+        "https://the-realtime-hackathon.vercel.app/brand-assets/email/crafter-station-64.png",
         "https://the-realtime-hackathon.vercel.app/brand-assets/email/signal.png",
       ]);
     },

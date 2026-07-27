@@ -83,7 +83,7 @@ function textPath(
 
 const portalLogo = (
   await readFile(
-    path.join(brandDirectory, "brand", "logos", "portal.svg"),
+    path.join(brandDirectory, "sources", "logos", "portal-master.svg"),
     "utf8",
   )
 )
@@ -92,7 +92,7 @@ const portalLogo = (
   .replace('fill="white"', `fill="${colors.gray}"`);
 const crafterStationLogo = (
   await readFile(
-    path.join(brandDirectory, "brand", "logos", "crafter-station.svg"),
+    path.join(brandDirectory, "sources", "logos", "crafter-station-master.svg"),
     "utf8",
   )
 ).replace('fill="#ffffff"', `fill="${colors.gray}"`);

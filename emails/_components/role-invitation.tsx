@@ -102,10 +102,7 @@ export function RoleConfirmationEmail({
               <Column align="right" style={brandColumnRight}>
                 <Text style={brandNameRight}>CRAFTER STATION</Text>
                 <Img
-                  src={assetUrl(
-                    assetBaseUrl,
-                    "brand/logos/crafter-station-64.png",
-                  )}
+                  src={assetUrl(assetBaseUrl, "email/crafter-station-64.png")}
                   width="20"
                   height="20"
                   alt="Crafter Station"

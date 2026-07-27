@@ -47,8 +47,7 @@ const crafterLogo = path.join(
   process.cwd(),
   "public",
   "brand-assets",
-  "brand",
-  "logos",
+  "email",
   "crafter-station-64.png",
 );
 const signatureFont = path.join(

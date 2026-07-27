@@ -66,11 +66,11 @@ export function PartnerMarks({ opacity = 0.62 }: { opacity?: number }) {
       }}
     >
       <Img
-        src={staticFile("brand-assets/brand/logos/portal.svg")}
+        src={staticFile("brand-assets/brand/logos/portal-dark.svg")}
         style={{ height: 48, objectFit: "cover", width: 48 }}
       />
       <Img
-        src={staticFile("brand-assets/brand/logos/crafter-station.svg")}
+        src={staticFile("brand-assets/brand/logos/crafter-station-dark.svg")}
         style={{ height: 44, width: 44 }}
       />
     </div>

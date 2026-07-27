@@ -9,6 +9,7 @@ const root = process.cwd();
 const outputDirectory = path.join(root, "public", "brand-assets");
 const brandDirectory = path.join(outputDirectory, "brand");
 const logoDirectory = path.join(brandDirectory, "logos");
+const sourceLogoDirectory = path.join(outputDirectory, "sources", "logos");
 const fontDirectory = path.join(brandDirectory, "fonts");
 const artworkDirectory = path.join(brandDirectory, "artwork");
 const emailDirectory = path.join(outputDirectory, "email");
@@ -60,7 +61,11 @@ const colors = {
 };
 
 const portalLogoSource = await readFile(
-  path.join(logoDirectory, "portal.svg"),
+  path.join(sourceLogoDirectory, "portal-master.svg"),
+  "utf8",
+);
+const crafterStationLogoSource = await readFile(
+  path.join(sourceLogoDirectory, "crafter-station-master.svg"),
   "utf8",
 );
 const portalLogoData = Buffer.from(
@@ -77,14 +82,54 @@ function svgDocument(width, height, content, extraStyles = "") {
     );
   }
 
-  return Buffer.from(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <style>
-        ${extraStyles}
-      </style>
-      ${content}
-    </svg>
-  `);
+  const styles = extraStyles.trim()
+    ? `<style>${extraStyles.trim()}</style>`
+    : "";
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${styles}${content.trim()}</svg>\n`,
+  );
+}
+
+function wordmarkArtwork(foreground) {
+  const width = 900;
+  const height = 400;
+  const content = `
+    <title>The Realtime Hackathon</title>
+    ${textPath("THE", { anchor: "middle", fill: foreground, letterSpacing: -0.075, size: 132, x: width / 2, y: 125 })}
+    ${textPath("REALTIME", { anchor: "middle", fill: colors.orange, letterSpacing: -0.075, size: 132, x: width / 2, y: 245 })}
+    ${textPath("HACKATHON", { anchor: "middle", fill: foreground, letterSpacing: -0.075, size: 132, x: width / 2, y: 365 })}
+  `;
+
+  return svgDocument(width, height, content);
+}
+
+function portalMarkArtwork(fill) {
+  return Buffer.from(
+    portalLogoSource
+      .replace(/<rect\b[^>]*\/>/, "")
+      .replace('fill="white"', `fill="${fill}"`),
+  );
+}
+
+function crafterStationMarkArtwork(fill) {
+  return Buffer.from(
+    crafterStationLogoSource.replace('fill="#ffffff"', `fill="${fill}"`),
+  );
+}
+
+async function writeLogoAsset(fileName, svg, width, height) {
+  await writeFile(path.join(logoDirectory, `${fileName}.svg`), svg);
+  const raster = sharp(svg).resize(width, height);
+  await Promise.all([
+    raster
+      .clone()
+      .png({ compressionLevel: 9 })
+      .toFile(path.join(logoDirectory, `${fileName}.png`)),
+    raster
+      .clone()
+      .webp({ lossless: true })
+      .toFile(path.join(logoDirectory, `${fileName}.webp`)),
+  ]);
 }
 
 function textPath(
@@ -288,6 +333,32 @@ await Promise.all(
   ].map((directory) => mkdir(directory, { recursive: true })),
 );
 
+for (const [mode, foreground] of [
+  ["dark", colors.white],
+  ["light", colors.black],
+]) {
+  await Promise.all([
+    writeLogoAsset(
+      `realtime-hackathon-wordmark-${mode}`,
+      wordmarkArtwork(foreground),
+      1_800,
+      800,
+    ),
+    writeLogoAsset(
+      `portal-${mode}`,
+      portalMarkArtwork(foreground),
+      1_024,
+      1_024,
+    ),
+    writeLogoAsset(
+      `crafter-station-${mode}`,
+      crafterStationMarkArtwork(foreground),
+      1_024,
+      1_024,
+    ),
+  ]);
+}
+
 const particlePng = await sharp(particleArtwork())
   .png({ compressionLevel: 9 })
   .toBuffer();
@@ -299,10 +370,10 @@ await sharp(particlePng)
   .png({ compressionLevel: 9 })
   .toFile(path.join(emailDirectory, "signal.png"));
 
-await sharp(await readFile(path.join(logoDirectory, "crafter-station.svg")))
+await sharp(Buffer.from(crafterStationLogoSource))
   .resize(64, 64)
   .png({ compressionLevel: 9 })
-  .toFile(path.join(logoDirectory, "crafter-station-64.png"));
+  .toFile(path.join(emailDirectory, "crafter-station-64.png"));
 
 await render(
   "web/open-graph/event",
@@ -422,7 +493,7 @@ await copyFile(
 
 for (const fileName of [
   "brand/fonts/geist-pixel-latin.woff2",
-  "brand/logos/crafter-station-64.png",
+  "email/crafter-station-64.png",
   "email/signal.png",
   "web/icons/portal-64.png",
 ]) {
@@ -436,9 +507,29 @@ const manifest = {
   files: {
     "brand/artwork/particle-torus.png": "1600x1600",
     "brand/fonts/geist-pixel-latin.woff2": "Geist Pixel Latin web font",
-    "brand/logos/crafter-station-64.png": "64x64",
-    "brand/logos/crafter-station.svg": "1024x1024",
-    "brand/logos/portal.svg": "1014x1014",
+    "brand/logos/crafter-station-dark.png": "1024x1024",
+    "brand/logos/crafter-station-dark.svg":
+      "1024x1024 vector mark for dark mode",
+    "brand/logos/crafter-station-dark.webp": "1024x1024",
+    "brand/logos/crafter-station-light.png": "1024x1024",
+    "brand/logos/crafter-station-light.svg":
+      "1024x1024 vector mark for light mode",
+    "brand/logos/crafter-station-light.webp": "1024x1024",
+    "brand/logos/portal-dark.png": "1024x1024",
+    "brand/logos/portal-dark.svg": "1014x1014 vector mark for dark mode",
+    "brand/logos/portal-dark.webp": "1024x1024",
+    "brand/logos/portal-light.png": "1024x1024",
+    "brand/logos/portal-light.svg": "1014x1014 vector mark for light mode",
+    "brand/logos/portal-light.webp": "1024x1024",
+    "brand/logos/realtime-hackathon-wordmark-dark.png": "1800x800",
+    "brand/logos/realtime-hackathon-wordmark-dark.svg":
+      "900x400 vector wordmark for dark mode",
+    "brand/logos/realtime-hackathon-wordmark-dark.webp": "1800x800",
+    "brand/logos/realtime-hackathon-wordmark-light.png": "1800x800",
+    "brand/logos/realtime-hackathon-wordmark-light.svg":
+      "900x400 vector wordmark for light mode",
+    "brand/logos/realtime-hackathon-wordmark-light.webp": "1800x800",
+    "email/crafter-station-64.png": "64x64",
     "email/signal.png": "1200x360",
     "social/static/event/instagram-feed-4x5.png": "1080x1350",
     "social/static/event/instagram-feed-4x5.webp": "1080x1350",
@@ -458,6 +549,8 @@ const manifest = {
     "sources/portraits/judges/maria-cristina-ruelas.png":
       "Judge portrait source",
     "sources/portraits/judges/victor-galvez.png": "Judge portrait source",
+    "sources/logos/crafter-station-master.svg": "Crafter Station vector source",
+    "sources/logos/portal-master.svg": "Portal vector source",
     "web/icons/apple-touch-icon.png": "180x180",
     "web/icons/favicon.ico": "16x16, 32x32, 64x64",
     "web/icons/portal-16.png": "16x16",
