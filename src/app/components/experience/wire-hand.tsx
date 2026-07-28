@@ -120,7 +120,16 @@ function buildHandPositions(): Float32Array {
  * dead centre, which is not a thing anyone notices is broken because it still
  * draws itself on beautifully.
  */
-export function WireHand({ active, z }: { active: boolean; z: number }) {
+export function WireHand({
+  active,
+  x = 0,
+  z,
+}: {
+  active: boolean;
+  /** Base offset from the centreline; the cursor swings it around this. */
+  x?: number;
+  z: number;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const geometryRef = useRef<THREE.BufferGeometry>(null);
   const materialRef = useRef<THREE.LineBasicMaterial>(null);
@@ -153,7 +162,7 @@ export function WireHand({ active, z }: { active: boolean; z: number }) {
 
     if (scroll.reduce) {
       // No cursor tilt — hold in place with a gentle static float only.
-      group.position.x = THREE.MathUtils.damp(group.position.x, 0, 3, dt);
+      group.position.x = THREE.MathUtils.damp(group.position.x, x, 3, dt);
       group.position.y = THREE.MathUtils.damp(group.position.y, 0, 3, dt);
       group.position.y += Math.sin(state.clock.elapsedTime) * 0.02;
       group.position.z = z;
@@ -162,7 +171,7 @@ export function WireHand({ active, z }: { active: boolean; z: number }) {
       return;
     }
 
-    const targetX = scroll.pointer.x * 2.2;
+    const targetX = x + scroll.pointer.x * 2.2;
     const targetY = scroll.pointer.y * 1.4;
     group.position.x = THREE.MathUtils.damp(group.position.x, targetX, 4, dt);
     group.position.y = THREE.MathUtils.damp(group.position.y, targetY, 4, dt);
@@ -186,7 +195,7 @@ export function WireHand({ active, z }: { active: boolean; z: number }) {
   });
 
   return (
-    <group ref={groupRef} position={[0, 0, z]}>
+    <group ref={groupRef} position={[x, 0, z]}>
       <lineSegments frustumCulled={false}>
         <bufferGeometry ref={geometryRef}>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />

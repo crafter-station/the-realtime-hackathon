@@ -24,14 +24,23 @@ import { WireWormhole } from "./wire-wormhole";
 const TRACK_START = 146;
 const TRACK_END = -898;
 /**
- * The hand sits a few units off the lens, not at the end of the world.
+ * The hand sits a short way in front of where the ride stops.
  *
- * It was parked at -940 against a `TRACK_END` of -898 — 42 units out, past the
- * fog's far plane at 105, about 5% of the frame, and dead centre where the
- * finale copy already is. Art-direction asks for it "beside a giant REGISTER
- * button", which means near enough to read and off to one side.
+ * Two ways to get this wrong and I found both. At -940 it was 42 units out,
+ * past the fog's far plane at 105 and about 5% of frame height — visible in
+ * principle, unreadable in practice. At -884 it was *behind* the camera: travel
+ * is toward -z, so a z greater than `TRACK_END` is somewhere you have already
+ * been. Seventeen units ahead puts it inside the fog's near plane at 26, so it
+ * arrives clear rather than grey.
  */
-const HAND_Z = -884;
+const HAND_Z = -915;
+/**
+ * Off the centreline. Art-direction asks for the hand "beside a giant REGISTER
+ * button" — centred it lands on the finale's own line of copy and occludes it,
+ * which is the same mistake as the centred hero type the layout rule exists to
+ * prevent.
+ */
+const HAND_X = 7.6;
 /** How far above the rim the opening frame sits, in world units. */
 const OPENING_LIFT = 13;
 
@@ -173,7 +182,7 @@ function FinaleHand() {
     const shouldBeActive = scroll.progress > 0.9;
     if (shouldBeActive !== active) setActive(shouldBeActive);
   });
-  return <WireHand active={active} z={HAND_Z} />;
+  return <WireHand active={active} x={HAND_X} z={HAND_Z} />;
 }
 
 export function PortalCanvas() {

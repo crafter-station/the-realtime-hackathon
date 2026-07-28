@@ -34,7 +34,7 @@ import { WELL_Z, wellThroatY } from "./wire-surface";
  */
 
 /** Where it rides relative to the camera: ahead, low, a little off-centre. */
-const FOLLOW = new THREE.Vector3(3.4, -2.7, -14);
+const FOLLOW = new THREE.Vector3(4.6, -3.4, -14);
 /** Pull toward the target, and the drag that stops it oscillating forever. */
 const STIFFNESS = 26;
 const DRAG = 6.5;
