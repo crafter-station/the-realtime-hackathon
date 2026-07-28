@@ -2,19 +2,10 @@
 
 import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
+import { CRAFTER_URL, PORTAL_URL, REGISTER_URL } from "./links";
 import { PortalCanvas } from "./portal-canvas";
 import { scroll } from "./store";
 
-const REGISTER_URL = "https://luma.com/realtime-hackathon";
-/**
- * Organiser sites. Constants because AGENTS.md requires every occurrence of an
- * event fact to be found before any of them changes, and inline literals in JSX
- * are exactly what makes that impossible — `crafterstation.com` shipped here as
- * a website when it is only ever the *mail* domain (`emails/_lib/`). The site
- * is the one README.md credits.
- */
-const PORTAL_URL = "https://useportal.co";
-const CRAFTER_URL = "https://crafter.run";
 const KICKOFF = new Date("2026-08-07T19:00:00-05:00").getTime();
 
 function detectQuality(): "high" | "lite" {
@@ -42,11 +33,11 @@ function clockParts(now: number): string {
 const HERO_FADE_START = 0.02;
 const HERO_FADE_END = 0.09;
 
-// Where the HUD hands over to the finale's own Register. The finale section is
-// one viewport tall at the very bottom, so it starts entering the frame around
-// 0.965 — the readout has to be gone by the time the giant CTA is readable.
-const HUD_FADE_START = 0.945;
-const HUD_FADE_END = 0.975;
+// Where the HUD hands over to the finale's own Register. Late on purpose: a
+// depth readout that vanishes at 097 never gets to say the one number the whole
+// thing is counting toward, so it holds until 100 is on screen and then goes.
+const HUD_FADE_START = 0.985;
+const HUD_FADE_END = 0.999;
 
 /**
  * The five tracks, revealed one card at a time while you fly through the

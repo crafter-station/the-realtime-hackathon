@@ -4589,11 +4589,12 @@ html.xp body {
   font-size: 0.95rem;
   color: #ffffff;
 }
-/* The readout is decoration; the link is not. Never hide the CTA from a
-   keyboard, whatever the scroll position has done to the group's opacity. */
-.xp-hud:focus-within {
-  opacity: 1 !important;
-}
+/* No `:focus-within` override here. It used to force the group visible so a
+   keyboard could never lose the link, but the HUD is now hidden with
+   `visibility` rather than opacity alone — nothing inside it can take focus in
+   the first place, so the rule could never fire. The guarantee it was making is
+   kept by the finale's own Register, which is a real focusable link and is on
+   screen exactly when this one is not. */
 @media (max-width: 40rem) {
   .xp-hud__read {
     display: none;

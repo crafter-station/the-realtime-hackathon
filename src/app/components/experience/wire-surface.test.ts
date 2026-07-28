@@ -206,16 +206,23 @@ describe("the far side", () => {
 });
 
 describe("wellCoverage", () => {
-  test("the two grids tile — every point is drawn exactly once", () => {
-    // Both meshes read this one function and take complementary halves. If it
-    // ever returns something outside 0..1 they either double-draw or leave a
-    // hole, and both are visible.
-    for (const z of eachZ(7)) {
-      for (const x of [-FLOOR_HW, -20, 0, 20, FLOOR_HW]) {
-        const c = wellCoverage(x, z);
-        expect(c).toBeGreaterThanOrEqual(0);
-        expect(c).toBeLessThanOrEqual(1);
-      }
+  test("coverage is decided per point, not per depth", () => {
+    // The invariant with teeth: at one depth, coverage must still vary with x,
+    // because the mesh it is splitting is radial. A depth-only predicate — the
+    // bug this replaced — returns the same value right across the frame, and
+    // that is what let both grids draw the same pixels.
+    const z = WELL_Z;
+    const near = wellCoverage(0, z);
+    const far = wellCoverage(240, z);
+    expect(near).toBeGreaterThan(0.9);
+    expect(far).toBeLessThan(1e-4);
+    // ...and it is monotonic outward, so there is no ring where it flickers
+    // back on beyond the handover.
+    let prev = Number.POSITIVE_INFINITY;
+    for (let x = 0; x <= 260; x += 5) {
+      const c = wellCoverage(x, z);
+      expect(c).toBeLessThanOrEqual(prev + 1e-9);
+      prev = c;
     }
   });
 

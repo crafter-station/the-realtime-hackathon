@@ -23,7 +23,15 @@ import { WireWormhole } from "./wire-wormhole";
 // corridor → open country → the ground closes → wormhole → end).
 const TRACK_START = 146;
 const TRACK_END = -898;
-const HAND_Z = -940;
+/**
+ * The hand sits a few units off the lens, not at the end of the world.
+ *
+ * It was parked at -940 against a `TRACK_END` of -898 — 42 units out, past the
+ * fog's far plane at 105, about 5% of the frame, and dead centre where the
+ * finale copy already is. Art-direction asks for it "beside a giant REGISTER
+ * button", which means near enough to read and off to one side.
+ */
+const HAND_Z = -884;
 /** How far above the rim the opening frame sits, in world units. */
 const OPENING_LIFT = 13;
 
