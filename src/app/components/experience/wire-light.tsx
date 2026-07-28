@@ -3,7 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { WORM_Z_END } from "./wire-surface";
+import { WELL_Z, WORM_Z_END, wellThroatY } from "./wire-surface";
 
 /**
  * Portal light.
@@ -66,11 +66,13 @@ function useGlowTexture() {
  */
 function Glow({
   z,
+  y = 0,
   radius,
   reach,
   peak,
 }: {
   z: number;
+  y?: number;
   radius: number;
   reach: number;
   peak: number;
@@ -92,7 +94,7 @@ function Glow({
   });
 
   return (
-    <sprite ref={sprite} position={[0, 0, z]} scale={[radius, radius, 1]}>
+    <sprite ref={sprite} position={[0, y, z]} scale={[radius, radius, 1]}>
       <spriteMaterial
         ref={material}
         map={texture}
@@ -110,8 +112,15 @@ function Glow({
 export function PortalLight() {
   return (
     <group>
-      {/* The throat the opening well drains into — the corridor mouth. */}
-      <Glow z={2} radius={26} reach={125} peak={0.85} />
+      {/*
+        The throat of the opening well. `reach` is deliberately far larger than
+        the distance the camera starts at, because this one is not something you
+        approach — it is lit in the first frame, before any scroll, and the well
+        is drawn around it. It was previously parked at the corridor mouth with
+        a reach shorter than that opening distance, so it read as zero until a
+        third of the way down the page.
+      */}
+      <Glow z={WELL_Z} y={wellThroatY()} radius={22} reach={260} peak={0.9} />
       {/* The vortex at the end of the ride. */}
       <Glow z={WORM_Z_END + 30} radius={34} reach={150} peak={1} />
     </group>

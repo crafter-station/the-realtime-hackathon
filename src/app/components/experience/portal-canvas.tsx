@@ -6,17 +6,24 @@ import * as THREE from "three";
 import { scroll, warpAmount } from "./store";
 import { WireHand } from "./wire-hand";
 import { PortalLight } from "./wire-light";
-import { WireTitle } from "./wire-title";
+import {
+  enclosure,
+  rideY,
+  WELL_Z,
+  wellThroatY,
+  wormholePresence,
+} from "./wire-surface";
 import { WireWarp } from "./wire-warp";
-import { enclosure, rideY, wormholePresence } from "./wire-surface";
 import { WireWorld } from "./wire-world";
 import { WireWormhole } from "./wire-wormhole";
 
-// Camera track: one long continuous ride (title field → the ground gives way →
+// Camera track: one long continuous ride (the well → the ground gives way →
 // corridor → open country → the ground closes → wormhole → end).
 const TRACK_START = 146;
 const TRACK_END = -662;
 const HAND_Z = -658;
+/** How far above the rim the opening frame sits, in world units. */
+const OPENING_LIFT = 6;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -107,10 +114,15 @@ function Rig() {
     // The run is dead straight down the centreline — only mouse parallax
     // shifts you off it.
     camera.position.x = damp(camera.position.x, state.pointer.x * 0.35, 4, cdt);
-    // Ride centred in the tunnel while closed → symmetric view.
+    // The opening frame looks at the well from above its rim, not from the
+    // plain at standing height — a gravity well only reads as a well when you
+    // can see into it. This is a camera move, not a change to where the ground
+    // is: `rideY` still returns eye height over the surface, and the lift is
+    // spent by the time the ground itself starts falling away.
+    const aim = THREE.MathUtils.smoothstep(camZ, WELL_Z + 15, TRACK_START);
     camera.position.y = damp(
       camera.position.y,
-      rideY(camZ) + state.pointer.y * 0.25,
+      rideY(camZ) + OPENING_LIFT * aim + state.pointer.y * 0.25,
       4,
       cdt,
     );
@@ -119,7 +131,17 @@ function Rig() {
     // slope of the rolling floor.
     camera.rotation.order = "YXZ";
     const slope = (rideY(camZ - 5) - rideY(camZ)) / 5;
-    const pitch = reduce ? 0 : Math.atan(slope) * 0.55;
+    // The opening frame is the well, so the camera has to be *looking* at it.
+    // On the flat rim the slope term is ~0, which would leave the throat down
+    // at the bottom edge; aim straight at it instead and hand back to the slope
+    // once the ground itself starts falling away.
+    const aimPitch = -Math.atan2(
+      camera.position.y - wellThroatY(),
+      camZ - WELL_Z,
+    );
+    const pitch = reduce
+      ? 0
+      : THREE.MathUtils.lerp(Math.atan(slope) * 0.55, aimPitch, aim);
     camera.rotation.x = damp(camera.rotation.x, pitch, 4, cdt);
 
     // FOV kick with speed (skipped for reduced motion).
@@ -161,12 +183,11 @@ export function PortalCanvas() {
         camera={{ fov: 55, near: 0.1, far: 190, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
-        {/* Reaches far enough that the title field and the curve of the ground
+        {/* Reaches far enough that the whole well and the curve of the ground
             beyond it are both readable from the opening frame. */}
         <fog attach="fog" args={["#0e0e10", 26, 105]} />
         <Starfield count={stars} />
         <WireWorld />
-        <WireTitle />
         <PortalLight />
         <WireWarp />
         <WireWormhole />
