@@ -364,7 +364,11 @@ export function columnFade(index: number, z: number): number {
   const w = wrap(z);
   if (index % 2 === 1) return 1 - smoothstep(0.45, 0.75, w);
   if (index % 4 === 2) return 1 - smoothstep(0.8, 0.98, w);
-  return 1;
+  // The survivors dim too. Thinning three columns in four and leaving the
+  // fourth at full strength is what made the closed corridor read as a few
+  // bright scratches laid over a dense ring pattern rather than as one ruled
+  // surface — the rails have to sit at the rings' weight, not above it.
+  return 1 - 0.45 * smoothstep(0.5, 0.95, w);
 }
 
 /** Rings thin by the same rule, one stage later — they are what reads as speed. */
