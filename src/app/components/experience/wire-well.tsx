@@ -116,40 +116,77 @@ function WellFigure() {
  * the real one three metres away.
  */
 const POINTER = new THREE.Vector2();
+/** Past the outermost ring, so the wave finishes clear of the drawn mesh. */
+const REVEAL_MAX = 230;
 
 function useCursorGravity(strength: number) {
   const uniforms = useRef({
     uCursor: { value: new THREE.Vector2(9999, 9999) },
     uPull: { value: 0 },
+    // Radius the reveal wave has reached, in world units. Starts inside the
+    // throat so the very first frame is dark but for the light itself.
+    uReveal: { value: 0 },
   });
 
   const onBeforeCompile = useMemo(
     () => (shader: THREE.WebGLProgramParametersWithUniforms) => {
       shader.uniforms.uCursor = uniforms.current.uCursor;
       shader.uniforms.uPull = uniforms.current.uPull;
+      shader.uniforms.uReveal = uniforms.current.uReveal;
       shader.vertexShader = shader.vertexShader
         .replace(
           "#include <common>",
           `#include <common>
            uniform vec2 uCursor;
-           uniform float uPull;`,
+           uniform float uPull;
+           uniform float uReveal;
+           varying float vReveal;`,
         )
         .replace(
           "#include <begin_vertex>",
           `#include <begin_vertex>
            float gd = distance(vec2(transformed.x, transformed.z), uCursor);
-           transformed.y -= uPull * exp(-(gd * gd) / 1500.0);`,
+           transformed.y -= uPull * exp(-(gd * gd) / 1500.0);
+           // The opening wave: the throat lights first and the sheet resolves
+           // outward from it, so the world reads as switching on rather than
+           // as having been there all along.
+           float rr = distance(vec2(transformed.x, transformed.z),
+                               vec2(0.0, ${WELL_Z.toFixed(1)}));
+           vReveal = 1.0 - smoothstep(uReveal - 26.0, uReveal, rr);`,
+        );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+           varying float vReveal;`,
+        )
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+           diffuseColor.a *= vReveal;`,
         );
     },
     [],
   );
 
   useFrame((state, dt) => {
+    // The reveal runs once, on its own clock, and is the only thing here not
+    // driven by scroll — an entrance is a thing that happens *to* you, not
+    // something you have to do. Reduced motion gets the same wave at four
+    // times the speed rather than none: it is an opacity ramp, not a rush.
+    const rv = uniforms.current.uReveal;
+    if (rv.value < REVEAL_MAX) {
+      rv.value = Math.min(
+        REVEAL_MAX,
+        rv.value + dt * (scroll.reduce ? 900 : 175),
+      );
+    }
+
     // Pointer is NDC; the well lies flat, so a ray onto the y = throat plane is
     // the honest mapping from screen to sheet. Without it the dip drifts away
     // from the cursor as the camera pitches down toward the throat.
     const target = uniforms.current.uCursor.value;
-    if (scroll.reduce || scroll.quality === "lite") {
+    if (scroll.reduce || scroll.quality === "lite" || !scroll.pointerMoved) {
       uniforms.current.uPull.value = 0;
       return;
     }

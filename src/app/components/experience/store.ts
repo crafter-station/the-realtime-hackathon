@@ -38,6 +38,14 @@ export const scroll = {
    * that wants the cursor has to be told, not ask.
    */
   pointer: { x: 0, y: 0 },
+  /**
+   * Whether the pointer has ever moved.
+   *
+   * The default (0, 0) is dead centre of the screen, which is exactly where the
+   * portal is — so anything that follows the cursor would dent the subject of
+   * the opening frame before the visitor has touched anything.
+   */
+  pointerMoved: false,
 };
 
 export type ScrollState = typeof scroll;

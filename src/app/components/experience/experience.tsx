@@ -142,6 +142,7 @@ export function Experience() {
     raf = requestAnimationFrame(loop);
 
     const onPointer = (e: PointerEvent) => {
+      scroll.pointerMoved = true;
       scroll.pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       scroll.pointer.y = -((e.clientY / window.innerHeight) * 2 - 1);
     };
@@ -293,6 +294,26 @@ export function Experience() {
           >
             Register free →
           </a>
+          {/* Brief §spine 10 asks the finale to carry the organiser credit. It
+              went missing with `partner-links.tsx` and nothing replaced it. */}
+          <p className="xp-colophon">
+            Built by{" "}
+            <a
+              href="https://useportal.co"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Portal
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://crafterstation.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Crafter Station
+            </a>
+          </p>
         </section>
       </main>
 
