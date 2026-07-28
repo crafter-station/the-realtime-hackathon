@@ -40,7 +40,7 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
 
 /** The field the well is sunk into sits out here, ahead of the corridor mouth. */
 export const WORLD_Z_START = 150;
-export const WORLD_Z_END = -600;
+export const WORLD_Z_END = -1080;
 
 // Wormhole stretch — the spiralling vortex the closed tube empties into.
 export const WORM_Z_IN = -580;
@@ -89,13 +89,32 @@ const FLARE_END = -132; // fully open country
 const CONE_START = -430; // the plane starts curling a second time
 const CONE_WRAPPED = -520; // closed into a circular tube
 const CONE_JOIN = -580; // tube sits on the wormhole's axis (= WORM_Z_IN)
+const EXIT_START = -778; // the far mouth: the tube begins to open again
+const EXIT_OPEN = -858; // out the other side, flat country
+
+/**
+ * Coming out the far side of the wormhole.
+ *
+ * The reason this exists: a portal is only legible if there is something on the
+ * other side of it, and until now there was not. The camera's track ended at
+ * z = -662 — past `WORM_Z_FULL` and short of `WORM_Z_END` — so the page ran out
+ * while you were still inside the vortex. Two portals, no arrival, and the
+ * opening well and the closing wormhole read as the same gesture twice.
+ *
+ * So the tube opens again. This is what makes the second portal a *passage*
+ * rather than a second destination, and it is the only difference between a
+ * journey and a loop.
+ */
+export function emergence(z: number): number {
+  return smoothstep(EXIT_START, EXIT_OPEN, z);
+}
 
 /** 0 = flat plane, 1 = closed all the way round. */
 export function wrap(z: number): number {
   const opening =
     smoothstep(MOUTH_OPEN, MOUTH_SHUT, z) *
     (1 - smoothstep(FLARE_START, FLARE_END, z));
-  const closing = smoothstep(CONE_START, CONE_WRAPPED, z);
+  const closing = smoothstep(CONE_START, CONE_WRAPPED, z) * (1 - emergence(z));
   return Math.max(opening, closing);
 }
 
@@ -172,12 +191,19 @@ export function wellThroatY(): number {
  *
  * The polar mesh and the Cartesian one both draw the opening, and this is what
  * splits the work: 1 while the plane is flat and the well is the subject, 0
- * once the curl has taken over. Fading on `wrap` rather than on a z threshold
- * means the handover tracks the geometry instead of a number that has to be
- * kept in step with it.
+ * once the curl has taken over.
+ *
+ * The curl term alone is not enough, and assuming it was cost an empty arrival:
+ * `wrap` is 0 in *two* places — the field the well sits in, and the open country
+ * out the far side of the wormhole — so a purely curl-driven test handed the far
+ * plain to a polar mesh that is nowhere near it, and culled the Cartesian grid
+ * that was supposed to be drawing the ground you land on. The z window is what
+ * makes this mean "the opening" rather than "anywhere flat".
  */
 export function wellPresence(z: number): number {
-  return 1 - smoothstep(0.05, 0.45, wrap(z));
+  const flat = 1 - smoothstep(0.05, 0.45, wrap(z));
+  const opening = 1 - smoothstep(WELL_Z - WELL_RADIUS, MOUTH_SHUT - 60, z);
+  return flat * opening;
 }
 
 /**
@@ -245,7 +271,9 @@ export function closedAxisHeight(z: number): number {
  * distorting it.
  */
 export function railShift(z: number): number {
-  const g = smoothstep(CONE_WRAPPED, CONE_JOIN, z);
+  // Unwound on the way out, or the arrival plain would still be hanging on the
+  // wormhole's axis with the ground nowhere near the camera.
+  const g = smoothstep(CONE_WRAPPED, CONE_JOIN, z) * (1 - emergence(z));
   if (g < 1e-4) return 0;
   return -(floorY(0, z) + closedAxisHeight(z)) * g;
 }
@@ -291,7 +319,7 @@ export function enclosure(z: number): number {
 
 /** 0 → 1 as the closed tube hands over to the spiralling wormhole. */
 export function wormholePresence(z: number): number {
-  return smoothstep(WORM_Z_IN, WORM_Z_FULL, z);
+  return smoothstep(WORM_Z_IN, WORM_Z_FULL, z) * (1 - emergence(z));
 }
 
 /** The grid gives way to the vortex, which by then occupies the same surface. */

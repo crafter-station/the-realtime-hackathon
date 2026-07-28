@@ -30,8 +30,8 @@ function clockParts(now: number): string {
 // Scroll fraction across which the hero copy rides along then fades away.
 // It holds until the walls are well up: leaving earlier opens a stretch with
 // nothing to read right after we have asked the visitor to keep scrolling.
-const HERO_FADE_START = 0.03;
-const HERO_FADE_END = 0.115;
+const HERO_FADE_START = 0.02;
+const HERO_FADE_END = 0.09;
 
 /**
  * The five tracks, revealed one card at a time while you fly through the
@@ -78,6 +78,8 @@ export function Experience() {
   const [clock, setClock] = useState("--:--:--:--");
   const progressFill = useRef<HTMLDivElement>(null);
   const heroLayer = useRef<HTMLDivElement>(null);
+  const hud = useRef<HTMLDivElement>(null);
+  const depthValue = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     scroll.quality = detectQuality();
@@ -114,6 +116,22 @@ export function Experience() {
           ? "none"
           : `translate3d(0, ${t * -6}vh, 0)`;
         layer.style.visibility = t >= 1 ? "hidden" : "visible";
+      }
+
+      // Depth readout. Written straight to the DOM rather than through state:
+      // this runs every frame, and a re-render per frame would cost more than
+      // everything else on the page put together.
+      const depth = depthValue.current;
+      if (depth) {
+        const pct = String(Math.round(scroll.progress * 100)).padStart(3, "0");
+        if (depth.textContent !== pct) depth.textContent = pct;
+      }
+      // The HUD waits for the hero's own CTA to leave, so the two are never
+      // asking for the same click at the same time.
+      if (hud.current) {
+        hud.current.style.opacity = String(
+          Math.min(1, Math.max(0, (scroll.progress - HERO_FADE_END) * 14)),
+        );
       }
 
       raf = requestAnimationFrame(loop);
@@ -237,7 +255,21 @@ export function Experience() {
           </p>
         </section>
 
-        {/* 06 — FINALE: the wire hand + giant register. */}
+        {/* 05.75 — THE OTHER SIDE. The beat the page was missing: the tube
+            opens, the vortex is behind you, and the ground comes back. A
+            portal you fall into and never come out of is not a portal. */}
+        <div className="xp-gap--emerge" aria-hidden />
+        <section className="xp-section xp-section--beat">
+          <p className="xp-label">The other side</p>
+          <h2 className="xp-huge">You&rsquo;re through</h2>
+          <p className="xp-beat-line">
+            Open country, and a weekend to build in it.{" "}
+            <strong>This is where it starts.</strong>
+          </p>
+        </section>
+
+        {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}
+        <div className="xp-gap--arrive" aria-hidden />
         <section className="xp-section xp-finale">
           <h2 className="xp-huge xp-huge--outline">Register</h2>
           <p className="xp-beat-line">
@@ -253,6 +285,34 @@ export function Experience() {
           </a>
         </section>
       </main>
+
+      {/*
+        Depth readout + a Register that is always there.
+
+        Two problems, one element. The page had exactly two focusable things,
+        both "Register free": one visible for the first tenth of the scroll and
+        the next at the very end — so for most of a thirty-screen ride there was
+        no way to act and no way to tab to anything. And the reference asks for
+        "a live % of scroll depth in a fixed corner, framing the page as literal
+        transit through the portal", which is the same corner and the same idea:
+        tell people how deep they are, and let them out whenever they want.
+      */}
+      <div className="xp-hud" ref={hud}>
+        <p className="xp-hud__read">
+          <span ref={depthValue} className="xp-hud__depth">
+            000
+          </span>
+          <span className="xp-hud__unit">% depth</span>
+        </p>
+        <a
+          className="xp-hud__cta"
+          href={REGISTER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Register free →
+        </a>
+      </div>
 
       <div className="xp-progress" aria-hidden>
         <div ref={progressFill} className="xp-progress__fill" />
