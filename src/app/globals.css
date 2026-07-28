@@ -4884,23 +4884,59 @@ html.xp body {
 }
 
 /* -- Fly-into-the-H hero layer -------------------------------------------- */
+/* The hero copy sits in columns 1–5 of the twelve, ragged right, so the centre
+   band stays clear. The well is the subject of this frame and the vanishing
+   point is its throat — `docs/visual-reference.md` calls keeping that band open
+   "the single most important layout rule", and centred type breaks it by
+   sitting exactly on the thing you are meant to be looking at. */
 .xp-heroLayer {
   position: fixed;
   inset: 0;
   z-index: 6;
   display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: clamp(1.4rem, 3.5vh, 2.6rem);
-  padding: 0 clamp(1.25rem, 5vw, 4rem) clamp(2rem, 6vh, 4rem);
-  text-align: center;
+  align-content: center;
+  justify-items: start;
+  gap: clamp(1.2rem, 3vh, 2.2rem);
+  padding-inline: max(
+    clamp(1.25rem, 4vw, 3rem),
+    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
+  );
+  text-align: left;
   pointer-events: none;
 }
+/* The well is bright enough now that grey body copy over it stops being
+   readable. A scrim raked across the side the copy is on buys the contrast
+   back without touching the centre band, which has to stay the brightest
+   thing in the frame. */
+.xp-heroLayer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    rgba(4, 7, 9, 0.94) 0%,
+    rgba(4, 7, 9, 0.8) 26%,
+    rgba(4, 7, 9, 0) 56%
+  );
+  pointer-events: none;
+}
+@media (max-width: 60rem) {
+  .xp-heroLayer::before {
+    background: linear-gradient(
+      to top,
+      rgba(4, 7, 9, 0.94) 0%,
+      rgba(4, 7, 9, 0.82) 38%,
+      rgba(4, 7, 9, 0) 68%
+    );
+  }
+}
 .xp-heroLayer .xp-display {
-  max-width: 14ch;
+  /* Tight and stacked — one or two words a line, per the reference. */
+  max-width: 11ch;
   font-family: var(--font-space), var(--sans);
   font-weight: 600;
-  font-size: clamp(2.6rem, 7vw, 7.6rem);
+  font-size: clamp(2.4rem, 5.2vw, 5.4rem);
   line-height: 1.02;
   letter-spacing: -0.015em;
   text-transform: uppercase;
@@ -4908,13 +4944,26 @@ html.xp body {
 }
 .xp-heroSub {
   display: grid;
-  justify-items: center;
+  justify-items: start;
   gap: 1.6rem;
+  max-width: min(100%, 34rem);
   will-change: opacity;
 }
 .xp-heroSub .xp-body {
-  max-width: 52ch;
-  text-align: center;
+  max-width: 40ch;
+  text-align: left;
+}
+
+/* Too narrow for a side column: drop the copy to the foot of the frame so the
+   well still owns the middle of the screen. */
+@media (max-width: 60rem) {
+  .xp-heroLayer {
+    align-content: end;
+    padding-bottom: clamp(2.5rem, 10vh, 6rem);
+  }
+  .xp-heroLayer .xp-display {
+    max-width: 100%;
+  }
 }
 .xp-heroSub .xp-register {
   pointer-events: auto;

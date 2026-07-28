@@ -16,6 +16,7 @@ import {
   surfaceVisibility,
   WORLD_Z_END,
   WORLD_Z_START,
+  wellPresence,
   wrap,
 } from "./wire-surface";
 
@@ -46,8 +47,11 @@ export function WireWorld() {
       fa: number,
       fb: number,
     ) => {
-      const va = surfaceVisibility(az) * fa;
-      const vb = surfaceVisibility(bz) * fb;
+      // Yield the opening to the polar mesh in `wire-well.tsx`. Rows and
+      // columns laid across a radial dip read as a warped tablecloth, and two
+      // grids drawn over each other read as neither.
+      const va = surfaceVisibility(az) * fa * (1 - wellPresence(az));
+      const vb = surfaceVisibility(bz) * fb * (1 - wellPresence(bz));
       if (va < 0.004 && vb < 0.004) return;
       const [x0, y0] = surfacePoint(ax, az);
       const [x1, y1] = surfacePoint(bx, bz);
@@ -82,7 +86,10 @@ export function WireWorld() {
       "position",
       new THREE.BufferAttribute(new Float32Array(pos), 3),
     );
-    g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(col), 3));
+    g.setAttribute(
+      "color",
+      new THREE.BufferAttribute(new Float32Array(col), 3),
+    );
     return g;
   }, []);
 
@@ -111,7 +118,8 @@ export function WireWorld() {
       pos[i * 3 + 1] = py;
       pos[i * 3 + 2] = z;
       // Brighter where the surface is closing in — the throats read hot.
-      const v = surfaceVisibility(z) * (0.35 + 0.65 * wrap(z));
+      const v =
+        surfaceVisibility(z) * (0.35 + 0.65 * wrap(z)) * (1 - wellPresence(z));
       col[i * 3] = v;
       col[i * 3 + 1] = v;
       col[i * 3 + 2] = v;
