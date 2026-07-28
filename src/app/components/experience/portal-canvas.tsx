@@ -178,11 +178,26 @@ function Rig() {
 /** Activates the finale hand once the journey is nearly complete. */
 function FinaleHand() {
   const [active, setActive] = useState(false);
+  const { camera, size } = useThree();
   useFrame(() => {
     const shouldBeActive = scroll.progress > 0.9;
     if (shouldBeActive !== active) setActive(shouldBeActive);
   });
-  return <WireHand active={active} x={HAND_X} z={HAND_Z} />;
+
+  // `HAND_X` is a world offset, and a world offset is not a place on screen:
+  // the same 7.6 units that sits beside the CTA on a wide desktop is off the
+  // edge of a portrait phone, where the horizontal field of view is a fraction
+  // as wide. Solve for the frustum's half-width at the hand's own depth and
+  // keep it inside that.
+  const handX = useMemo(() => {
+    const cam = camera as THREE.PerspectiveCamera;
+    const distance = Math.abs(TRACK_END - HAND_Z);
+    const halfHeight = Math.tan((cam.fov * Math.PI) / 360) * distance;
+    const halfWidth = halfHeight * (size.width / Math.max(size.height, 1));
+    return Math.min(HAND_X, halfWidth * 0.56);
+  }, [camera, size]);
+
+  return <WireHand active={active} x={handX} z={HAND_Z} />;
 }
 
 export function PortalCanvas() {
