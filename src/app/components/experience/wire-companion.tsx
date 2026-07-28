@@ -43,11 +43,24 @@ const MIN_AHEAD = 11;
 const MAX_AHEAD = 20;
 /** How far it may swing off the follow point before we rein it back in. */
 const MAX_SWING = 2.2;
+/**
+ * It stands down over the briefing.
+ *
+ * Everywhere else it is company on a ride you are watching. The three panels
+ * are the one stretch you are *reading*, and a floating object drifting across
+ * a line of type is a distraction rather than a companion — it settled squarely
+ * on "Judges deliberate and pick the winners". It comes back for the finale,
+ * which is a place again rather than a page.
+ */
+const HUSH_IN = 0.845;
+const HUSH_OUT = 0.955;
 /** Scratch, so the spring does not allocate a vector every frame. */
 const PULL = new THREE.Vector3();
 
 export function WireCompanion() {
   const group = useRef<THREE.Group>(null);
+  const wire = useRef<THREE.MeshBasicMaterial>(null);
+  const core = useRef<THREE.MeshBasicMaterial>(null);
   const velocity = useMemo(() => new THREE.Vector3(), []);
   const target = useMemo(() => new THREE.Vector3(), []);
   const rest = useMemo(
@@ -105,6 +118,27 @@ export function WireCompanion() {
       g.position.y += (target.y - g.position.y) * k;
     }
 
+    // Hush over the briefing panels, back for the finale.
+    const p = scroll.progress;
+    const hush =
+      THREE.MathUtils.smoothstep(p, HUSH_IN, HUSH_IN + 0.02) *
+      (1 - THREE.MathUtils.smoothstep(p, HUSH_OUT, HUSH_OUT + 0.02));
+    const show = 1 - hush;
+    if (wire.current)
+      wire.current.opacity = THREE.MathUtils.damp(
+        wire.current.opacity,
+        0.75 * show,
+        5,
+        cdt,
+      );
+    if (core.current)
+      core.current.opacity = THREE.MathUtils.damp(
+        core.current.opacity,
+        show,
+        5,
+        cdt,
+      );
+
     // Roll it along its own travel, so the surface reads as a solid that turns
     // rather than a sphere sliding sideways.
     g.rotation.x += velocity.z * cdt * 0.16;
@@ -113,9 +147,13 @@ export function WireCompanion() {
 
   return (
     <group ref={group}>
-      <mesh>
+      {/* Drawn after the core: both are in the transparent pass now that the
+          core fades too, and without an explicit order the solid one sorts on
+          top and the ball arrives at the finale as a black disc. */}
+      <mesh renderOrder={2}>
         <icosahedronGeometry args={[0.5, 2]} />
         <meshBasicMaterial
+          ref={wire}
           color="#ffffff"
           wireframe
           transparent
@@ -125,9 +163,9 @@ export function WireCompanion() {
       </mesh>
       {/* A dark core, so the wireframe reads as a surface with a far side
           rather than as a transparent cage of lines. */}
-      <mesh>
+      <mesh renderOrder={1}>
         <sphereGeometry args={[0.485, 24, 16]} />
-        <meshBasicMaterial color="#07090c" />
+        <meshBasicMaterial ref={core} color="#07090c" transparent opacity={1} />
       </mesh>
     </group>
   );

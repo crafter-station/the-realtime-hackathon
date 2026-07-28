@@ -4539,7 +4539,35 @@ html.xp body {
    rather than watch, so they get a measure and a left edge instead of the
    centred beat treatment — and they sit in columns 1–5 like the hero, keeping
    the centre band clear, which the reference calls the one rule not to break. */
+/* These are the only stretches on the page you read rather than watch, and the
+   arrival plain's grid runs straight through them. The scrim is raked from the
+   reading edge so the rows stay legible without boxing them in or closing off
+   the centre band. */
+.xp-section--panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    rgba(4, 7, 9, 0.93) 0%,
+    rgba(4, 7, 9, 0.82) 34%,
+    rgba(4, 7, 9, 0) 68%
+  );
+  pointer-events: none;
+}
+@media (max-width: 60rem) {
+  .xp-section--panel::before {
+    background: linear-gradient(
+      100deg,
+      rgba(4, 7, 9, 0.94) 0%,
+      rgba(4, 7, 9, 0.9) 55%,
+      rgba(4, 7, 9, 0.62) 100%
+    );
+  }
+}
 .xp-section--panel {
+  position: relative;
   min-height: 100svh;
   display: grid;
   align-content: center;
