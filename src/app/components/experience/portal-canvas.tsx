@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { scroll, warpAmount } from "./store";
+import { scroll, warpRender } from "./store";
 import { WireHand } from "./wire-hand";
 import { PortalLight } from "./wire-light";
 import {
@@ -54,7 +54,7 @@ function Starfield({ count }: { count: number }) {
     const camZ = state.camera.position.z;
     const arr = geometry.attributes.position.array as Float32Array;
     for (let i = 2; i < arr.length; i += 3) {
-      if (arr[i] > camZ + 8) arr[i] -= 88;
+      if (arr[i] > camZ - 10) arr[i] -= 88;
     }
     geometry.attributes.position.needsUpdate = true;
     // Stars dim inside the closed tunnel, then blaze back up around the
@@ -68,7 +68,7 @@ function Starfield({ count }: { count: number }) {
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
         THREE.MathUtils.lerp(base, 0.92, worm) *
-          (1 - warpAmount(scroll.progress)),
+          (1 - warpRender(scroll.progress)),
         3,
         dt,
       );
@@ -96,12 +96,7 @@ function Starfield({ count }: { count: number }) {
  */
 function Rig() {
   const { camera } = useThree();
-  const reduce = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  const reduce = scroll.reduce;
   useFrame((state, dt) => {
     const cdt = Math.min(dt, 0.05);
     const v = Math.min(Math.abs(scroll.velocity), 30);
@@ -114,7 +109,12 @@ function Rig() {
 
     // The run is dead straight down the centreline — only mouse parallax
     // shifts you off it.
-    camera.position.x = damp(camera.position.x, state.pointer.x * 0.35, 4, cdt);
+    camera.position.x = damp(
+      camera.position.x,
+      scroll.pointer.x * 0.35,
+      4,
+      cdt,
+    );
     // The opening frame looks at the well from above its rim, not from the
     // plain at standing height — a gravity well only reads as a well when you
     // can see into it. This is a camera move, not a change to where the ground
@@ -123,7 +123,7 @@ function Rig() {
     const aim = THREE.MathUtils.smoothstep(camZ, WELL_Z + 15, TRACK_START);
     camera.position.y = damp(
       camera.position.y,
-      rideY(camZ) + OPENING_LIFT * aim + state.pointer.y * 0.25,
+      rideY(camZ) + OPENING_LIFT * aim + scroll.pointer.y * 0.25,
       4,
       cdt,
     );

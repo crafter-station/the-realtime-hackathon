@@ -19,6 +19,25 @@ export const scroll = {
   warp: 0,
   /** Rendering budget chosen by capability detection. */
   quality: "high" as Quality,
+  /**
+   * `prefers-reduced-motion`, resolved once on mount.
+   *
+   * Lives here because four separate components were each running their own
+   * `matchMedia` call for it — four chances to disagree about one fact, and in
+   * practice they already did: the streak field checked the flag, then used it
+   * only to zero a velocity term while the full-field hyperspace jump played at
+   * full strength anyway.
+   */
+  reduce: false,
+  /**
+   * Pointer in normalised device coordinates, -1..1, y up.
+   *
+   * Tracked from `window` rather than read off r3f's `state.pointer`, because
+   * the overlay `<main>` covers the canvas edge to edge — every pointer event
+   * lands on a DOM section and the canvas below never hears about it. Anything
+   * that wants the cursor has to be told, not ask.
+   */
+  pointer: { x: 0, y: 0 },
 };
 
 export type ScrollState = typeof scroll;
@@ -49,10 +68,29 @@ function smoothstep(edge0: number, edge1: number, x: number) {
   return t * t * (3 - 2 * t);
 }
 
-/** 0 → 1 → 0 across the hyperspace beat. */
+/**
+ * 0 → 1 → 0 across the hyperspace beat.
+ *
+ * The pure curve, and the thing the four thresholds above are reasoned about.
+ * Renderers want `warpRender` instead.
+ */
 export function warpAmount(progress: number): number {
   return (
     smoothstep(JUMP_IN, JUMP_FULL, progress) *
     (1 - smoothstep(JUMP_HOLD, JUMP_OUT, progress))
   );
+}
+
+/**
+ * What anything that draws should read.
+ *
+ * `prefers-reduced-motion` asks for less vestibular motion, not less content —
+ * so under it the beat still happens and the copy still lands on it, the
+ * streaks just stay short and the world never fully drops away. A full-field
+ * radial rush is the single most likely thing on this page to make someone ill,
+ * and until now it played at full strength no matter what the visitor asked
+ * their operating system for.
+ */
+export function warpRender(progress: number): number {
+  return warpAmount(progress) * (scroll.reduce ? 0.22 : 1);
 }

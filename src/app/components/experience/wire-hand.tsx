@@ -3,6 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { scroll } from "./store";
 
 type Finger = {
   base: THREE.Vector3;
@@ -124,9 +125,7 @@ export function WireHand({ active, z }: { active: boolean; z: number }) {
   const totalVertices = positions.length / 3;
 
   useEffect(() => {
-    reducedMotion.current =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    reducedMotion.current = scroll.reduce;
   }, []);
 
   useEffect(() => {

@@ -86,9 +86,12 @@ export function Experience() {
     document.documentElement.classList.add("xp");
     setMounted(true);
 
+    // Resolved once, here, before the canvas mounts — every renderer reads
+    // `scroll.reduce` rather than asking the platform itself.
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    scroll.reduce = reduce;
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
 
     let raf = 0;
@@ -138,9 +141,16 @@ export function Experience() {
     };
     raf = requestAnimationFrame(loop);
 
+    const onPointer = (e: PointerEvent) => {
+      scroll.pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      scroll.pointer.y = -((e.clientY / window.innerHeight) * 2 - 1);
+    };
+    window.addEventListener("pointermove", onPointer, { passive: true });
+
     return () => {
       cancelAnimationFrame(raf);
       lenis.destroy();
+      window.removeEventListener("pointermove", onPointer);
       document.documentElement.classList.remove("xp");
     };
   }, []);

@@ -3,7 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { scroll, warpAmount } from "./store";
+import { scroll, warpRender } from "./store";
 import {
   columnFade,
   FLOOR_COLS,
@@ -133,7 +133,7 @@ export function WireWorld() {
   useFrame((_, dt) => {
     const v = THREE.MathUtils.clamp(Math.abs(scroll.velocity) * 0.05, 0, 1);
     // The world drops away for the hyperspace jump, leaving only the streaks.
-    const jump = 1 - warpAmount(scroll.progress) ** 0.6;
+    const jump = 1 - warpRender(scroll.progress) ** 0.6;
     if (gridMat.current) {
       gridMat.current.opacity = THREE.MathUtils.damp(
         gridMat.current.opacity,

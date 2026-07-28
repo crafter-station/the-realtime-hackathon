@@ -98,8 +98,91 @@ function WellFigure() {
   );
 }
 
+/**
+ * Cursor gravity.
+ *
+ * The one thing on the page that answers back. A gravity well is a mass bending
+ * the sheet it sits in, so the honest interaction is to let the visitor be a
+ * second mass: the grid dips toward the pointer, and the dip follows.
+ *
+ * Done on the GPU, in the vertex stage, because it has to be. The mesh is
+ * ~15,000 segments baked once; re-walking 30,000 vertices in JavaScript every
+ * frame to move them a few units would cost more than the entire rest of the
+ * frame. `onBeforeCompile` lets the displacement ride along in the shader for
+ * free, and the geometry stays static and uploaded exactly once.
+ *
+ * The falloff is Gaussian rather than the well's own `1 - sqrt` profile: this
+ * is a dent, not a second portal, and a sharp throat here would compete with
+ * the real one three metres away.
+ */
+const POINTER = new THREE.Vector2();
+
+function useCursorGravity(strength: number) {
+  const uniforms = useRef({
+    uCursor: { value: new THREE.Vector2(9999, 9999) },
+    uPull: { value: 0 },
+  });
+
+  const onBeforeCompile = useMemo(
+    () => (shader: THREE.WebGLProgramParametersWithUniforms) => {
+      shader.uniforms.uCursor = uniforms.current.uCursor;
+      shader.uniforms.uPull = uniforms.current.uPull;
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          "#include <common>",
+          `#include <common>
+           uniform vec2 uCursor;
+           uniform float uPull;`,
+        )
+        .replace(
+          "#include <begin_vertex>",
+          `#include <begin_vertex>
+           float gd = distance(vec2(transformed.x, transformed.z), uCursor);
+           transformed.y -= uPull * exp(-(gd * gd) / 1500.0);`,
+        );
+    },
+    [],
+  );
+
+  useFrame((state, dt) => {
+    // Pointer is NDC; the well lies flat, so a ray onto the y = throat plane is
+    // the honest mapping from screen to sheet. Without it the dip drifts away
+    // from the cursor as the camera pitches down toward the throat.
+    const target = uniforms.current.uCursor.value;
+    if (scroll.reduce || scroll.quality === "lite") {
+      uniforms.current.uPull.value = 0;
+      return;
+    }
+    const ray = state.raycaster;
+    ray.setFromCamera(
+      POINTER.set(scroll.pointer.x, scroll.pointer.y),
+      state.camera,
+    );
+    const dir = ray.ray.direction;
+    const origin = ray.ray.origin;
+    const planeY = wellThroatY();
+    if (Math.abs(dir.y) > 1e-4) {
+      const t = (planeY - origin.y) / dir.y;
+      if (t > 0 && t < 400) {
+        target.set(origin.x + dir.x * t, origin.z + dir.z * t);
+      }
+    }
+    // Only while the well is the thing you are looking at.
+    const near = 1 - THREE.MathUtils.smoothstep(scroll.progress, 0.02, 0.13);
+    uniforms.current.uPull.value = THREE.MathUtils.damp(
+      uniforms.current.uPull.value,
+      strength * near,
+      6,
+      dt,
+    );
+  });
+
+  return onBeforeCompile;
+}
+
 export function WellGrid() {
   const material = useRef<THREE.LineBasicMaterial>(null);
+  const onBeforeCompile = useCursorGravity(15);
 
   const geometry = useMemo(() => {
     const pos: number[] = [];
@@ -197,6 +280,7 @@ export function WellGrid() {
           transparent
           opacity={0.9}
           depthWrite={false}
+          onBeforeCompile={onBeforeCompile}
         />
       </lineSegments>
       <WellFigure />
