@@ -20,6 +20,13 @@ const roleConfigs = {
         slug: "arturo-barrantes",
       },
       {
+        firstName: "FAUSTO",
+        image: "fausto-rolandi.png",
+        lastName: "ROLANDI",
+        roles: ["CO-FOUNDER @ EMPREMAFIA"],
+        slug: "fausto-rolandi",
+      },
+      {
         firstName: "MARIA CRISTINA",
         image: "maria-cristina-ruelas.png",
         lastName: "RUELAS",
