@@ -4595,9 +4595,18 @@ html.xp body {
    the first place, so the rule could never fire. The guarantee it was making is
    kept by the finale's own Register, which is a real focusable link and is on
    screen exactly when this one is not. */
+/* On a phone the ride is 24,000px long, which is exactly where knowing how
+   deep you are matters most — so the readout stays and sheds its label instead
+   of disappearing. `% DEPTH` is the part you only need to read once. */
 @media (max-width: 40rem) {
-  .xp-hud__read {
+  .xp-hud {
+    gap: 0.6rem;
+  }
+  .xp-hud__unit {
     display: none;
+  }
+  .xp-hud__depth {
+    font-size: 0.82rem;
   }
 }
 
