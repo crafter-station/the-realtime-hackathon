@@ -28,8 +28,50 @@ function clockParts(now: number): string {
 }
 
 // Scroll fraction across which the hero copy rides along then fades away.
-const HERO_FADE_START = 0.02;
-const HERO_FADE_END = 0.09;
+// It holds until the walls are well up: leaving earlier opens a stretch with
+// nothing to read right after we have asked the visitor to keep scrolling.
+const HERO_FADE_START = 0.03;
+const HERO_FADE_END = 0.115;
+
+/**
+ * The five tracks, revealed one card at a time while you fly through the
+ * streak field. Sides alternate so the cards never stack over the vanishing
+ * point, which is where the eye is already pinned.
+ *
+ * Names and framing come from `docs/portal-experience-brief.md` §3–7, where
+ * each track is a Portal capability rather than a theme we liked the sound of.
+ * The brief is explicit that these are not ours to invent ("no filler feature
+ * lists that don't map to a real Portal capability"), so change them there
+ * first. Adding or removing one changes the `JUMP_*` thresholds in `store.ts`
+ * — see the note there.
+ */
+const TRACKS = [
+  {
+    name: "MULTIPLAYER",
+    copy: "Shared live rooms: channels, presence, chat.",
+    side: "left",
+  },
+  {
+    name: "LIVE STREAMING",
+    copy: "Broadcast state to a crowd in realtime.",
+    side: "right",
+  },
+  {
+    name: "REAL-TIME LOCATION",
+    copy: "Living maps, presence in space.",
+    side: "left",
+  },
+  {
+    name: "AI AGENTS",
+    copy: "Autonomous agents acting on live signals.",
+    side: "right",
+  },
+  {
+    name: "WILD SIGNAL",
+    copy: "Open realtime experiments without a category.",
+    side: "left",
+  },
+] as const;
 
 export function Experience() {
   const [mounted, setMounted] = useState(false);
@@ -121,6 +163,45 @@ export function Experience() {
       <main className="xp-overlay" id="top">
         {/* 02 — Ride the grid, into the curves. Long. */}
         <div className="xp-gap--ride" aria-hidden />
+
+        {/* 02.5 — The jump: count down, punch into hyperspace, meet the
+            tracks in the streaks. */}
+        <section className="xp-section xp-section--beat">
+          <p className="xp-label">Hold on</p>
+          <p className="xp-beat-line xp-beat-line--wide">
+            You are about to enter <strong>another dimension</strong>.
+          </p>
+        </section>
+        {[3, 2, 1].map((n) => (
+          <section className="xp-section xp-count" key={n}>
+            <p className="xp-count__n">{n}</p>
+          </section>
+        ))}
+        <div className="xp-gap--jump" aria-hidden />
+
+        <section className="xp-section xp-section--beat xp-tracksIntro">
+          <p className="xp-label">Five tracks</p>
+          <p className="xp-beat-line">
+            Pick one, or ignore them all. <strong>Ship something live.</strong>
+          </p>
+        </section>
+        {TRACKS.map((track, i) => (
+          <section
+            className={`xp-section xp-trackSlot xp-trackSlot--${track.side}`}
+            key={track.name}
+          >
+            <article className="xp-trackCard">
+              <p className="xp-trackCard__head">
+                <span>{track.name}</span>
+                <span className="xp-trackCard__n">
+                  [{String(i + 1).padStart(2, "0")}]
+                </span>
+              </p>
+              <p className="xp-trackCard__copy">{track.copy}</p>
+            </article>
+          </section>
+        ))}
+        <div className="xp-gap--jumpOut" aria-hidden />
 
         {/* 03 — The curve closes: PRIZES appear. */}
         <section className="xp-section xp-section--beat">

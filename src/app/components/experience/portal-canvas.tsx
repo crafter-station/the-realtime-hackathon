@@ -3,22 +3,20 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { scroll } from "./store";
+import { scroll, warpAmount } from "./store";
 import { WireHand } from "./wire-hand";
-import {
-  enclosure,
-  pathX,
-  rideY,
-  WireWorld,
-  wormholePresence,
-} from "./wire-world";
+import { PortalLight } from "./wire-light";
+import { WireTitle } from "./wire-title";
+import { WireWarp } from "./wire-warp";
+import { enclosure, rideY, wormholePresence } from "./wire-surface";
+import { WireWorld } from "./wire-world";
 import { WireWormhole } from "./wire-wormhole";
 
-// Camera track: one long continuous ride (hero grid → curves → tunnel →
-// wormhole → end).
-const TRACK_START = 9;
-const TRACK_END = -440;
-const HAND_Z = -436;
+// Camera track: one long continuous ride (title field → the ground gives way →
+// corridor → open country → the ground closes → wormhole → end).
+const TRACK_START = 146;
+const TRACK_END = -662;
+const HAND_Z = -658;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -33,7 +31,9 @@ function Starfield({ count }: { count: number }) {
     for (let i = 0; i < count; i += 1) {
       positions[i * 3] = (Math.random() - 0.5) * 80;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 55;
-      positions[i * 3 + 2] = 8 - Math.random() * 80;
+      // The band has to start centred on the camera, not on the origin —
+      // otherwise the sky is empty for the whole opening act.
+      positions[i * 3 + 2] = TRACK_START + 8 - Math.random() * 88;
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -55,9 +55,12 @@ function Starfield({ count }: { count: number }) {
       const inside = enclosure(camZ);
       const worm = wormholePresence(camZ);
       const base = THREE.MathUtils.lerp(0.7, 0.12, inside);
+      // The streak field replaces the starfield outright during the jump —
+      // two star layers at once just reads as noise.
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
-        THREE.MathUtils.lerp(base, 0.92, worm),
+        THREE.MathUtils.lerp(base, 0.92, worm) *
+          (1 - warpAmount(scroll.progress)),
         3,
         dt,
       );
@@ -101,15 +104,9 @@ function Rig() {
     const camZ = damp(camera.position.z, base - surge, 4.2, cdt);
     camera.position.z = camZ;
 
-    // Follow the curved centerline; look slightly ahead so turns feel real.
-    const cx = pathX(camZ);
-    const ahead = pathX(camZ - 6);
-    camera.position.x = damp(
-      camera.position.x,
-      cx + state.pointer.x * 0.35,
-      4,
-      cdt,
-    );
+    // The run is dead straight down the centreline — only mouse parallax
+    // shifts you off it.
+    camera.position.x = damp(camera.position.x, state.pointer.x * 0.35, 4, cdt);
     // Ride centred in the tunnel while closed → symmetric view.
     camera.position.y = damp(
       camera.position.y,
@@ -118,15 +115,12 @@ function Rig() {
       cdt,
     );
 
-    // Yaw toward the path ahead, bank into the curve, pitch with the slope.
+    // No yaw or bank without a curve to lean into; pitch still follows the
+    // slope of the rolling floor.
     camera.rotation.order = "YXZ";
-    const yaw = Math.atan2(ahead - cx, 6) * 0.32;
-    const bank = reduce ? 0 : (ahead - cx) * 0.012;
     const slope = (rideY(camZ - 5) - rideY(camZ)) / 5;
     const pitch = reduce ? 0 : Math.atan(slope) * 0.55;
-    camera.rotation.y = damp(camera.rotation.y, yaw, 4, cdt);
     camera.rotation.x = damp(camera.rotation.x, pitch, 4, cdt);
-    camera.rotation.z = damp(camera.rotation.z, bank, 4, cdt);
 
     // FOV kick with speed (skipped for reduced motion).
     const cam = camera as THREE.PerspectiveCamera;
@@ -156,13 +150,25 @@ export function PortalCanvas() {
     <div className="xp-stage">
       <Canvas
         dpr={scroll.quality === "lite" ? [1, 1.3] : [1, 1.8]}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
-        camera={{ fov: 55, near: 0.1, far: 110, position: [0, 0, TRACK_START] }}
+        gl={{
+          antialias: true,
+          powerPreference: "high-performance",
+          // Lets the frame be read back after it is drawn, which is the only
+          // way to capture this canvas — for OG art, and for looking at the
+          // thing while building it.
+          preserveDrawingBuffer: true,
+        }}
+        camera={{ fov: 55, near: 0.1, far: 190, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
-        <fog attach="fog" args={["#0e0e10", 14, 50]} />
+        {/* Reaches far enough that the title field and the curve of the ground
+            beyond it are both readable from the opening frame. */}
+        <fog attach="fog" args={["#0e0e10", 26, 105]} />
         <Starfield count={stars} />
         <WireWorld />
+        <WireTitle />
+        <PortalLight />
+        <WireWarp />
         <WireWormhole />
         <FinaleHand />
         <Rig />
