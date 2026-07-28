@@ -68,10 +68,10 @@ export type ScrollState = typeof scroll;
  * Camera z is `lerp(TRACK_START, TRACK_END, progress)` in `portal-canvas.tsx`,
  * so these fractions also decide which world event each beat lands on.
  */
-const JUMP_IN = 0.158; // "3" — streaks begin stretching
-const JUMP_FULL = 0.286; // past "1", fully in hyperspace
-const JUMP_HOLD = 0.498; // last track card
-const JUMP_OUT = 0.54; // back out, the wire world returns
+const JUMP_IN = 0.149; // "3" — streaks begin stretching
+const JUMP_FULL = 0.271; // past "1", fully in hyperspace
+const JUMP_HOLD = 0.469; // last track card
+const JUMP_OUT = 0.51; // back out, the wire world returns
 
 /**
  * 0 → 1 → 0 across the hyperspace beat.

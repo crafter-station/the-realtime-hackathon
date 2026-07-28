@@ -79,6 +79,58 @@ const TRACKS = [
   },
 ] as const;
 
+/**
+ * The briefing content.
+ *
+ * Every line here is sourced, because the brief forbids the alternative in as
+ * many words: "Reuse real event data from `src/lib/` where it exists; **do not
+ * fabricate** schedule". The schedule rows come from `emails/_lib/event-details.ts`,
+ * which is what the mentors and judges were actually sent — the Saturday
+ * mentoring window, the Sunday 10:00 review, the 16:00–18:00 deliberation and
+ * the 19:00 showcase are all quoted from there rather than imagined.
+ *
+ * Note what is deliberately absent: the judging *rubric*. `event-details.ts`
+ * says "the official rubric … will be sent directly to confirmed judges", so it
+ * is not public and it is not ours to summarise. The page says who judges and
+ * when, and stops.
+ *
+ * The 39 hours are not a slogan either: kickoff Friday 19:00 to submissions
+ * closing Sunday 10:00 is exactly 39 hours, which is the same window the
+ * JSON-LD in `layout.tsx` publishes.
+ */
+const FORMAT_FACTS = [
+  ["Window", "Fri 19:00 → Sun 10:00, 39 hours"],
+  ["Teams", "1 to 4 people — entering alone is fine"],
+  ["Where", "Online, in Discord"],
+  ["Cost", "Free"],
+  ["Ship", "A working product built with Portal"],
+] as const;
+
+const SCHEDULE = [
+  ["Fri 19:00", "Kickoff."],
+  ["Sat 09:00–21:00", "Mentor office hours, in the Discord channels."],
+  ["Sun 10:00", "Submissions close. Judges begin reviewing."],
+  ["Sun 16:00–18:00", "Judges deliberate and pick the winners."],
+  ["Sun 19:00", "Top-five showcase and winners announced, on Discord."],
+] as const;
+
+const FAQ = [
+  ["Do I need a team?", "No. Teams are one to four people, and one is a team."],
+  ["What does it cost?", "Nothing. Registration is free."],
+  [
+    "Do I have to pick a track?",
+    "Pick one, or ignore them all — Wild Signal exists for the things that fit nowhere.",
+  ],
+  [
+    "How is it judged?",
+    "Judges review every submission from Sunday 10:00 against the official criteria, then deliberate in the afternoon. Winners are announced at 19:00.",
+  ],
+  [
+    "What are the prizes?",
+    "US$800 in cash: US$500 for first, US$300 for second.",
+  ],
+] as const;
+
 export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
@@ -302,6 +354,52 @@ export function Experience() {
             Open country, and a weekend to build in it.{" "}
             <strong>This is where it starts.</strong>
           </p>
+        </section>
+
+        {/* 05.9 — THE BRIEFING. Brief spine 9, and the largest gap the page
+            had: a hackathon page with no schedule, no format and no answer to
+            "do I need a team" is missing the things somebody actually needs
+            before they register. It sits here, on the open ground after the
+            ride, because this is where the spectacle stops and the practical
+            questions start — and because the stretch was empty scroll anyway. */}
+        <div className="xp-gap--brief" aria-hidden />
+        <section className="xp-section xp-section--panel">
+          <p className="xp-label">The format</p>
+          <h2 className="xp-panel__head">39 hours, start to submission</h2>
+          <dl className="xp-facts">
+            {FORMAT_FACTS.map(([term, value]) => (
+              <div className="xp-facts__row" key={term}>
+                <dt>{term}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section className="xp-section xp-section--panel">
+          <p className="xp-label">Schedule</p>
+          <h2 className="xp-panel__head">All times Lima, UTC&minus;5</h2>
+          <ol className="xp-schedule">
+            {SCHEDULE.map(([when, what]) => (
+              <li className="xp-schedule__row" key={when}>
+                <span className="xp-schedule__when">{when}</span>
+                <span className="xp-schedule__what">{what}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="xp-section xp-section--panel">
+          <p className="xp-label">Questions</p>
+          <h2 className="xp-panel__head">Before you register</h2>
+          <dl className="xp-faq">
+            {FAQ.map(([q, a]) => (
+              <div className="xp-faq__row" key={q}>
+                <dt>{q}</dt>
+                <dd>{a}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}

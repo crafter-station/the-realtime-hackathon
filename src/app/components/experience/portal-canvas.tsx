@@ -22,7 +22,7 @@ import { WireWormhole } from "./wire-wormhole";
 // Camera track: one long continuous ride (the well → the ground gives way →
 // corridor → open country → the ground closes → wormhole → end).
 const TRACK_START = 146;
-const TRACK_END = -898;
+const TRACK_END = -960;
 /**
  * The hand sits a short way in front of where the ride stops.
  *
@@ -33,7 +33,7 @@ const TRACK_END = -898;
  * been. Seventeen units ahead puts it inside the fog's near plane at 26, so it
  * arrives clear rather than grey.
  */
-const HAND_Z = -915;
+const HAND_Z = -977;
 /**
  * Off the centreline. Art-direction asks for the hand "beside a giant REGISTER
  * button" — centred it lands on the finale's own line of copy and occludes it,

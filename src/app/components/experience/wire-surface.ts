@@ -40,7 +40,7 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
 
 /** The field the well is sunk into sits out here, ahead of the corridor mouth. */
 export const WORLD_Z_START = 150;
-export const WORLD_Z_END = -1080;
+export const WORLD_Z_END = -1140;
 
 // Wormhole stretch — the spiralling vortex the closed tube empties into.
 export const WORM_Z_IN = -580;
@@ -89,8 +89,8 @@ const FLARE_END = -132; // fully open country
 const CONE_START = -430; // the plane starts curling a second time
 const CONE_WRAPPED = -520; // closed into a circular tube
 const CONE_JOIN = -580; // tube sits on the wormhole's axis (= WORM_Z_IN)
-const EXIT_START = -778; // the far mouth: the tube begins to open again
-const EXIT_OPEN = -858; // out the other side, flat country
+const EXIT_START = -740; // the far mouth: the tube begins to open again
+const EXIT_OPEN = -800; // out the other side, flat country
 
 /**
  * Coming out the far side of the wormhole.

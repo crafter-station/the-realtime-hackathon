@@ -4534,6 +4534,92 @@ html.xp body {
   );
 }
 
+/* -- The briefing panels ---------------------------------------------------
+   Schedule, format and FAQ. These are the only stretches on the page you read
+   rather than watch, so they get a measure and a left edge instead of the
+   centred beat treatment — and they sit in columns 1–5 like the hero, keeping
+   the centre band clear, which the reference calls the one rule not to break. */
+.xp-section--panel {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  text-align: left;
+  padding-inline: max(
+    clamp(1.25rem, 4vw, 3rem),
+    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
+  );
+}
+.xp-section--panel > * {
+  max-width: min(100%, 40rem);
+}
+.xp-panel__head {
+  /* Stacked rather than wide, so it can never reach the HUD's corner. The beat
+     headings are short enough that this never came up; these are sentences, and
+     at 760px "All times Lima, UTC-5" ran straight under the depth readout. */
+  max-width: 17ch;
+  margin: 0.6rem 0 1.8rem;
+  font-family: var(--font-space), var(--sans);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3.2vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+/* Rows are a hairline grid: label left, value right, nothing boxed. */
+.xp-facts,
+.xp-faq,
+.xp-schedule {
+  width: min(100%, 40rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.xp-facts__row,
+.xp-schedule__row,
+.xp-faq__row {
+  display: grid;
+  gap: 0.2rem 1.6rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.xp-facts__row:last-child,
+.xp-schedule__row:last-child,
+.xp-faq__row:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+@media (min-width: 34rem) {
+  .xp-facts__row,
+  .xp-schedule__row {
+    grid-template-columns: 11rem 1fr;
+  }
+  .xp-faq__row {
+    grid-template-columns: 14rem 1fr;
+  }
+}
+.xp-facts dt,
+.xp-schedule__when,
+.xp-faq dt {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+.xp-facts dd,
+.xp-schedule__what,
+.xp-faq dd {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+  line-height: 1.5;
+  color: #ffffff;
+}
+.xp-faq dd {
+  color: var(--ink-2);
+}
+
 /* Organiser credit under the finale CTA. Quiet on purpose — it is a colophon,
    not a second call to action. */
 .xp-colophon {
@@ -4898,10 +4984,14 @@ html.xp body {
    Without this stretch the page ends inside the vortex and the whole journey
    is a portal that opens onto another portal. */
 .xp-gap--emerge {
-  height: 292svh;
+  height: 200svh;
+}
+/* Short breath between "You're through" and the practical questions. */
+.xp-gap--brief {
+  height: 70svh;
 }
 .xp-gap--arrive {
-  height: 223svh;
+  height: 120svh;
 }
 
 /* Giant beat typography (prizes / countdown). */
