@@ -28,14 +28,21 @@ export type ScrollState = typeof scroll;
  *
  * The streaks are WebGL and the track cards are DOM, so the one thing that has
  * to agree between them is *scroll position* — tying the effect to progress
- * keeps it in sync with the overlay by construction. These four numbers are the
- * section boundaries in `globals.css` divided by the total scrollable height;
- * if the `--jump` / `--cards` gaps change, change these with them.
+ * keeps it in sync with the overlay by construction. These four numbers are
+ * section boundaries in `globals.css` divided by the total scrollable height.
+ *
+ * They are derived, not chosen, and two separate things move them:
+ *   - any `.xp-gap--*` / `.xp-count` / `.xp-trackSlot` height in `globals.css`;
+ *   - the *number* of `.xp-section`s in `experience.tsx` — adding a track card
+ *     adds 100svh to the total and shifts every fraction below.
+ * Re-derive them together or the streaks drift out of step with the copy.
+ * Camera z is `lerp(TRACK_START, TRACK_END, progress)` in `portal-canvas.tsx`,
+ * so these fractions also decide which world event each beat lands on.
  */
-const JUMP_IN = 0.193; // "3" — streaks begin stretching
-const JUMP_FULL = 0.373; // past "1", fully in hyperspace
-const JUMP_HOLD = 0.626; // last track card
-const JUMP_OUT = 0.686; // back out, the wire world returns
+const JUMP_IN = 0.185; // "3" — streaks begin stretching
+const JUMP_FULL = 0.356; // past "1", fully in hyperspace
+const JUMP_HOLD = 0.643; // last track card
+const JUMP_OUT = 0.7; // back out, the wire world returns
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));

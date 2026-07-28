@@ -34,30 +34,42 @@ const HERO_FADE_START = 0.03;
 const HERO_FADE_END = 0.115;
 
 /**
- * The four tracks, revealed one card at a time while you fly through the
+ * The five tracks, revealed one card at a time while you fly through the
  * streak field. Sides alternate so the cards never stack over the vanishing
  * point, which is where the eye is already pinned.
+ *
+ * Names and framing come from `docs/portal-experience-brief.md` §3–7, where
+ * each track is a Portal capability rather than a theme we liked the sound of.
+ * The brief is explicit that these are not ours to invent ("no filler feature
+ * lists that don't map to a real Portal capability"), so change them there
+ * first. Adding or removing one changes the `JUMP_*` thresholds in `store.ts`
+ * — see the note there.
  */
 const TRACKS = [
   {
-    name: "CO-OP AI",
-    copy: "People and agents sharing one live workspace.",
+    name: "MULTIPLAYER",
+    copy: "Shared live rooms: channels, presence, chat.",
     side: "left",
   },
   {
-    name: "LIVE SYSTEMS",
-    copy: "Products that act on changing data.",
+    name: "LIVE STREAMING",
+    copy: "Broadcast state to a crowd in realtime.",
     side: "right",
   },
   {
-    name: "CROWD MODE",
-    copy: "Experiences shaped by the audience.",
+    name: "REAL-TIME LOCATION",
+    copy: "Living maps, presence in space.",
     side: "left",
+  },
+  {
+    name: "AI AGENTS",
+    copy: "Autonomous agents acting on live signals.",
+    side: "right",
   },
   {
     name: "WILD SIGNAL",
-    copy: "Realtime experiments without a category.",
-    side: "right",
+    copy: "Open realtime experiments without a category.",
+    side: "left",
   },
 ] as const;
 
@@ -168,7 +180,7 @@ export function Experience() {
         <div className="xp-gap--jump" aria-hidden />
 
         <section className="xp-section xp-section--beat xp-tracksIntro">
-          <p className="xp-label">Four tracks</p>
+          <p className="xp-label">Five tracks</p>
           <p className="xp-beat-line">
             Pick one, or ignore them all. <strong>Ship something live.</strong>
           </p>
