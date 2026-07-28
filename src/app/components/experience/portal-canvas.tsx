@@ -23,6 +23,23 @@ import { WireWormhole } from "./wire-wormhole";
 // corridor → open country → the ground closes → wormhole → end).
 const TRACK_START = 146;
 const TRACK_END = -960;
+
+/**
+ * Where the camera stands still under `prefers-reduced-motion`.
+ *
+ * visual-reference §4.5 asks for exactly this: "corridor freezes at a static
+ * one-point plate; content cross-fades. **The still frame must be a good poster
+ * on its own.**" Scaling the streak field to 0.22 was a discount, not a freeze —
+ * the camera still travelled the full 1,106 units, which is the large-field
+ * motion the setting is actually about.
+ *
+ * The station is the corridor rather than the well, because the spec names the
+ * corridor and because a one-point plate is what a rectangular tunnel gives you
+ * and a funnel does not. The cost is real and worth stating: somebody who asks
+ * for reduced motion gets the tunnel but not the fall into the well — and the
+ * fall is the motion, which is the thing they asked us to remove.
+ */
+const POSTER_Z = -34;
 /**
  * The hand sits a short way in front of where the ride stops.
  *
@@ -119,8 +136,12 @@ function Rig() {
     const cdt = Math.min(dt, 0.05);
     const v = Math.min(Math.abs(scroll.velocity), 30);
 
-    // Forward travel + a velocity surge pushing you deeper.
-    const base = THREE.MathUtils.lerp(TRACK_START, TRACK_END, scroll.progress);
+    // Forward travel + a velocity surge pushing you deeper — or, for reduced
+    // motion, no travel at all: the camera holds its station and the copy
+    // scrolls over a still frame.
+    const base = reduce
+      ? POSTER_Z
+      : THREE.MathUtils.lerp(TRACK_START, TRACK_END, scroll.progress);
     const surge = reduce ? 0 : v * 0.12;
     const camZ = damp(camera.position.z, base - surge, 4.2, cdt);
     camera.position.z = camZ;

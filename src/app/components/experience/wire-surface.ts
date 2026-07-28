@@ -208,6 +208,30 @@ const COVER_OUT = 190; // = R_MAX in `wire-well.tsx`
  * The band is narrow and sits out where the polar mesh has already faded with
  * radius, so the handover happens between two things that are both nearly gone.
  */
+/**
+ * Darkens both grids across the seam between them.
+ *
+ * `wellCoverage` splits the frame, but a split is a crossfade, and a crossfade
+ * between two *topologies* does not blend — at coverage 0.5 you get the polar
+ * mesh at half strength and the Cartesian one at half strength drawn over each
+ * other, which reads as a second, finer mesh laid across the rings. Measured at
+ * (x = -6, z = 66) it was 0.62 against 0.60: both grids, both plainly visible,
+ * dead centre of frame.
+ *
+ * The band cannot be moved somewhere unseen, because the well spans z 38..162
+ * and the curl runs 140..6 — they overlap by construction, and the camera looks
+ * straight down the overlap. So instead of hiding the seam, both sides are dimmed
+ * across it: two grids at 15% read as nothing, where two at 60% read as a mistake.
+ *
+ * `4c(1-c)` peaks at exactly the coverage where the double-draw is worst and is
+ * zero wherever one grid owns the point outright, so nothing outside the seam
+ * loses any brightness.
+ */
+export function handoverDim(x: number, z: number): number {
+  const c = wellCoverage(x, z);
+  return 1 - 0.82 * (4 * c * (1 - c));
+}
+
 export function wellCoverage(x: number, z: number): number {
   const r = Math.hypot(x, z - WELL_Z);
   const inside = 1 - smoothstep(COVER_IN, COVER_OUT, r);

@@ -5,6 +5,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import {
+  handoverDim,
   surfacePoint,
   WELL_RADIUS,
   WELL_Z,
@@ -221,7 +222,7 @@ export function WellGrid() {
       // the outermost ones kept drawing at a fifth strength right across the
       // Cartesian grid they were supposed to have handed over to.
       const out = 1 - THREE.MathUtils.smoothstep(r, WELL_RADIUS * 1.1, R_MAX);
-      return wellCoverage(x, z) * out * (0.55 + 2.8 * lit);
+      return wellCoverage(x, z) * handoverDim(x, z) * out * (0.55 + 2.8 * lit);
     };
 
     const seg = (

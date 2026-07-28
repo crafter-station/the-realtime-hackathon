@@ -97,5 +97,8 @@ export function warpAmount(progress: number): number {
  * their operating system for.
  */
 export function warpRender(progress: number): number {
-  return warpAmount(progress) * (scroll.reduce ? 0.22 : 1);
+  // Off, not quieter. The camera holds still under reduced motion, so a streak
+  // field firing past a stationary viewpoint is motion with nothing motivating
+  // it — the worst of both. 0.22 was a discount from when the ride still moved.
+  return scroll.reduce ? 0 : warpAmount(progress);
 }

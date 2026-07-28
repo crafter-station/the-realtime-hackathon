@@ -8,6 +8,7 @@ import {
   columnFade,
   FLOOR_COLS,
   FLOOR_HW,
+  handoverDim,
   PERIMETER,
   ringFade,
   STEP_X,
@@ -51,8 +52,16 @@ export function WireWorld() {
       // columns laid across a radial dip read as a warped tablecloth, and two
       // grids drawn over each other read as neither. Per *point*, because the
       // mesh we are yielding to is radial — see `wellCoverage`.
-      const va = surfaceVisibility(az) * fa * (1 - wellCoverage(ax, az));
-      const vb = surfaceVisibility(bz) * fb * (1 - wellCoverage(bx, bz));
+      const va =
+        surfaceVisibility(az) *
+        fa *
+        (1 - wellCoverage(ax, az)) *
+        handoverDim(ax, az);
+      const vb =
+        surfaceVisibility(bz) *
+        fb *
+        (1 - wellCoverage(bx, bz)) *
+        handoverDim(bx, bz);
       if (va < 0.004 && vb < 0.004) return;
       const [x0, y0] = surfacePoint(ax, az);
       const [x1, y1] = surfacePoint(bx, bz);
