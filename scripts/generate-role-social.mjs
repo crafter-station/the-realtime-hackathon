@@ -7,12 +7,78 @@ import sharp from "sharp";
 
 const root = process.cwd();
 const brandDirectory = path.join(root, "public", "brand-assets");
-const outputDirectory = path.join(brandDirectory, "social", "static", "judges");
+const role = process.argv[2];
+const roleConfigs = {
+  judges: {
+    label: "OFFICIAL JUDGE",
+    people: [
+      {
+        firstName: "ARTURO",
+        image: "arturo-barrantes.png",
+        lastName: "BARRANTES",
+        roles: ["FOUNDER @ CLOUDFORGE AI"],
+        slug: "arturo-barrantes",
+      },
+      {
+        firstName: "MARIA CRISTINA",
+        image: "maria-cristina-ruelas.png",
+        lastName: "RUELAS",
+        roles: ["FOUNDER @ 3DEVLABS"],
+        slug: "maria-cristina-ruelas",
+      },
+      {
+        firstName: "VICTOR",
+        image: "victor-galvez.png",
+        lastName: "GALVEZ",
+        roles: ["TECH LEAD @ BCP"],
+        slug: "victor-galvez",
+      },
+    ],
+  },
+  mentors: {
+    label: "OFFICIAL MENTOR",
+    people: [
+      {
+        firstName: "ARTURO",
+        image: "arturo-barrantes.png",
+        lastName: "BARRANTES",
+        roles: ["CEO @ CLOUDFORGE"],
+        slug: "arturo-barrantes",
+      },
+      {
+        firstName: "DAVID",
+        image: "david-morales-norato.png",
+        lastName: "MORALES NORATO",
+        roles: ["CTO @ INERXIA"],
+        slug: "david-morales-norato",
+      },
+      {
+        firstName: "IGNACIO",
+        image: "ignacio-velasquez.png",
+        lastName: "VELASQUEZ",
+        roles: ["COFOUNDER @ GPT CHAIN"],
+        slug: "ignacio-velasquez",
+      },
+      {
+        firstName: "MARCELO",
+        image: "marcelo-arias.png",
+        lastName: "ARIAS",
+        roles: ["FOUNDER @ ANIMO"],
+        slug: "marcelo-arias",
+      },
+    ],
+  },
+};
+const roleConfig = roleConfigs[role];
+if (!roleConfig) {
+  throw new Error('Provide the role as "judges" or "mentors".');
+}
+const outputDirectory = path.join(brandDirectory, "social", "static", role);
 const portraitDirectory = path.join(
   brandDirectory,
   "sources",
   "portraits",
-  "judges",
+  role,
 );
 const fontFileName = "GeistPixel-Square.ttf";
 const fontDirectories = {
@@ -109,40 +175,16 @@ const particleUri = asDataUri(
   "image/png",
 );
 
-const judges = [
-  {
-    firstName: "ARTURO",
-    image: "arturo-barrantes.png",
-    lastName: "BARRANTES",
-    roles: ["FOUNDER @ CLOUDFORGE AI"],
-    slug: "arturo-barrantes",
-  },
-  {
-    firstName: "MARIA CRISTINA",
-    image: "maria-cristina-ruelas.png",
-    lastName: "RUELAS",
-    roles: ["FOUNDER @ 3DEVLABS"],
-    slug: "maria-cristina-ruelas",
-  },
-  {
-    firstName: "VICTOR",
-    image: "victor-galvez.png",
-    lastName: "GALVEZ",
-    roles: ["TECH LEAD @ BCP"],
-    slug: "victor-galvez",
-  },
-];
-
 const width = 1_080;
 const height = 1_350;
 
 await mkdir(outputDirectory, { recursive: true });
-for (const judge of judges) {
+for (const person of roleConfig.people) {
   const portraitUri = asDataUri(
-    await readFile(path.join(portraitDirectory, judge.image)),
+    await readFile(path.join(portraitDirectory, person.image)),
     "image/png",
   );
-  const roles = judge.roles
+  const roles = person.roles
     .map((role, index) =>
       textPath(role, {
         anchor: "middle",
@@ -175,10 +217,10 @@ for (const judge of judges) {
 
       <image href="${portalLogoUri}" x="64" y="58" width="48" height="48"/>
       <image href="${crafterStationLogoUri}" x="972" y="60" width="44" height="44"/>
-      ${textPath("OFFICIAL JUDGE", { anchor: "middle", fill: colors.orange, letterSpacing: 0.12, size: 27, x: 540, y: 172 })}
+      ${textPath(roleConfig.label, { anchor: "middle", fill: colors.orange, letterSpacing: 0.12, size: 27, x: 540, y: 172 })}
 
-      ${textPath(judge.firstName, { anchor: "middle", fill: colors.white, letterSpacing: -0.065, size: judge.firstName.length > 10 ? 70 : 86, x: 540, y: 1_010 })}
-      ${textPath(judge.lastName, { anchor: "middle", fill: colors.orange, letterSpacing: -0.065, size: 96, x: 540, y: 1_094 })}
+      ${textPath(person.firstName, { anchor: "middle", fill: colors.white, letterSpacing: -0.065, size: person.firstName.length > 10 ? 70 : 86, x: 540, y: 1_010 })}
+      ${textPath(person.lastName, { anchor: "middle", fill: colors.orange, letterSpacing: -0.065, size: person.lastName.length > 12 ? 76 : 96, x: 540, y: 1_094 })}
       ${roles}
 
       ${textPath("THE REALTIME HACKATHON", { fill: colors.particle, letterSpacing: 0.1, size: 18, x: 64, y: 1_291 })}
@@ -187,7 +229,7 @@ for (const judge of judges) {
   `);
 
   const png = await sharp(svg).png({ compressionLevel: 9 }).toBuffer();
-  const outputName = `${judge.slug}-linkedin-4x5`;
+  const outputName = `${person.slug}-linkedin-4x5`;
   await writeFile(path.join(outputDirectory, `${outputName}.png`), png);
   await sharp(png)
     .webp({ quality: 92, smartSubsample: true })
@@ -195,5 +237,5 @@ for (const judge of judges) {
 }
 
 console.log(
-  `Generated judge social assets in ${path.relative(root, outputDirectory)}`,
+  `Generated ${role} social assets in ${path.relative(root, outputDirectory)}`,
 );

@@ -158,12 +158,13 @@ bun run font:setup
 `bun run brand:generate` overwrites the complete tracked asset set. Run it only
 when intentionally regenerating every brand output.
 
-Judge announcement artwork can be regenerated independently after updating the
-transparent portraits in
-`public/brand-assets/sources/portraits/judges/`:
+Judge and mentor announcement artwork can be regenerated independently after
+updating the transparent portraits in
+`public/brand-assets/sources/portraits/<role>/`:
 
 ```bash
 bun run brand:generate:judges
+bun run brand:generate:mentors
 ```
 
 ## License

@@ -23,12 +23,14 @@ Event website: [hack.useportal.co](https://hack.useportal.co)
 | Crafter Station logo | `brand/logos/crafter-station-*` |
 | Instagram or LinkedIn event post | `social/static/event/` |
 | Judge announcement post | `social/static/judges/` |
+| Mentor announcement post | `social/static/mentors/` |
 | Instagram video | `social/video/instagram/` |
 | Open Graph or link-preview image | `web/open-graph/` |
 | Luma event image | `web/listings/` |
 | Favicon or app icon | `web/icons/` |
 | Email artwork | `email/` |
 | Editable judge portrait | `sources/portraits/judges/` |
+| Editable mentor portrait | `sources/portraits/mentors/` |
 | Canonical logo geometry | `sources/logos/` |
 | Dimensions for every asset | `manifest.json` |
 
@@ -71,7 +73,8 @@ Ready-to-publish campaign content.
 social/
 ├── static/
 │   ├── event/     # General event posts for Instagram, LinkedIn, and X
-│   └── judges/    # Individual judge announcement posts
+│   ├── judges/    # Individual judge announcement posts
+│   └── mentors/   # Individual mentor announcement posts
 └── video/
     └── instagram/ # Rendered event-poster and schedule videos
 ```
@@ -96,8 +99,10 @@ Inputs used to regenerate publishing assets.
 
 ```text
 sources/
-├── logos/                 # Canonical Portal and Crafter Station vectors
-└── portraits/judges/      # Transparent, pixel-treated judge portraits
+├── logos/                  # Canonical Portal and Crafter Station vectors
+└── portraits/
+    ├── judges/             # Transparent, pixel-treated judge portraits
+    └── mentors/            # Transparent, pixel-treated mentor portraits
 ```
 
 Do not publish files from `sources/logos/` directly. Some masters intentionally
@@ -210,11 +215,12 @@ bun run font:setup
 bun run brand:generate
 ```
 
-After changing a portrait in `sources/portraits/judges/`, regenerate judge
-announcements separately:
+After changing a portrait in `sources/portraits/judges/` or
+`sources/portraits/mentors/`, regenerate role announcements separately:
 
 ```bash
 bun run brand:generate:judges
+bun run brand:generate:mentors
 ```
 
 Render the Instagram videos with:
