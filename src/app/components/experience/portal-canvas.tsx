@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll, warpRender } from "./store";
+import { WireCompanion } from "./wire-companion";
 import { WireHand } from "./wire-hand";
 import { PortalLight } from "./wire-light";
 import {
@@ -190,6 +191,7 @@ export function PortalCanvas() {
         <Starfield count={stars} />
         <WireWorld />
         <WellGrid />
+        <WireCompanion />
         <PortalLight />
         <WireWarp />
         <WireWormhole />

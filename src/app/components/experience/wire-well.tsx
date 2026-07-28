@@ -8,7 +8,7 @@ import {
   surfacePoint,
   WELL_RADIUS,
   WELL_Z,
-  wellPresence,
+  wellCoverage,
   wellThroatY,
 } from "./wire-surface";
 
@@ -47,56 +47,6 @@ const SPOKES = 120;
 const RING_BIAS = 1.15;
 
 const ringRadius = (i: number) => R_MAX * (i / RINGS) ** RING_BIAS;
-
-/**
- * A person, standing on the floor of the well.
- *
- * Doing all the work of scale. Without it the well is an abstract funnel and
- * could be a metre across or a light-year; with it the walls read as enormous
- * and the whole frame acquires a horizon. It is a silhouette rather than a
- * model on purpose — anything with detail would invite you to look at *it*,
- * and the subject is the portal it is standing in.
- *
- * Billboarded, because a flat cut-out seen from the side stops being a person.
- */
-function WellFigure() {
-  const texture = useMemo(() => {
-    const w = 64;
-    const h = 128;
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.fillStyle = "#05070a";
-      // head, torso, legs — a stance, not an anatomy
-      ctx.beginPath();
-      ctx.arc(w / 2, h * 0.13, w * 0.11, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillRect(w * 0.37, h * 0.22, w * 0.26, h * 0.4);
-      ctx.fillRect(w * 0.4, h * 0.6, w * 0.08, h * 0.38);
-      ctx.fillRect(w * 0.52, h * 0.6, w * 0.08, h * 0.38);
-    }
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
-  }, []);
-
-  const height = 3.4;
-  return (
-    <sprite
-      position={[0, wellThroatY() + height / 2, WELL_Z]}
-      scale={[height / 2, height, 1]}
-    >
-      <spriteMaterial
-        map={texture}
-        transparent
-        depthWrite={false}
-        fog={false}
-      />
-    </sprite>
-  );
-}
 
 /**
  * Cursor gravity.
@@ -243,12 +193,16 @@ export function WellGrid() {
     // Vertex colours above 1 clamp at render, which is exactly the over-exposed
     // band the reference has either side of the figure.
     const fade = (r: number, theta: number) => {
+      const x = r * Math.cos(theta);
       const z = WELL_Z + r * Math.sin(theta);
-      const out = 1 - THREE.MathUtils.smoothstep(r, WELL_RADIUS * 1.1, R_MAX);
       const lit =
         1 -
         THREE.MathUtils.smoothstep(r, WELL_RADIUS * 0.06, WELL_RADIUS * 0.9);
-      return wellPresence(z) * (0.22 + 0.78 * out) * (0.55 + 2.8 * lit);
+      // No brightness floor. A floor meant the rings never actually ended, so
+      // the outermost ones kept drawing at a fifth strength right across the
+      // Cartesian grid they were supposed to have handed over to.
+      const out = 1 - THREE.MathUtils.smoothstep(r, WELL_RADIUS * 1.1, R_MAX);
+      return wellCoverage(x, z) * out * (0.55 + 2.8 * lit);
     };
 
     const seg = (
@@ -320,7 +274,6 @@ export function WellGrid() {
           onBeforeCompile={onBeforeCompile}
         />
       </lineSegments>
-      <WellFigure />
     </group>
   );
 }

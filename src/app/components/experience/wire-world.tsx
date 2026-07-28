@@ -16,7 +16,7 @@ import {
   surfaceVisibility,
   WORLD_Z_END,
   WORLD_Z_START,
-  wellPresence,
+  wellCoverage,
   wrap,
 } from "./wire-surface";
 
@@ -49,9 +49,10 @@ export function WireWorld() {
     ) => {
       // Yield the opening to the polar mesh in `wire-well.tsx`. Rows and
       // columns laid across a radial dip read as a warped tablecloth, and two
-      // grids drawn over each other read as neither.
-      const va = surfaceVisibility(az) * fa * (1 - wellPresence(az));
-      const vb = surfaceVisibility(bz) * fb * (1 - wellPresence(bz));
+      // grids drawn over each other read as neither. Per *point*, because the
+      // mesh we are yielding to is radial — see `wellCoverage`.
+      const va = surfaceVisibility(az) * fa * (1 - wellCoverage(ax, az));
+      const vb = surfaceVisibility(bz) * fb * (1 - wellCoverage(bx, bz));
       if (va < 0.004 && vb < 0.004) return;
       const [x0, y0] = surfacePoint(ax, az);
       const [x1, y1] = surfacePoint(bx, bz);
@@ -119,7 +120,9 @@ export function WireWorld() {
       pos[i * 3 + 2] = z;
       // Brighter where the surface is closing in — the throats read hot.
       const v =
-        surfaceVisibility(z) * (0.35 + 0.65 * wrap(z)) * (1 - wellPresence(z));
+        surfaceVisibility(z) *
+        (0.35 + 0.65 * wrap(z)) *
+        (1 - wellCoverage((u - 0.5) * PERIMETER, z));
       col[i * 3] = v;
       col[i * 3 + 1] = v;
       col[i * 3 + 2] = v;

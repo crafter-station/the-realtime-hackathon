@@ -206,6 +206,35 @@ export function wellPresence(z: number): number {
   return flat * opening;
 }
 
+/** Where the polar mesh's outer edge hands over to the Cartesian grid. */
+const COVER_IN = 168;
+const COVER_OUT = 190; // = R_MAX in `wire-well.tsx`
+
+/**
+ * Which of the two grids owns a point on the surface.
+ *
+ * 1 = the polar mesh draws it, 0 = the Cartesian one does. They read this same
+ * function of the same point and take complementary halves, so between them
+ * every point is drawn exactly once.
+ *
+ * It has to take x as well as z, and that is the whole reason it exists.
+ * `wellPresence` is a function of depth alone, which is fine for a grid made of
+ * rows and columns and wrong for one made of rings: a ring of radius 170 passes
+ * through z ≈ WELL_Z out at the frame edges, where depth-only says "the well
+ * owns 63% of this" and the Cartesian grid happily draws the other 37% straight
+ * across it. Two topologies at partial strength do not blend — they cross, and
+ * you can see every crossing.
+ *
+ * The band is narrow and sits out where the polar mesh has already faded with
+ * radius, so the handover happens between two things that are both nearly gone.
+ */
+export function wellCoverage(x: number, z: number): number {
+  const r = Math.hypot(x, z - WELL_Z);
+  const inside = 1 - smoothstep(COVER_IN, COVER_OUT, r);
+  const flat = 1 - smoothstep(0.05, 0.45, wrap(z));
+  return inside * flat;
+}
+
 /**
  * Rolling ground height. This is what makes the ride rise and fall.
  *
