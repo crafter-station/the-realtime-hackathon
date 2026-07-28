@@ -151,9 +151,9 @@ export function waveWindow(z: number): number {
  * without flattening the walls the way a smaller exponent would.
  */
 export const WELL_Z = 100; // centre, far enough ahead to sit on the eye line
-export const WELL_RADIUS = 42;
-export const WELL_DEPTH = 24;
-const WELL_THROAT = 6;
+export const WELL_RADIUS = 62;
+export const WELL_DEPTH = 42;
+const WELL_THROAT = 19;
 
 export function wellDrop(x: number, z: number): number {
   const r = Math.hypot(x, z - WELL_Z);
@@ -165,6 +165,19 @@ export function wellDrop(x: number, z: number): number {
 /** Where the throat actually bottoms out — the depth the portal light sits at. */
 export function wellThroatY(): number {
   return floorY(0, WELL_Z);
+}
+
+/**
+ * How much of the frame the well owns, by depth.
+ *
+ * The polar mesh and the Cartesian one both draw the opening, and this is what
+ * splits the work: 1 while the plane is flat and the well is the subject, 0
+ * once the curl has taken over. Fading on `wrap` rather than on a z threshold
+ * means the handover tracks the geometry instead of a number that has to be
+ * kept in step with it.
+ */
+export function wellPresence(z: number): number {
+  return 1 - smoothstep(0.05, 0.45, wrap(z));
 }
 
 /**

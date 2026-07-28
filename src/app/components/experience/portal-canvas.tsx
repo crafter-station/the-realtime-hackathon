@@ -14,6 +14,7 @@ import {
   wormholePresence,
 } from "./wire-surface";
 import { WireWarp } from "./wire-warp";
+import { WellGrid } from "./wire-well";
 import { WireWorld } from "./wire-world";
 import { WireWormhole } from "./wire-wormhole";
 
@@ -23,7 +24,7 @@ const TRACK_START = 146;
 const TRACK_END = -662;
 const HAND_Z = -658;
 /** How far above the rim the opening frame sits, in world units. */
-const OPENING_LIFT = 6;
+const OPENING_LIFT = 13;
 
 function damp(current: number, target: number, lambda: number, dt: number) {
   return THREE.MathUtils.damp(current, target, lambda, dt);
@@ -82,7 +83,7 @@ function Starfield({ count }: { count: number }) {
         sizeAttenuation
         color="#ffffff"
         transparent
-        opacity={0.7}
+        opacity={0.95}
         depthWrite={false}
       />
     </points>
@@ -167,7 +168,7 @@ function FinaleHand() {
 }
 
 export function PortalCanvas() {
-  const stars = scroll.quality === "lite" ? 1200 : 3200;
+  const stars = scroll.quality === "lite" ? 2200 : 6500;
   return (
     <div className="xp-stage">
       <Canvas
@@ -188,6 +189,7 @@ export function PortalCanvas() {
         <fog attach="fog" args={["#0e0e10", 26, 105]} />
         <Starfield count={stars} />
         <WireWorld />
+        <WellGrid />
         <PortalLight />
         <WireWarp />
         <WireWormhole />

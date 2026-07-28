@@ -33,7 +33,18 @@ const GLOW_RGBA = [
   [1, "rgba(255,77,0,0)"],
 ] as const;
 
-function useGlowTexture() {
+/** The opening well's light. Cyan to match the reference, not Portal orange. */
+const WELL_GLOW_RGBA = [
+  [0, "rgba(255,255,255,1)"],
+  [0.14, "rgba(216,255,252,0.95)"],
+  [0.34, "rgba(120,240,230,0.6)"],
+  [0.62, "rgba(60,200,200,0.2)"],
+  [1, "rgba(40,170,180,0)"],
+] as const;
+
+type GlowRamp = readonly (readonly [number, string])[];
+
+function useGlowTexture(ramp: GlowRamp = GLOW_RGBA) {
   return useMemo(() => {
     const size = 256;
     const canvas = document.createElement("canvas");
@@ -49,14 +60,41 @@ function useGlowTexture() {
         size / 2,
         size / 2,
       );
-      for (const [stop, color] of GLOW_RGBA) g.addColorStop(stop, color);
+      for (const [stop, color] of ramp) g.addColorStop(stop, color);
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, size, size);
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
-  }, []);
+  }, [ramp]);
+}
+
+/**
+ * The light pooled in the bottom of the well.
+ *
+ * A billboard sprite is wrong for this one: the reference does not show a lamp
+ * hanging in the throat, it shows the *surface itself* glowing where the walls
+ * turn over, brightest in a band either side of the centre. So this is a disc
+ * lying flat on the floor of the well, additive, seen at a raking angle — which
+ * is what squashes it into that band from the camera's point of view.
+ */
+function WellPool({ z, y, radius }: { z: number; y: number; radius: number }) {
+  const texture = useGlowTexture(WELL_GLOW_RGBA);
+  return (
+    <mesh position={[0, y + 0.15, z]} rotation={[-Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[radius, 64]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        opacity={0.9}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        side={THREE.DoubleSide}
+        fog={false}
+      />
+    </mesh>
+  );
 }
 
 /**
@@ -120,7 +158,8 @@ export function PortalLight() {
         a reach shorter than that opening distance, so it read as zero until a
         third of the way down the page.
       */}
-      <Glow z={WELL_Z} y={wellThroatY()} radius={22} reach={260} peak={0.9} />
+      <WellPool z={WELL_Z} y={wellThroatY()} radius={44} />
+      <Glow z={WELL_Z} y={wellThroatY()} radius={11} reach={260} peak={0.3} />
       {/* The vortex at the end of the ride. */}
       <Glow z={WORM_Z_END + 30} radius={34} reach={150} peak={1} />
     </group>
