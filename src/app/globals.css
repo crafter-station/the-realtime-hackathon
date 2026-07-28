@@ -4770,7 +4770,7 @@ html.xp body {
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
 /* Scroll room for the plane to curl up around you and close into the corridor
-   (`MOUTH_SHUT`, z = 6, lands at ~0.17 progress). Long enough to read as the
+   (`MOUTH_SHUT`, z = 6, lands at ~0.13 progress). Long enough to read as the
    ground giving way, short enough that the first beat arrives before the ride
    feels like it has stalled. */
 .xp-gap--ride {
@@ -4873,7 +4873,7 @@ html.xp body {
   max-width: 26ch;
 }
 /* The second curl: the open country folds back into a circular tube
-   (`CONE_START` −430 → `CONE_WRAPPED` −520, i.e. ~0.71 → ~0.82 progress). This
+   (`CONE_START` −430 → `CONE_WRAPPED` −520, i.e. ~0.55 → ~0.64 progress). This
    gap has to span exactly that, because KICKOFF on the far side of it is
    supposed to land once the tube has closed. */
 .xp-gap--tunnel {

@@ -6,6 +6,8 @@
  * on every scroll tick — the canvas reacts through the animation loop instead.
  */
 
+import { smoothstep } from "./wire-surface";
+
 export type Quality = "high" | "lite";
 
 export const scroll = {
@@ -70,11 +72,6 @@ const JUMP_IN = 0.158; // "3" — streaks begin stretching
 const JUMP_FULL = 0.286; // past "1", fully in hyperspace
 const JUMP_HOLD = 0.498; // last track card
 const JUMP_OUT = 0.54; // back out, the wire world returns
-
-function smoothstep(edge0: number, edge1: number, x: number) {
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
 
 /**
  * 0 → 1 → 0 across the hyperspace beat.

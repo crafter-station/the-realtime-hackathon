@@ -43,6 +43,8 @@ const MIN_AHEAD = 11;
 const MAX_AHEAD = 20;
 /** How far it may swing off the follow point before we rein it back in. */
 const MAX_SWING = 2.2;
+/** Scratch, so the spring does not allocate a vector every frame. */
+const PULL = new THREE.Vector3();
 
 export function WireCompanion() {
   const group = useRef<THREE.Group>(null);
@@ -80,7 +82,8 @@ export function WireCompanion() {
 
     // Spring, then drag. Exponential drag rather than a per-frame multiplier
     // keeps the settle identical whatever the refresh rate.
-    velocity.addScaledVector(target.clone().sub(g.position), STIFFNESS * cdt);
+    PULL.copy(target).sub(g.position);
+    velocity.addScaledVector(PULL, STIFFNESS * cdt);
     velocity.multiplyScalar(Math.exp(-DRAG * cdt));
     g.position.addScaledVector(velocity, cdt);
 

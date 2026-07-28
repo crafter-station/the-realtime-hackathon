@@ -186,26 +186,6 @@ export function wellThroatY(): number {
   return floorY(0, WELL_Z);
 }
 
-/**
- * How much of the frame the well owns, by depth.
- *
- * The polar mesh and the Cartesian one both draw the opening, and this is what
- * splits the work: 1 while the plane is flat and the well is the subject, 0
- * once the curl has taken over.
- *
- * The curl term alone is not enough, and assuming it was cost an empty arrival:
- * `wrap` is 0 in *two* places — the field the well sits in, and the open country
- * out the far side of the wormhole — so a purely curl-driven test handed the far
- * plain to a polar mesh that is nowhere near it, and culled the Cartesian grid
- * that was supposed to be drawing the ground you land on. The z window is what
- * makes this mean "the opening" rather than "anywhere flat".
- */
-export function wellPresence(z: number): number {
-  const flat = 1 - smoothstep(0.05, 0.45, wrap(z));
-  const opening = 1 - smoothstep(WELL_Z - WELL_RADIUS, MOUTH_SHUT - 60, z);
-  return flat * opening;
-}
-
 /** Where the polar mesh's outer edge hands over to the Cartesian grid. */
 const COVER_IN = 168;
 const COVER_OUT = 190; // = R_MAX in `wire-well.tsx`
@@ -218,7 +198,7 @@ const COVER_OUT = 190; // = R_MAX in `wire-well.tsx`
  * every point is drawn exactly once.
  *
  * It has to take x as well as z, and that is the whole reason it exists.
- * `wellPresence` is a function of depth alone, which is fine for a grid made of
+ * A depth-only predicate is fine for a grid made of
  * rows and columns and wrong for one made of rings: a ring of radius 170 passes
  * through z ≈ WELL_Z out at the frame edges, where depth-only says "the well
  * owns 63% of this" and the Cartesian grid happily draws the other 37% straight
@@ -231,7 +211,13 @@ const COVER_OUT = 190; // = R_MAX in `wire-well.tsx`
 export function wellCoverage(x: number, z: number): number {
   const r = Math.hypot(x, z - WELL_Z);
   const inside = 1 - smoothstep(COVER_IN, COVER_OUT, r);
-  const flat = 1 - smoothstep(0.05, 0.45, wrap(z));
+  // The curl guard has to start *late*. `wrap` is already 0.21 at the well's
+  // own centre, so a window opening at 0.05 diluted the well's ownership of its
+  // own middle to 63% and let the Cartesian grid draw the other 37% right
+  // through the bowl. Invisible in a still, because the polar mesh is far
+  // brighter there — but it is two grids over one surface, which is the whole
+  // thing this function exists to prevent.
+  const flat = 1 - smoothstep(0.35, 0.75, wrap(z));
   return inside * flat;
 }
 

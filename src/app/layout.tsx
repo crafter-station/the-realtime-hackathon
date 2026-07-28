@@ -96,6 +96,7 @@ const eventJsonLd = {
     {
       "@type": "Organization",
       name: "Crafter Station",
+      url: "https://crafter.run",
     },
   ],
 };

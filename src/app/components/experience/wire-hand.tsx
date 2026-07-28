@@ -113,20 +113,21 @@ function buildHandPositions(): Float32Array {
 /**
  * A wireframe hand, built purely from lines, that draws itself out of
  * nothing when `active` and follows the cursor around a fixed depth `z`.
+ *
+ * The cursor comes from `scroll.pointer`, not r3f's `state.pointer`. The overlay
+ * `<main>` covers the canvas edge to edge, so pointer events land on a DOM
+ * section and the canvas never hears them — read off r3f this hand sat frozen
+ * dead centre, which is not a thing anyone notices is broken because it still
+ * draws itself on beautifully.
  */
 export function WireHand({ active, z }: { active: boolean; z: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const geometryRef = useRef<THREE.BufferGeometry>(null);
   const materialRef = useRef<THREE.LineBasicMaterial>(null);
   const progress = useRef(0);
-  const reducedMotion = useRef(false);
 
   const positions = useMemo(() => buildHandPositions(), []);
   const totalVertices = positions.length / 3;
-
-  useEffect(() => {
-    reducedMotion.current = scroll.reduce;
-  }, []);
 
   useEffect(() => {
     geometryRef.current?.computeBoundingSphere();
@@ -150,7 +151,7 @@ export function WireHand({ active, z }: { active: boolean; z: number }) {
     const group = groupRef.current;
     if (!group) return;
 
-    if (reducedMotion.current) {
+    if (scroll.reduce) {
       // No cursor tilt — hold in place with a gentle static float only.
       group.position.x = THREE.MathUtils.damp(group.position.x, 0, 3, dt);
       group.position.y = THREE.MathUtils.damp(group.position.y, 0, 3, dt);
@@ -161,15 +162,15 @@ export function WireHand({ active, z }: { active: boolean; z: number }) {
       return;
     }
 
-    const targetX = state.pointer.x * 2.2;
-    const targetY = state.pointer.y * 1.4;
+    const targetX = scroll.pointer.x * 2.2;
+    const targetY = scroll.pointer.y * 1.4;
     group.position.x = THREE.MathUtils.damp(group.position.x, targetX, 4, dt);
     group.position.y = THREE.MathUtils.damp(group.position.y, targetY, 4, dt);
     group.position.y += Math.sin(state.clock.elapsedTime) * 0.02;
     group.position.z = THREE.MathUtils.damp(group.position.z, z, 4, dt);
 
-    const targetRotZ = state.pointer.x * -0.25;
-    const targetRotX = state.pointer.y * 0.2;
+    const targetRotZ = scroll.pointer.x * -0.25;
+    const targetRotX = scroll.pointer.y * 0.2;
     group.rotation.z = THREE.MathUtils.damp(
       group.rotation.z,
       targetRotZ,
