@@ -23,7 +23,7 @@ const roleConfigs = {
         firstName: "FAUSTO",
         image: "fausto-rolandi.png",
         lastName: "ROLANDI",
-        roles: ["CO-FOUNDER @ EMPREMAFIA"],
+        roles: ["CO-FOUNDER @ RABBIT"],
         slug: "fausto-rolandi",
       },
       {
