@@ -10,7 +10,7 @@ import {
   WORM_Z_END,
   WORM_Z_START,
   wormholePresence,
-} from "./wire-world";
+} from "./wire-surface";
 
 /**
  * The flat grid folds into a wormhole: concentric rings receding down -z, each

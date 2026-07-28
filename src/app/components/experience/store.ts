@@ -32,10 +32,10 @@ export type ScrollState = typeof scroll;
  * section boundaries in `globals.css` divided by the total scrollable height;
  * if the `--jump` / `--cards` gaps change, change these with them.
  */
-const JUMP_IN = 0.242; // "3" — streaks begin stretching
-const JUMP_FULL = 0.389; // past "1", fully in hyperspace
-const JUMP_HOLD = 0.591; // last track card
-const JUMP_OUT = 0.638; // back out, the wire world returns
+const JUMP_IN = 0.193; // "3" — streaks begin stretching
+const JUMP_FULL = 0.373; // past "1", fully in hyperspace
+const JUMP_HOLD = 0.626; // last track card
+const JUMP_OUT = 0.686; // back out, the wire world returns
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));

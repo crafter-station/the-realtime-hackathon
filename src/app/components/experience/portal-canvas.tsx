@@ -5,13 +5,16 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { scroll, warpAmount } from "./store";
 import { WireHand } from "./wire-hand";
+import { PortalLight } from "./wire-light";
+import { WireTitle } from "./wire-title";
 import { WireWarp } from "./wire-warp";
-import { enclosure, rideY, WireWorld, wormholePresence } from "./wire-world";
+import { enclosure, rideY, wormholePresence } from "./wire-surface";
+import { WireWorld } from "./wire-world";
 import { WireWormhole } from "./wire-wormhole";
 
-// Camera track: one long continuous ride (hero grid → curves → tunnel →
-// wormhole → end).
-const TRACK_START = 9;
+// Camera track: one long continuous ride (title field → the ground gives way →
+// corridor → open country → the ground closes → wormhole → end).
+const TRACK_START = 146;
 const TRACK_END = -662;
 const HAND_Z = -658;
 
@@ -28,7 +31,9 @@ function Starfield({ count }: { count: number }) {
     for (let i = 0; i < count; i += 1) {
       positions[i * 3] = (Math.random() - 0.5) * 80;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 55;
-      positions[i * 3 + 2] = 8 - Math.random() * 80;
+      // The band has to start centred on the camera, not on the origin —
+      // otherwise the sky is empty for the whole opening act.
+      positions[i * 3 + 2] = TRACK_START + 8 - Math.random() * 88;
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -145,13 +150,24 @@ export function PortalCanvas() {
     <div className="xp-stage">
       <Canvas
         dpr={scroll.quality === "lite" ? [1, 1.3] : [1, 1.8]}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
-        camera={{ fov: 55, near: 0.1, far: 110, position: [0, 0, TRACK_START] }}
+        gl={{
+          antialias: true,
+          powerPreference: "high-performance",
+          // Lets the frame be read back after it is drawn, which is the only
+          // way to capture this canvas — for OG art, and for looking at the
+          // thing while building it.
+          preserveDrawingBuffer: true,
+        }}
+        camera={{ fov: 55, near: 0.1, far: 190, position: [0, 0, TRACK_START] }}
       >
         <color attach="background" args={["#0e0e10"]} />
-        <fog attach="fog" args={["#0e0e10", 14, 50]} />
+        {/* Reaches far enough that the title field and the curve of the ground
+            beyond it are both readable from the opening frame. */}
+        <fog attach="fog" args={["#0e0e10", 26, 105]} />
         <Starfield count={stars} />
         <WireWorld />
+        <WireTitle />
+        <PortalLight />
         <WireWarp />
         <WireWormhole />
         <FinaleHand />

@@ -4703,11 +4703,12 @@ html.xp body {
 
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
-/* Scroll room for the tunnel fly-through and the grid approach. The opening
-   tunnel owns most of this: it holds for ~340svh, then takes ~225svh to open
-   out into the plain. */
+/* Scroll room for the plane to curl up around you and close into the corridor
+   (`MOUTH_SHUT`, z = 6, lands at ~0.17 progress). Long enough to read as the
+   ground giving way, short enough that the first beat arrives before the ride
+   feels like it has stalled. */
 .xp-gap--ride {
-  height: 620svh;
+  height: 280svh;
 }
 
 /* -- The jump to hyperspace ------------------------------------------------
@@ -4715,14 +4716,18 @@ html.xp body {
    its four thresholds are these boundaries over the total scrollable height.
    Change a height here and the streaks drift out of step with the copy. */
 
-/* 3 · 2 · 1 — one screen-and-a-bit each, so each numeral gets its own beat.
+/* 3 · 2 · 1 — one screen each, which is the floor rather than a preference.
    The numeral is sticky rather than centred in its section: a section taller
    than the viewport would otherwise park its content near the top of the
    window and scroll it off, and the beat is supposed to *hold* while you keep
-   scrolling, then hand over to the next. */
+   scrolling, then hand over to the next.
+   The pinned band has to be a full viewport. Shrink it (say a 50svh band on a
+   60svh stride) and two numerals fit on screen together — the countdown reads
+   "2 1" instead of counting. So the drum roll is paid for out of the ride gap
+   ahead of it, not out of the numerals. */
 .xp-count {
   display: block;
-  min-height: 110svh;
+  min-height: 100svh;
   padding: 0;
 }
 .xp-count__n {
@@ -4741,13 +4746,13 @@ html.xp body {
 }
 /* The punch itself: no copy, just the streaks reaching full stretch. */
 .xp-gap--jump {
-  height: 110svh;
+  height: 60svh;
 }
 /* One card per slot, alternating sides of the vanishing point. Sticky for the
    same reason as the numerals: each card holds its screen, then hands over. */
 .xp-trackSlot {
   display: block;
-  min-height: 125svh;
+  min-height: 100svh;
   padding: 0;
 }
 .xp-trackCard {
@@ -4796,18 +4801,21 @@ html.xp body {
 }
 /* Room to drop back out of hyperspace before the grid returns. */
 .xp-gap--jumpOut {
-  height: 140svh;
+  height: 100svh;
 }
 .xp-beat-line--wide {
   max-width: 26ch;
 }
-/* A long ride down the wire tunnel before it collapses into the wormhole. */
+/* The second curl: the open country folds back into a circular tube
+   (`CONE_START` −430 → `CONE_WRAPPED` −520, i.e. ~0.71 → ~0.82 progress). This
+   gap has to span exactly that, because KICKOFF on the far side of it is
+   supposed to land once the tube has closed. */
 .xp-gap--tunnel {
-  height: 560svh;
+  height: 260svh;
 }
 /* Extra room to fall down the wormhole's throat. */
 .xp-gap--wormhole {
-  height: 220svh;
+  height: 150svh;
 }
 
 /* Giant beat typography (prizes / countdown). */

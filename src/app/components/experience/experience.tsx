@@ -28,8 +28,10 @@ function clockParts(now: number): string {
 }
 
 // Scroll fraction across which the hero copy rides along then fades away.
-const HERO_FADE_START = 0.02;
-const HERO_FADE_END = 0.09;
+// It holds until the walls are well up: leaving earlier opens a stretch with
+// nothing to read right after we have asked the visitor to keep scrolling.
+const HERO_FADE_START = 0.03;
+const HERO_FADE_END = 0.115;
 
 /**
  * The four tracks, revealed one card at a time while you fly through the
