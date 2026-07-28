@@ -33,6 +33,12 @@ function clockParts(now: number): string {
 const HERO_FADE_START = 0.02;
 const HERO_FADE_END = 0.09;
 
+// Where the HUD hands over to the finale's own Register. The finale section is
+// one viewport tall at the very bottom, so it starts entering the frame around
+// 0.965 — the readout has to be gone by the time the giant CTA is readable.
+const HUD_FADE_START = 0.945;
+const HUD_FADE_END = 0.975;
+
 /**
  * The five tracks, revealed one card at a time while you fly through the
  * streak field. Sides alternate so the cards never stack over the vanishing
@@ -129,12 +135,31 @@ export function Experience() {
         const pct = String(Math.round(scroll.progress * 100)).padStart(3, "0");
         if (depth.textContent !== pct) depth.textContent = pct;
       }
-      // The HUD waits for the hero's own CTA to leave, so the two are never
-      // asking for the same click at the same time.
+      // The HUD is bracketed by the two big CTAs and never overlaps either: it
+      // waits for the hero's own Register to leave, and stands down again as
+      // the finale's arrives. Its whole job is to offer a way out *during* the
+      // ride — at the end the giant one is right there, and two Registers on
+      // screen at once is just the page competing with itself.
       if (hud.current) {
-        hud.current.style.opacity = String(
-          Math.min(1, Math.max(0, (scroll.progress - HERO_FADE_END) * 14)),
+        const inA = Math.min(
+          1,
+          Math.max(0, (scroll.progress - HERO_FADE_END) * 14),
         );
+        const outA =
+          1 -
+          Math.min(
+            1,
+            Math.max(
+              0,
+              (scroll.progress - HUD_FADE_START) /
+                (HUD_FADE_END - HUD_FADE_START),
+            ),
+          );
+        const o = inA * outA;
+        hud.current.style.opacity = String(o);
+        // Not merely transparent: an invisible link is still clickable and
+        // still in the tab order. The finale's own CTA takes over both jobs.
+        hud.current.style.visibility = o < 0.02 ? "hidden" : "visible";
       }
 
       raf = requestAnimationFrame(loop);
