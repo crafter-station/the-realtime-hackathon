@@ -4589,30 +4589,6 @@ html.xp body {
   font-size: 0.95rem;
   color: #ffffff;
 }
-.xp-hud__cta {
-  display: inline-flex;
-  align-items: center;
-  height: 2.3rem;
-  padding: 0 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 999px;
-  background: rgba(10, 12, 14, 0.6);
-  backdrop-filter: blur(8px);
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: #ffffff;
-  transition:
-    background var(--dur-ui) var(--ease-out),
-    border-color var(--dur-ui) var(--ease-out);
-}
-@media (hover: hover) and (pointer: fine) {
-  .xp-hud__cta:hover {
-    background: #ffffff;
-    border-color: #ffffff;
-    color: #0e0e10;
-  }
-}
 /* The readout is decoration; the link is not. Never hide the CTA from a
    keyboard, whatever the scroll position has done to the group's opacity. */
 .xp-hud:focus-within {

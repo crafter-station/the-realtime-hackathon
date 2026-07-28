@@ -6,6 +6,15 @@ import { PortalCanvas } from "./portal-canvas";
 import { scroll } from "./store";
 
 const REGISTER_URL = "https://luma.com/realtime-hackathon";
+/**
+ * Organiser sites. Constants because AGENTS.md requires every occurrence of an
+ * event fact to be found before any of them changes, and inline literals in JSX
+ * are exactly what makes that impossible — `crafterstation.com` shipped here as
+ * a website when it is only ever the *mail* domain (`emails/_lib/`). The site
+ * is the one README.md credits.
+ */
+const PORTAL_URL = "https://useportal.co";
+const CRAFTER_URL = "https://crafter.run";
 const KICKOFF = new Date("2026-08-07T19:00:00-05:00").getTime();
 
 function detectQuality(): "high" | "lite" {
@@ -323,19 +332,11 @@ export function Experience() {
               went missing with `partner-links.tsx` and nothing replaced it. */}
           <p className="xp-colophon">
             Built by{" "}
-            <a
-              href="https://useportal.co"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
               Portal
             </a>{" "}
             and{" "}
-            <a
-              href="https://crafterstation.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={CRAFTER_URL} target="_blank" rel="noopener noreferrer">
               Crafter Station
             </a>
           </p>
@@ -361,7 +362,7 @@ export function Experience() {
           <span className="xp-hud__unit">% depth</span>
         </p>
         <a
-          className="xp-hud__cta"
+          className="xp-register xp-register--sm"
           href={REGISTER_URL}
           target="_blank"
           rel="noopener noreferrer"
