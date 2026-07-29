@@ -33,12 +33,15 @@ import {
  */
 
 /**
- * The one hue in the opening. Note this is *not* Portal orange — the reference
- * this frame is matched against is cyan, and the brief's rule that orange is
- * the only chromatic thing in the world still holds everywhere downstream.
- * Swapping the opening back to orange is this constant and `PORTAL_GLOW`.
+ * The mesh is white, like every other line in this world.
+ *
+ * It was cyan, matched to a reference image. Portal is orange, and the colour
+ * belongs to the light rather than to the lines: `wire-light.tsx` puts it at the
+ * two throats and nowhere else, which is what stops one accent becoming a colour
+ * scheme. A white grid around an orange throat is the design the art direction
+ * describes; a coloured grid is a tint over everything.
  */
-export const WELL_CYAN = "#6ff0e6";
+export const WELL_LINE = "#ffffff";
 
 /** Reaches well past the rim so the plain around the well is ruled too. */
 const R_MAX = 190;
@@ -286,7 +289,7 @@ export function WellGrid() {
       <lineSegments geometry={geometry}>
         <lineBasicMaterial
           ref={material}
-          color={WELL_CYAN}
+          color={WELL_LINE}
           vertexColors
           transparent
           opacity={0.9}
