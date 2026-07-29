@@ -85,8 +85,8 @@ export function WireWorld() {
       const rf = ringFade(k, z);
       if (rf < 0.004) continue;
       for (let i = 0; i < FLOOR_COLS; i += 1) {
-        const fa = Math.max(columnFade(i, z), 0.35);
-        const fb = Math.max(columnFade(i + 1, z), 0.35);
+        const fa = Math.max(columnFade(i, z), 0.2);
+        const fb = Math.max(columnFade(i + 1, z), 0.2);
         seg(colX(i), z, colX(i + 1), z, rf * fa, rf * fb);
       }
     }
@@ -112,7 +112,7 @@ export function WireWorld() {
    * material's opacity moves.
    */
   const dustGeometry = useMemo(() => {
-    const count = scroll.quality === "lite" ? 5000 : 14000;
+    const count = scroll.quality === "lite" ? 3200 : 9000;
     const pos = new Float32Array(count * 3);
     const col = new Float32Array(count * 3);
     // A golden-ratio walk rather than Math.random: even at every scale, and
@@ -149,7 +149,7 @@ export function WireWorld() {
     if (gridMat.current) {
       gridMat.current.opacity = THREE.MathUtils.damp(
         gridMat.current.opacity,
-        THREE.MathUtils.lerp(0.3, 0.72, v) * jump,
+        THREE.MathUtils.lerp(0.2, 0.48, v) * jump,
         4,
         dt,
       );
@@ -157,7 +157,7 @@ export function WireWorld() {
     if (dustMat.current) {
       dustMat.current.opacity = THREE.MathUtils.damp(
         dustMat.current.opacity,
-        THREE.MathUtils.lerp(0.5, 0.95, v) * jump,
+        THREE.MathUtils.lerp(0.32, 0.62, v) * jump,
         4,
         dt,
       );
@@ -171,18 +171,18 @@ export function WireWorld() {
           ref={gridMat}
           vertexColors
           transparent
-          opacity={0.3}
+          opacity={0.2}
           depthWrite={false}
         />
       </lineSegments>
       <points geometry={dustGeometry}>
         <pointsMaterial
           ref={dustMat}
-          size={0.055}
+          size={0.045}
           sizeAttenuation
           vertexColors
           transparent
-          opacity={0.5}
+          opacity={0.32}
           depthWrite={false}
           fog
         />

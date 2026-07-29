@@ -388,17 +388,18 @@ export function surfaceVisibility(z: number): number {
  */
 export function columnFade(index: number, z: number): number {
   const w = wrap(z);
-  if (index % 2 === 1) return 1 - smoothstep(0.45, 0.75, w);
-  if (index % 4 === 2) return 1 - smoothstep(0.8, 0.98, w);
+  if (index % 2 === 1) return 1 - smoothstep(0.35, 0.65, w);
+  if (index % 4 === 2) return 1 - smoothstep(0.65, 0.9, w);
   // The survivors dim too. Thinning three columns in four and leaving the
   // fourth at full strength is what made the closed corridor read as a few
   // bright scratches laid over a dense ring pattern rather than as one ruled
   // surface — the rails have to sit at the rings' weight, not above it.
-  return 1 - 0.45 * smoothstep(0.5, 0.95, w);
+  return 1 - 0.62 * smoothstep(0.4, 0.9, w);
 }
 
 /** Rings thin by the same rule, one stage later — they are what reads as speed. */
 export function ringFade(index: number, z: number): number {
-  if (index % 2 === 1) return 1 - smoothstep(0.6, 0.9, wrap(z));
-  return 1;
+  if (index % 2 === 1) return 1 - smoothstep(0.45, 0.8, wrap(z));
+  if (index % 4 === 2) return 1 - 0.45 * smoothstep(0.7, 0.95, wrap(z));
+  return 1 - 0.2 * smoothstep(0.75, 0.98, wrap(z));
 }

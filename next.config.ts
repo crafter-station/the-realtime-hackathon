@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Hide the on-screen "N" route indicator during local development.
+  devIndicators: false,
 };
 
 export default nextConfig;

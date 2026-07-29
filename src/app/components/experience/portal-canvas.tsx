@@ -5,7 +5,6 @@ import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Z } from "./journey";
 import { scroll, warpRender } from "./store";
-import { WireCompanion } from "./wire-companion";
 import { WireCount } from "./wire-count";
 import { WireHand } from "./wire-hand";
 import { PortalLight } from "./wire-light";
@@ -252,7 +251,6 @@ export function PortalCanvas() {
         <Starfield count={stars} />
         <WireWorld />
         <WellGrid />
-        <WireCompanion />
         <WireCount />
         <PortalLight />
         <WireWarp />

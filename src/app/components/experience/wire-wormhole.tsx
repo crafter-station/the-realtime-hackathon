@@ -21,10 +21,10 @@ import {
  * group spins slowly around its axis to feel alive.
  */
 
-const SPOKES = 20; // points around each ring
-const RING_STEP = 2.1; // z spacing between rings
-const TWIST = 0.05; // radians of swirl per world unit of depth
-const ARMS = 6; // brighter spiral arms threaded through the mesh
+const SPOKES = 12; // points around each ring
+const RING_STEP = 3.4; // z spacing between rings
+const TWIST = 0.035; // radians of swirl per world unit of depth
+const ARMS = 3; // brighter spiral arms threaded through the mesh
 
 /** Radius taper: wide mouth that rushes down to a tight throat near the core. */
 function wormRadius(u: number): number {
@@ -35,7 +35,7 @@ function wormRadius(u: number): number {
 
 /** Brightness of a vertex: fade in with presence, dim toward the dark throat. */
 function bright(pres: number, u: number): number {
-  return pres * (1 - u * 0.72);
+  return pres * (1 - u * 0.85) * 0.72;
 }
 
 export function WireWormhole() {
@@ -157,13 +157,13 @@ export function WireWormhole() {
 
   useFrame((_, dt) => {
     const g = group.current;
-    if (g) g.rotation.z += dt * 0.06; // slow swirl
+    if (g) g.rotation.z += dt * 0.035; // slow swirl
     const v = THREE.MathUtils.clamp(Math.abs(scroll.velocity) * 0.05, 0, 1);
-    const target = THREE.MathUtils.lerp(0.5, 0.95, v);
+    const target = THREE.MathUtils.lerp(0.32, 0.62, v);
     if (meshMat.current) {
       meshMat.current.opacity = THREE.MathUtils.damp(
         meshMat.current.opacity,
-        target * 0.85,
+        target * 0.55,
         4,
         dt,
       );
@@ -171,7 +171,7 @@ export function WireWormhole() {
     if (armsMat.current) {
       armsMat.current.opacity = THREE.MathUtils.damp(
         armsMat.current.opacity,
-        target,
+        target * 0.7,
         4,
         dt,
       );

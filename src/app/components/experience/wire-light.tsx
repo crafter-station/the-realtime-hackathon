@@ -177,7 +177,7 @@ export function PortalLight() {
       <WellPool z={WELL_Z} y={wellThroatY()} radius={44} />
       <Glow z={WELL_Z} y={wellThroatY()} radius={11} reach={260} peak={0.3} />
       {/* The vortex at the end of the ride. */}
-      <Glow z={WORM_Z_END + 30} radius={34} reach={150} peak={1} />
+      <Glow z={WORM_Z_END + 30} radius={26} reach={130} peak={0.62} />
     </group>
   );
 }

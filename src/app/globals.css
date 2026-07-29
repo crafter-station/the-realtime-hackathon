@@ -224,46 +224,9 @@ button {
   scale: 0.96;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  html,
-  body {
-    cursor:
-      url("/cursors/retro-arrow.svg") 1 1,
-      default;
-  }
-
-  a[href],
-  button:not(:disabled),
-  summary,
-  [role="button"]:not([aria-disabled="true"]) {
-    cursor:
-      url("/cursors/retro-pointer.svg") 11 1,
-      pointer;
-  }
-
-  button:disabled,
-  [aria-disabled="true"] {
-    cursor: not-allowed;
-  }
-
-  html[data-pointer-pressed="true"],
-  html[data-pointer-pressed="true"] body {
-    cursor:
-      url("/cursors/retro-arrow-pressed.svg") 1 1,
-      default;
-  }
-
-  html[data-pointer-pressed="true"]
-    :where(
-      a[href],
-      button:not(:disabled),
-      summary,
-      [role="button"]:not([aria-disabled="true"])
-    ) {
-    cursor:
-      url("/cursors/retro-pointer-pressed.svg") 9 1,
-      pointer;
-  }
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 ::selection {
