@@ -61,11 +61,25 @@ const roleConfigs = {
         slug: "david-morales-norato",
       },
       {
+        firstName: "EMMY",
+        image: "emmy-pardo.png",
+        lastName: "PARDO",
+        roles: ["GTM ENGINEER @ 30X"],
+        slug: "emmy-pardo",
+      },
+      {
         firstName: "IGNACIO",
         image: "ignacio-velasquez.png",
         lastName: "VELASQUEZ",
         roles: ["COFOUNDER @ GPT CHAIN"],
         slug: "ignacio-velasquez",
+      },
+      {
+        firstName: "JUAN",
+        image: "juan-ortega.png",
+        lastName: "ORTEGA",
+        roles: ["FOUNDER @ VISAGENTE.COM"],
+        slug: "juan-ortega",
       },
       {
         firstName: "MARCELO",
