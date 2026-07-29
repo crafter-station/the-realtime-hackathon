@@ -4858,7 +4858,6 @@ html.xp body {
 .xp-section {
   position: relative;
   z-index: 1;
-  min-height: 100svh;
   display: grid;
   align-content: center;
   gap: 1.4rem;

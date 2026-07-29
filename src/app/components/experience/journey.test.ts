@@ -170,14 +170,30 @@ describe("the warp window", () => {
   });
 });
 
-describe("dead scroll", () => {
+describe("travel", () => {
   /**
-   * The thing the cut is for, as a number rather than an impression. A stretch
-   * with no `beat` is scroll where there is nothing to read.
+   * The thing the cut was for, as a number rather than an impression.
+   *
+   * The first version of this allowed 0.5, which passed at 42% before the cut
+   * and would have passed a doubling of every gap — a ceiling nothing could
+   * reach is not a guard. It sits just above where the cut landed, so growing
+   * the travel has to be a deliberate edit to this line.
+   *
+   * Note it measures gap share of the budget, not the windowed "positions with
+   * nothing on screen" figure the page reports — those are different quantities
+   * and only this one is computable here.
    */
-  test("is reported, and under the agreed ceiling", () => {
+  test("gaps stay under a third and a bit of the ride", () => {
     const empty = BUDGET.filter((s) => !s.copy).reduce((a, s) => a + s.svh, 0);
-    const share = empty / totalSvh();
-    expect(share).toBeLessThan(0.5);
+    expect(empty / totalSvh()).toBeLessThan(0.36);
+  });
+
+  test("the opening keeps enough room to close the corridor clear of the well", () => {
+    // Found by hitting it: cut `ride` to 190svh and `MOUTH_SHUT` has to move to
+    // z 61 to stay pinned — inside the well, so the corridor would finish
+    // closing in the middle of the funnel. The floor is that the corridor shuts
+    // beyond the well's near rim.
+    const wellNearRim = 100 - 62; // WELL_Z - WELL_RADIUS, in `wire-surface`
+    expect(Z.MOUTH_SHUT).toBeLessThan(wellNearRim);
   });
 });

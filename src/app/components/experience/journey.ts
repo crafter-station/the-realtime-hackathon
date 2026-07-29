@@ -30,12 +30,13 @@ export type Stretch = {
   /** Unique; the overlay looks its height up by this. */
   id: string;
   /**
-   * Height in `svh`.
+   * Height in `svh`, and the only place it is stated.
    *
-   * The overlay applies this for the gaps and the briefing panels. The
-   * fixed-height beats — sections, numerals, track slots — are still sized by
-   * `globals.css` at one screen each, and the budget states the same number so
-   * the arithmetic is right. That is a duplication, and #17 is where it goes.
+   * The overlay applies every one of these — gaps as an exact `height`, beats
+   * as `minHeight` so content can grow. `globals.css` no longer declares any of
+   * them, which is what stops the budget and the page drifting apart: cutting a
+   * number here used to change nothing on screen because CSS was still sizing
+   * the element.
    */
   svh: number;
   /** True when the stretch carries copy — the rest is travel. */
@@ -111,6 +112,18 @@ export const BUDGET: readonly Stretch[] = [
  * every one of these has a scroll fraction — which is what makes them
  * comparable to the budget above.
  */
+/**
+ * How long each transition takes, in world units.
+ *
+ * Re-pinning the ride moves the *end* of each of these; the run is what gives
+ * the stretch its character and is meant to survive. Held as spans rather than
+ * re-typed alongside the ends, because that is the pair a re-pin is most likely
+ * to update by half.
+ */
+const FLARE_RUN = 62;
+const CONE_RUN = 90;
+const WORM_RUN = 40;
+
 export const Z = {
   TRACK_START: 146,
   TRACK_END: -960,
@@ -123,11 +136,11 @@ export const Z = {
   /** Closed into the corridor section. */
   MOUTH_SHUT: 17,
   /** Corridor starts peeling open. */
-  FLARE_START: -112,
+  FLARE_START: -174 + FLARE_RUN,
   /** Fully open country. */
   FLARE_END: -174,
   /** The plane starts curling a second time. */
-  CONE_START: -425,
+  CONE_START: -515 + CONE_RUN,
   /** Closed into a circular tube. */
   CONE_WRAPPED: -515,
 
@@ -137,7 +150,7 @@ export const Z = {
   EXIT_OPEN: -767,
 
   /** The tube sits on the wormhole's axis here, and the vortex takes over. */
-  WORM_Z_IN: -574,
+  WORM_Z_IN: -614 + WORM_RUN,
   WORM_Z_FULL: -614,
   WORM_Z_END: -809,
 } as const;
