@@ -4514,11 +4514,6 @@ html.xp body {
     clamp(3rem, 8vh, 6rem);
 }
 
-/* Traversal gap — scroll here flies the camera through the portal. */
-.xp-gap {
-  height: 150svh;
-}
-
 /* Content floats over the continuous space — never covers the canvas. */
 .xp-editorial {
   position: relative;
@@ -4532,6 +4527,249 @@ html.xp body {
     rgba(6, 6, 8, 0.72),
     rgba(6, 6, 8, 0) 70%
   );
+}
+
+/* -- The briefing panels ---------------------------------------------------
+   Schedule, format and FAQ. These are the only stretches on the page you read
+   rather than watch, so they get a measure and a left edge instead of the
+   centred beat treatment — and they sit in columns 1–5 like the hero, keeping
+   the centre band clear, which the reference calls the one rule not to break. */
+/* These are the only stretches on the page you read rather than watch, and the
+   arrival plain's grid runs straight through them. The scrim is raked from the
+   reading edge so the rows stay legible without boxing them in or closing off
+   the centre band. */
+.xp-section--panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    rgba(4, 7, 9, 0.93) 0%,
+    rgba(4, 7, 9, 0.82) 34%,
+    rgba(4, 7, 9, 0) 68%
+  );
+  pointer-events: none;
+}
+@media (max-width: 60rem) {
+  .xp-section--panel::before {
+    background: linear-gradient(
+      100deg,
+      rgba(4, 7, 9, 0.94) 0%,
+      rgba(4, 7, 9, 0.9) 55%,
+      rgba(4, 7, 9, 0.62) 100%
+    );
+  }
+}
+.xp-section--panel {
+  position: relative;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  text-align: left;
+  padding-inline: max(
+    clamp(1.25rem, 4vw, 3rem),
+    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
+  );
+}
+.xp-section--panel > * {
+  max-width: min(100%, 40rem);
+}
+.xp-panel__head {
+  /* Stacked rather than wide, so it can never reach the HUD's corner. The beat
+     headings are short enough that this never came up; these are sentences, and
+     at 760px "All times Lima, UTC-5" ran straight under the depth readout. */
+  max-width: 17ch;
+  margin: 0.6rem 0 1.8rem;
+  font-family: var(--font-space), var(--sans);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3.2vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+/* Rows are a hairline grid: label left, value right, nothing boxed. */
+.xp-facts,
+.xp-faq,
+.xp-schedule {
+  width: min(100%, 40rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.xp-facts__row,
+.xp-schedule__row,
+.xp-faq__row {
+  display: grid;
+  gap: 0.2rem 1.6rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.xp-facts__row:last-child,
+.xp-schedule__row:last-child,
+.xp-faq__row:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+@media (min-width: 34rem) {
+  .xp-facts__row,
+  .xp-schedule__row {
+    grid-template-columns: 11rem 1fr;
+  }
+  .xp-faq__row {
+    grid-template-columns: 14rem 1fr;
+  }
+}
+.xp-facts dt,
+.xp-schedule__when,
+.xp-faq dt {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+.xp-facts dd,
+.xp-schedule__what,
+.xp-faq dd {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+  line-height: 1.5;
+  color: #ffffff;
+}
+.xp-faq dd {
+  color: var(--ink-2);
+}
+
+/* The ambient-sound toggle.
+   Square, not a pill: `visual-reference.md` says "Radius 0. This style has no
+   rounded corners", and art-direction reserves the pill shape for the Register
+   CTA — a second pill beside it reads as a second call to action however the
+   comment describes it. It sits in its own dock rather than inside the HUD,
+   because the HUD stands down at the finale and a control for something still
+   audible must not go with it. */
+.xp-soundDock {
+  position: fixed;
+  top: clamp(1rem, 3vh, 2rem);
+  right: calc(clamp(1.25rem, 4vw, 3rem) + 12.5rem);
+  z-index: 30;
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+@media (max-width: 40rem) {
+  .xp-soundDock {
+    right: calc(clamp(1.25rem, 4vw, 3rem) + 10.5rem);
+  }
+}
+.xp-hud__sound {
+  display: inline-flex;
+  align-items: center;
+  height: 2.3rem;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(10, 12, 14, 0.6);
+  backdrop-filter: blur(8px);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition:
+    color var(--dur-ui) var(--ease-out),
+    border-color var(--dur-ui) var(--ease-out);
+}
+.xp-hud__sound[aria-pressed="true"] {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+/* The global focus ring is orange, which art-direction forbids outright
+   ("NOTHING else — no orange, no color" / "Kill: all orange accents"). White,
+   offset, so it reads against the dark chrome. */
+.xp-hud__sound:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .xp-hud__sound:hover {
+    color: #ffffff;
+  }
+}
+
+/* Organiser credit under the finale CTA. Quiet on purpose — it is a colophon,
+   not a second call to action. */
+.xp-colophon {
+  margin: 2.2rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.xp-colophon a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+  pointer-events: auto;
+  transition: color var(--dur-ui) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .xp-colophon a:hover {
+    color: #ffffff;
+  }
+}
+
+/* Depth readout + persistent Register, top right. Mono, hairline, small — it
+   is instrumentation, not chrome, and it must never compete with the centre
+   band the vanishing point lives in. */
+.xp-hud {
+  position: fixed;
+  top: clamp(1rem, 3vh, 2rem);
+  right: clamp(1.25rem, 4vw, 3rem);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+.xp-hud__read {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
+}
+.xp-hud__depth {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+/* No `:focus-within` override here. It used to force the group visible so a
+   keyboard could never lose the link, but the HUD is now hidden with
+   `visibility` rather than opacity alone — nothing inside it can take focus in
+   the first place, so the rule could never fire. The guarantee it was making is
+   kept by the finale's own Register, which is a real focusable link and is on
+   screen exactly when this one is not. */
+/* On a phone the ride is 24,000px long, which is exactly where knowing how
+   deep you are matters most — so the readout stays and sheds its label instead
+   of disappearing. `% DEPTH` is the part you only need to read once. */
+@media (max-width: 40rem) {
+  .xp-hud {
+    gap: 0.6rem;
+  }
+  .xp-hud__unit {
+    display: none;
+  }
+  .xp-hud__depth {
+    font-size: 0.82rem;
+  }
 }
 
 /* Bottom scroll-progress bar. */
@@ -4674,7 +4912,6 @@ html.xp body {
 .xp-section {
   position: relative;
   z-index: 1;
-  min-height: 100svh;
   display: grid;
   align-content: center;
   gap: 1.4rem;
@@ -4703,14 +4940,6 @@ html.xp body {
 
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
-/* Scroll room for the plane to curl up around you and close into the corridor
-   (`MOUTH_SHUT`, z = 6, lands at ~0.17 progress). Long enough to read as the
-   ground giving way, short enough that the first beat arrives before the ride
-   feels like it has stalled. */
-.xp-gap--ride {
-  height: 280svh;
-}
-
 /* -- The jump to hyperspace ------------------------------------------------
    These heights are what `warpAmount()` in store.ts is calibrated against:
    its four thresholds are these boundaries over the total scrollable height.
@@ -4727,7 +4956,6 @@ html.xp body {
    ahead of it, not out of the numerals. */
 .xp-count {
   display: block;
-  min-height: 100svh;
   padding: 0;
 }
 .xp-count__n {
@@ -4744,15 +4972,10 @@ html.xp body {
   color: #ffffff;
   font-variant-numeric: tabular-nums;
 }
-/* The punch itself: no copy, just the streaks reaching full stretch. */
-.xp-gap--jump {
-  height: 60svh;
-}
 /* One card per slot, alternating sides of the vanishing point. Sticky for the
    same reason as the numerals: each card holds its screen, then hands over. */
 .xp-trackSlot {
   display: block;
-  min-height: 100svh;
   padding: 0;
 }
 .xp-trackCard {
@@ -4799,23 +5022,8 @@ html.xp body {
 .xp-trackSlot--right .xp-trackCard {
   margin-left: auto;
 }
-/* Room to drop back out of hyperspace before the grid returns. */
-.xp-gap--jumpOut {
-  height: 100svh;
-}
 .xp-beat-line--wide {
   max-width: 26ch;
-}
-/* The second curl: the open country folds back into a circular tube
-   (`CONE_START` −430 → `CONE_WRAPPED` −520, i.e. ~0.71 → ~0.82 progress). This
-   gap has to span exactly that, because KICKOFF on the far side of it is
-   supposed to land once the tube has closed. */
-.xp-gap--tunnel {
-  height: 260svh;
-}
-/* Extra room to fall down the wormhole's throat. */
-.xp-gap--wormhole {
-  height: 150svh;
 }
 
 /* Giant beat typography (prizes / countdown). */

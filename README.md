@@ -28,14 +28,15 @@
 The Realtime Hackathon is an online build weekend presented by
 [Portal](https://useportal.co/) and
 [Crafter Station](https://crafter.run/). Participants have from August 7 to
-August 9, 2026 to create a working product in one of four tracks:
+August 9, 2026 to create a working product in one of five tracks:
 
 | Track | Challenge |
 | --- | --- |
-| **Co-op AI** | People and agents sharing one live workspace |
-| **Live Systems** | Products that act on changing data |
-| **Crowd Mode** | Experiences shaped by the audience |
-| **Wild Signal** | Realtime experiments without a category |
+| **Multiplayer** | Shared live rooms: channels, presence, chat |
+| **Live Streaming** | Broadcast state to a crowd in realtime |
+| **Real-time Location** | Living maps, presence in space |
+| **AI Agents** | Autonomous agents acting on live signals |
+| **Wild Signal** | Open realtime experiments without a category |
 
 Teams can have one to four members. The event awards **US$800 in cash
 prizes**, with US$500 for first place and US$300 for second place.

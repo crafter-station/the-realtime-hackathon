@@ -3,11 +3,12 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { scroll, warpAmount } from "./store";
+import { scroll, warpRender } from "./store";
 import {
   columnFade,
   FLOOR_COLS,
   FLOOR_HW,
+  handoverDim,
   PERIMETER,
   ringFade,
   STEP_X,
@@ -16,7 +17,7 @@ import {
   surfaceVisibility,
   WORLD_Z_END,
   WORLD_Z_START,
-  wellPresence,
+  wellCoverage,
   wrap,
 } from "./wire-surface";
 
@@ -49,9 +50,18 @@ export function WireWorld() {
     ) => {
       // Yield the opening to the polar mesh in `wire-well.tsx`. Rows and
       // columns laid across a radial dip read as a warped tablecloth, and two
-      // grids drawn over each other read as neither.
-      const va = surfaceVisibility(az) * fa * (1 - wellPresence(az));
-      const vb = surfaceVisibility(bz) * fb * (1 - wellPresence(bz));
+      // grids drawn over each other read as neither. Per *point*, because the
+      // mesh we are yielding to is radial — see `wellCoverage`.
+      const va =
+        surfaceVisibility(az) *
+        fa *
+        (1 - wellCoverage(ax, az)) *
+        handoverDim(ax, az);
+      const vb =
+        surfaceVisibility(bz) *
+        fb *
+        (1 - wellCoverage(bx, bz)) *
+        handoverDim(bx, bz);
       if (va < 0.004 && vb < 0.004) return;
       const [x0, y0] = surfacePoint(ax, az);
       const [x1, y1] = surfacePoint(bx, bz);
@@ -119,7 +129,9 @@ export function WireWorld() {
       pos[i * 3 + 2] = z;
       // Brighter where the surface is closing in — the throats read hot.
       const v =
-        surfaceVisibility(z) * (0.35 + 0.65 * wrap(z)) * (1 - wellPresence(z));
+        surfaceVisibility(z) *
+        (0.35 + 0.65 * wrap(z)) *
+        (1 - wellCoverage((u - 0.5) * PERIMETER, z));
       col[i * 3] = v;
       col[i * 3 + 1] = v;
       col[i * 3 + 2] = v;
@@ -133,7 +145,7 @@ export function WireWorld() {
   useFrame((_, dt) => {
     const v = THREE.MathUtils.clamp(Math.abs(scroll.velocity) * 0.05, 0, 1);
     // The world drops away for the hyperspace jump, leaving only the streaks.
-    const jump = 1 - warpAmount(scroll.progress) ** 0.6;
+    const jump = 1 - warpRender(scroll.progress) ** 0.6;
     if (gridMat.current) {
       gridMat.current.opacity = THREE.MathUtils.damp(
         gridMat.current.opacity,

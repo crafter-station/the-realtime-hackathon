@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { CRAFTER_URL, PORTAL_URL } from "@/app/components/experience/links";
 import { cn } from "@/lib/utils";
 
 const geistPixel = localFont({
@@ -79,7 +80,7 @@ const eventJsonLd = {
   description:
     "A 39-hour online hackathon for builders creating multiplayer, live, and agentic products with Portal.",
   startDate: "2026-08-07T19:00:00-05:00",
-  endDate: "2026-08-09T19:00:00-05:00",
+  endDate: "2026-08-09T10:00:00-05:00",
   eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
   eventStatus: "https://schema.org/EventScheduled",
   image: "https://hack.useportal.co/brand-assets/web/open-graph/event.png",
@@ -91,11 +92,12 @@ const eventJsonLd = {
     {
       "@type": "Organization",
       name: "Portal",
-      url: "https://useportal.co",
+      url: PORTAL_URL,
     },
     {
       "@type": "Organization",
       name: "Crafter Station",
+      url: CRAFTER_URL,
     },
   ],
 };
