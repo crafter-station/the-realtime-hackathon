@@ -72,14 +72,31 @@ export const BUDGET: readonly Stretch[] = [
   { id: "count3", copy: true, svh: 100, note: "3" },
   { id: "count2", copy: true, svh: 100, note: "2" },
   { id: "count1", copy: true, svh: 100, note: "1" },
-  { id: "jump", svh: 45, note: "the punch — streaks at full stretch, no copy" },
-  { id: "tracksIntro", copy: true, svh: 100, note: "FIVE TRACKS" },
-  { id: "track1", copy: true, svh: 75, note: "MULTIPLAYER" },
-  { id: "track2", copy: true, svh: 75, note: "LIVE STREAMING" },
-  { id: "track3", copy: true, svh: 75, note: "REAL-TIME LOCATION" },
-  { id: "track4", copy: true, svh: 75, note: "AI AGENTS" },
-  { id: "track5", copy: true, svh: 75, note: "WILD SIGNAL" },
-  { id: "jumpOut", svh: 70, note: "dropping back out of hyperspace" },
+  {
+    id: "jump",
+    svh: 18,
+    note:
+      "the punch — streaks at full stretch, no copy. Kept short so scanners " +
+      "reach the tracks before the empty corridor eats them.",
+  },
+  {
+    id: "tracksIntro",
+    copy: true,
+    svh: 70,
+    note: "FIVE TRACKS — a beat, not a second empty screen before the cards",
+  },
+  { id: "track1", copy: true, svh: 95, note: "MULTIPLAYER" },
+  { id: "track2", copy: true, svh: 95, note: "LIVE STREAMING" },
+  { id: "track3", copy: true, svh: 95, note: "REAL-TIME LOCATION" },
+  { id: "track4", copy: true, svh: 95, note: "AI AGENTS" },
+  { id: "track5", copy: true, svh: 95, note: "WILD SIGNAL" },
+  {
+    id: "jumpOut",
+    svh: 28,
+    note:
+      "dropping back out of hyperspace — thin on purpose; prizes should arrive " +
+      "while the last card is still in muscle memory",
+  },
   { id: "prizes", copy: true, svh: 100, note: "PRIZES" },
   { id: "tunnel", svh: 150, note: "the second curl, into the closed tube" },
   { id: "kickoff", copy: true, svh: 100, note: "KICKOFF — the live countdown" },
@@ -278,6 +295,31 @@ export function heightOf(id: string): number {
   const s = BUDGET.find((x) => x.id === id);
   if (!s) throw new Error(`journey: no stretch named "${id}"`);
   return s.svh;
+}
+
+/**
+ * The same ride for someone who asked for less motion.
+ *
+ * The camera already holds station under `scroll.reduce` — `Rig` parks it at
+ * `POSTER_Z` and the world stops travelling. What did not change was the
+ * *distance*: 21,400px of scrolling, now past a still frame, to reach about two
+ * thousand characters of text. Honouring the request for the transitions and
+ * ignoring it for the journey is honouring the smaller half.
+ *
+ * Everything collapses to zero, which is not the same as everything vanishing.
+ * The gaps are pure travel and have nothing to say, so they go entirely. The
+ * beats keep every word and simply stop reserving a viewport each — `min-height`
+ * of zero lets each one size to its own content, and `.xp-section`'s padding
+ * still separates them. The ride becomes the document it always had underneath.
+ *
+ * It lives here, next to `heightOf`, because this module owns the shape of the
+ * ride and a second opinion about it kept in a component is how the budget and
+ * the world drifted apart the last four times.
+ */
+export function reducedSvh(id: string): number {
+  const s = BUDGET.find((x) => x.id === id);
+  if (!s) throw new Error(`journey: no stretch named "${id}"`);
+  return 0;
 }
 
 /** Where a world event happens, as a fraction of the scrollable height. */

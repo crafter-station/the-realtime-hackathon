@@ -3,7 +3,9 @@ import {
   BEAT_PINS,
   BUDGET,
   beatFraction,
+  heightOf,
   maxScrollSvh,
+  reducedSvh,
   totalSvh,
   UNPINNED,
   warpWindow,
@@ -144,6 +146,30 @@ describe("pinning", () => {
   });
 });
 
+describe("less motion", () => {
+  /**
+   * The camera already parks at `POSTER_Z` under `scroll.reduce`, so the world
+   * stops travelling. The distance did not: 21,400px of scrolling, past a still
+   * frame, for about two thousand characters of text.
+   */
+  test("every stretch collapses, so the ride becomes the document", () => {
+    for (const s of BUDGET) expect(reducedSvh(s.id)).toBe(0);
+  });
+
+  test("the collapse covers the whole budget, including anything added later", () => {
+    // The failure this guards is a new section quietly keeping its full height
+    // because someone extended the budget and not the collapse.
+    const total = BUDGET.reduce((a, s) => a + reducedSvh(s.id), 0);
+    expect(total).toBe(0);
+    expect(totalSvh()).toBeGreaterThan(2000);
+  });
+
+  test("it holds the same contract as heightOf about names", () => {
+    expect(() => reducedSvh("nope")).toThrow();
+    expect(() => heightOf("nope")).toThrow();
+  });
+});
+
 describe("the warp window", () => {
   /**
    * The one derivation whose failure this module's own header calls "silent",
@@ -195,5 +221,60 @@ describe("travel", () => {
     // beyond the well's near rim.
     const wellNearRim = 100 - 62; // WELL_Z - WELL_RADIUS, in `wire-surface`
     expect(Z.MOUTH_SHUT).toBeLessThan(wellNearRim);
+  });
+});
+
+describe("hyperspace bracket", () => {
+  /**
+   * The conversion-relevant middle: punch → five tracks → drop-out.
+   *
+   * Scanners bounce here when empty travel around the cards outruns the cards
+   * themselves. These numbers are what a visitor feels — heights and shares —
+   * not streak geometry. Restore a long `jump` / `jumpOut` and the first test
+   * fails; starve the five slots and the second does.
+   */
+  const BRACKET = [
+    "jump",
+    "tracksIntro",
+    "track1",
+    "track2",
+    "track3",
+    "track4",
+    "track5",
+    "jumpOut",
+  ] as const;
+
+  const TRACK_CARDS = [
+    "track1",
+    "track2",
+    "track3",
+    "track4",
+    "track5",
+  ] as const;
+
+  test("empty travel around the cards stays a thin slice of the bracket", () => {
+    const bracket = BRACKET.reduce((a, id) => a + heightOf(id), 0);
+    const emptyAround = heightOf("jump") + heightOf("jumpOut");
+    // Landed near 8% after the cut. A ceiling of 12% still forbids the old
+    // ~20% padding without demanding a specific pair of gap heights.
+    expect(emptyAround / bracket).toBeLessThan(0.12);
+  });
+
+  test("the five track cards own most of the bracket", () => {
+    const bracket = BRACKET.reduce((a, id) => a + heightOf(id), 0);
+    const cards = TRACK_CARDS.reduce((a, id) => a + heightOf(id), 0);
+    // Cards were ~64% of the bracket; the cut puts them above 80%. A 75%
+    // floor is the property ("more present than the padding"), not the exact
+    // landing.
+    expect(cards / bracket).toBeGreaterThan(0.75);
+  });
+
+  test("each track slot holds at least as long as the intro beat", () => {
+    // So budget moved into the cards cannot quietly migrate back into a long
+    // "Five tracks" title screen that scanners skip.
+    const intro = heightOf("tracksIntro");
+    for (const id of TRACK_CARDS) {
+      expect(heightOf(id)).toBeGreaterThanOrEqual(intro);
+    }
   });
 });

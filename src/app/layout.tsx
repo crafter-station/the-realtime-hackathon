@@ -3,7 +3,11 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { CRAFTER_URL, PORTAL_URL } from "@/app/components/experience/links";
+import {
+  CRAFTER_URL,
+  PORTAL_URL,
+  REGISTER_URL,
+} from "@/app/components/experience/links";
 import { cn } from "@/lib/utils";
 
 const geistPixel = localFont({
@@ -84,6 +88,30 @@ const eventJsonLd = {
   eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
   eventStatus: "https://schema.org/EventScheduled",
   image: "https://hack.useportal.co/brand-assets/web/open-graph/event.png",
+  url: "https://hack.useportal.co",
+  /*
+    Free, said in the one way a search engine can read.
+
+    The page says "free" in the hero, on three buttons and in the FAQ, and none
+    of that was machine-readable: an `Event` with no `offers` is an event whose
+    price is unknown, which is exactly the field Google's event rich results
+    lean on. A zero-price `Offer` is how "no ticket, just register" is spelled,
+    and the URL on it is the registration page rather than this one, because
+    that is where the offer is actually taken up.
+
+    `validFrom` is the day registration opened. Kept as the announcement date
+    rather than "now": a date computed at build time would quietly change with
+    every deploy.
+  */
+  isAccessibleForFree: true,
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    availability: "https://schema.org/InStock",
+    url: REGISTER_URL,
+    validFrom: "2026-07-01T00:00:00-05:00",
+  },
   location: {
     "@type": "VirtualLocation",
     url: "https://hack.useportal.co",

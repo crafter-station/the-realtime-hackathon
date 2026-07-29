@@ -2,7 +2,7 @@
 
 import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
-import { heightOf } from "./journey";
+import { heightOf, reducedSvh } from "./journey";
 import { CRAFTER_URL, PORTAL_URL, REGISTER_URL } from "./links";
 import { PortalCanvas } from "./portal-canvas";
 import { browserGraph, createSoundscape } from "./soundscape";
@@ -137,18 +137,29 @@ export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
   const progressFill = useRef<HTMLDivElement>(null);
-  const heroLayer = useRef<HTMLDivElement>(null);
+  const heroLayer = useRef<HTMLElement>(null);
   const hud = useRef<HTMLDivElement>(null);
   const depthValue = useRef<HTMLSpanElement>(null);
   const [sound, setSound] = useState<"idle" | "on" | "off">("idle");
-  // Built once and kept for the life of the page. The engine itself creates
-  // nothing until `toggle` is first called from the button, so holding it here
-  // costs an object and no audio machinery.
-  const soundDock = useRef<HTMLDivElement>(null);
-  // Lazily, so the factory runs once rather than on every render — the previous
-  // `useRef(createSoundscape(...))` built one each time and threw all but the
-  // first away, which the comment beside it claimed it did not.
+  /*
+    `scroll.reduce` is read by the renderers inside the frame loop, which never
+    re-renders React. The section heights are rendered markup, so they need the
+    same fact as state — resolved in the same place, from the same query, so the
+    two cannot disagree.
+  */
+  const [reduce, setReduce] = useState(false);
+  // The part of the HUD that is allowed to leave at the finale. The row itself
+  // stays, because the sound control lives in it and the drone outlasts the
+  // ride.
+  const fading = useRef<HTMLDivElement>(null);
+  // Built once and kept for the life of the page, lazily so the factory runs
+  // once rather than on every render — the previous `useRef(createSoundscape(…))`
+  // built one each time and threw all but the first away, which the comment
+  // beside it claimed it did not.
   const soundscape = useRef<ReturnType<typeof createSoundscape> | null>(null);
+  /** How tall a stretch is for this visitor. The ride, or the document. */
+  const span = (id: string) => (reduce ? reducedSvh(id) : heightOf(id));
+
   const engineOf = () => {
     soundscape.current ??= createSoundscape(browserGraph);
     return soundscape.current;
@@ -165,6 +176,7 @@ export function Experience() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     scroll.reduce = reduce;
+    setReduce(reduce);
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
 
     let raf = 0;
@@ -211,7 +223,7 @@ export function Experience() {
       // the finale's arrives. Its whole job is to offer a way out *during* the
       // ride — at the end the giant one is right there, and two Registers on
       // screen at once is just the page competing with itself.
-      if (hud.current) {
+      if (fading.current) {
         const inA = Math.min(
           1,
           Math.max(0, (scroll.progress - HERO_FADE_END) * 14),
@@ -227,20 +239,10 @@ export function Experience() {
             ),
           );
         const o = inA * outA;
-        hud.current.style.opacity = String(o);
+        fading.current.style.opacity = String(o);
         // Not merely transparent: an invisible link is still clickable and
         // still in the tab order. The finale's own CTA takes over both jobs.
-        hud.current.style.visibility = o < 0.02 ? "hidden" : "visible";
-        // The dock rides along while silent, and stops hiding as soon as there
-        // is something audible to switch off.
-        const dock = soundDock.current;
-        if (dock && dock.dataset.sounding !== "true") {
-          dock.style.opacity = String(o);
-          dock.style.visibility = o < 0.02 ? "hidden" : "visible";
-        } else if (dock) {
-          dock.style.opacity = "1";
-          dock.style.visibility = "visible";
-        }
+        fading.current.style.visibility = o < 0.02 ? "hidden" : "visible";
       }
 
       raf = requestAnimationFrame(loop);
@@ -254,11 +256,42 @@ export function Experience() {
     };
     window.addEventListener("pointermove", onPointer, { passive: true });
 
+    /*
+      The room turns itself on.
+
+      It used to wait for someone to find a 2.3rem button, which meant almost
+      nobody heard it. It cannot start any earlier than a gesture — a context
+      built outside one is born suspended and never plays — so the first gesture
+      of any kind is the earliest "always" a browser permits.
+
+      Listening to more than the obvious events on purpose: this page is driven
+      by scrolling, and `wheel` and `scroll` are not user-activation triggers.
+      Somebody who only trackpad-scrolls can reach the bottom having never
+      unlocked audio, so every plausible gesture gets a try, and `nudge` asks a
+      still-suspended context again. Both calls are no-ops once it is running,
+      and `start` only acts from `idle` — so a visitor who mutes by hand is not
+      overruled by their next click.
+    */
+    const WAKERS = ["pointerdown", "keydown", "touchend", "click"] as const;
+    const wake = () => {
+      // The ref rather than `engineOf`, so this mount-once effect does not take
+      // a dependency on a closure that is rebuilt every render.
+      soundscape.current ??= createSoundscape(browserGraph);
+      const engine = soundscape.current;
+      engine.start();
+      engine.nudge();
+      setSound(engine.state());
+    };
+    for (const type of WAKERS) {
+      window.addEventListener(type, wake, { passive: true });
+    }
+
     return () => {
       cancelAnimationFrame(raf);
       soundscape.current?.dispose();
       lenis.destroy();
       window.removeEventListener("pointermove", onPointer);
+      for (const type of WAKERS) window.removeEventListener(type, wake);
       document.documentElement.classList.remove("xp");
     };
   }, []);
@@ -275,8 +308,23 @@ export function Experience() {
     <>
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
 
-      {/* 01 — HERO layer (fixed over the grid horizon). */}
-      <div ref={heroLayer} className="xp-heroLayer">
+      {/*
+        The way out, for anyone who cannot or does not want to travel 21,400px
+        to reach it.
+
+        The ride is the point of this page, so nothing here shortens it — but a
+        keyboard or screen-reader user arriving at the top had no route to the
+        one action the page exists for except the whole journey. First focusable
+        thing on the page, invisible until focused.
+      */}
+      <a className="xp-skip" href="#register">
+        Skip the ride, go to register
+      </a>
+
+      {/* 01 — HERO layer (fixed over the grid horizon). A banner landmark: it
+          holds the page title and the first call to action, and `<main>` was
+          the only landmark on the page before it. */}
+      <header ref={heroLayer} className="xp-heroLayer">
         <h1 className="xp-display">The realtime hackathon</h1>
         <div className="xp-heroSub">
           <p className="xp-body">
@@ -294,13 +342,30 @@ export function Experience() {
             Register free →
           </a>
         </div>
-      </div>
+
+        {/*
+          The one thing the page never said in its own language.
+
+          Everything here is driven by scrolling and the only signal to scroll
+          was a sentence inside the body copy. There was CSS for a cue and no
+          markup — it was planned and never built, and the orphaned rules were
+          swept out with the rest of the previous design.
+
+          Decorative on purpose: the sentence above already tells a screen reader
+          what to do, and a second voice saying "scroll" is noise. It rides the
+          hero, so it leaves exactly when the hero does.
+        */}
+        <div className="xp-cue" aria-hidden>
+          <span className="xp-cue__label">Scroll</span>
+          <span className="xp-cue__rail" />
+        </div>
+      </header>
 
       <main className="xp-overlay" id="top">
         {/* 02 — Ride the grid, into the curves. Long. */}
         <div
           className="xp-gap--ride"
-          style={{ height: `${heightOf("ride")}svh` }}
+          style={{ height: `${span("ride")}svh` }}
           aria-hidden
         />
 
@@ -308,9 +373,9 @@ export function Experience() {
             tracks in the streaks. */}
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("holdOn")}svh` }}
+          style={{ minHeight: `${span("holdOn")}svh` }}
         >
-          <p className="xp-label">Hold on</p>
+          <h2 className="xp-label">Hold on</h2>
           <p className="xp-beat-line xp-beat-line--wide">
             You are about to enter <strong>another dimension</strong>.
           </p>
@@ -318,23 +383,34 @@ export function Experience() {
         {[3, 2, 1].map((n) => (
           <section
             className="xp-section xp-count"
-            style={{ minHeight: `${heightOf(`count${n}`)}svh` }}
+            style={{ minHeight: `${span(`count${n}`)}svh` }}
             key={n}
           >
-            <p className="xp-count__n">{n}</p>
+            {/*
+              Present for the server, for no-JS, and for reduced motion — where
+              the camera never travels, so a glyph pinned to a z it never
+              reaches would never appear. Once the world is carrying the count,
+              this one stands down rather than doubling it.
+            */}
+            <p
+              className="xp-count__n"
+              data-inworld={reduce ? undefined : "true"}
+            >
+              {n}
+            </p>
           </section>
         ))}
         <div
           className="xp-gap--jump"
-          style={{ height: `${heightOf("jump")}svh` }}
+          style={{ height: `${span("jump")}svh` }}
           aria-hidden
         />
 
         <section
           className="xp-section xp-section--beat xp-tracksIntro"
-          style={{ minHeight: `${heightOf("tracksIntro")}svh` }}
+          style={{ minHeight: `${span("tracksIntro")}svh` }}
         >
-          <p className="xp-label">Five tracks</p>
+          <h2 className="xp-label">Five tracks</h2>
           <p className="xp-beat-line">
             Pick one, or ignore them all. <strong>Ship something live.</strong>
           </p>
@@ -342,33 +418,33 @@ export function Experience() {
         {TRACKS.map((track, i) => (
           <section
             className={`xp-section xp-trackSlot xp-trackSlot--${track.side}`}
-            style={{ minHeight: `${heightOf(`track${i + 1}`)}svh` }}
+            style={{ minHeight: `${span(`track${i + 1}`)}svh` }}
             key={track.name}
           >
             <article className="xp-trackCard">
-              <p className="xp-trackCard__head">
+              <h3 className="xp-trackCard__head">
                 <span>{track.name}</span>
                 <span className="xp-trackCard__n">
                   [{String(i + 1).padStart(2, "0")}]
                 </span>
-              </p>
+              </h3>
               <p className="xp-trackCard__copy">{track.copy}</p>
             </article>
           </section>
         ))}
         <div
           className="xp-gap--jumpOut"
-          style={{ height: `${heightOf("jumpOut")}svh` }}
+          style={{ height: `${span("jumpOut")}svh` }}
           aria-hidden
         />
 
         {/* 03 — The curve closes: PRIZES appear. */}
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("prizes")}svh` }}
+          style={{ minHeight: `${span("prizes")}svh` }}
         >
-          <p className="xp-label">Prizes</p>
-          <h2 className="xp-huge">US$800</h2>
+          <h2 className="xp-label">Prizes</h2>
+          <p className="xp-huge">US$800</p>
           <p className="xp-beat-line">
             <strong>1st — US$500</strong> · <strong>2nd — US$300</strong> ·
             cash, no strings
@@ -378,16 +454,16 @@ export function Experience() {
         {/* 04 — Through the tunnel. */}
         <div
           className="xp-gap--tunnel"
-          style={{ height: `${heightOf("tunnel")}svh` }}
+          style={{ height: `${span("tunnel")}svh` }}
           aria-hidden
         />
 
         {/* 05 — COUNTDOWN, live. */}
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("kickoff")}svh` }}
+          style={{ minHeight: `${span("kickoff")}svh` }}
         >
-          <p className="xp-label">Kickoff</p>
+          <h2 className="xp-label">Kickoff</h2>
           <p className="xp-clock">
             {clock}
             <small>
@@ -399,15 +475,15 @@ export function Experience() {
         {/* 05.5 — Into the wormhole: the grid folds into the vortex. */}
         <div
           className="xp-gap--wormhole"
-          style={{ height: `${heightOf("wormhole")}svh` }}
+          style={{ height: `${span("wormhole")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("anotherDimension")}svh` }}
+          style={{ minHeight: `${span("anotherDimension")}svh` }}
         >
-          <p className="xp-label">Another dimension</p>
-          <h2 className="xp-huge xp-huge--outline">Warp</h2>
+          <h2 className="xp-label">Another dimension</h2>
+          <p className="xp-huge xp-huge--outline">Warp</p>
           <p className="xp-beat-line">
             The grid folds into a wormhole. <strong>Keep falling.</strong>
           </p>
@@ -418,15 +494,15 @@ export function Experience() {
             portal you fall into and never come out of is not a portal. */}
         <div
           className="xp-gap--emerge"
-          style={{ height: `${heightOf("emerge")}svh` }}
+          style={{ height: `${span("emerge")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("otherSide")}svh` }}
+          style={{ minHeight: `${span("otherSide")}svh` }}
         >
-          <p className="xp-label">The other side</p>
-          <h2 className="xp-huge">You&rsquo;re through</h2>
+          <h2 className="xp-label">The other side</h2>
+          <p className="xp-huge">You&rsquo;re through</p>
           <p className="xp-beat-line">
             Open country, and a weekend to build in it.{" "}
             <strong>This is where it starts.</strong>
@@ -441,15 +517,15 @@ export function Experience() {
             questions start — and because the stretch was empty scroll anyway. */}
         <div
           className="xp-gap--brief"
-          style={{ height: `${heightOf("brief")}svh` }}
+          style={{ height: `${span("brief")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: `${heightOf("format")}svh` }}
+          style={{ minHeight: `${span("format")}svh` }}
         >
-          <p className="xp-label">The format</p>
-          <h2 className="xp-panel__head">39 hours, start to submission</h2>
+          <h2 className="xp-label">The format</h2>
+          <p className="xp-panel__head">39 hours, start to submission</p>
           <dl className="xp-facts">
             {FORMAT_FACTS.map(([term, value]) => (
               <div className="xp-facts__row" key={term}>
@@ -462,10 +538,10 @@ export function Experience() {
 
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: `${heightOf("schedule")}svh` }}
+          style={{ minHeight: `${span("schedule")}svh` }}
         >
-          <p className="xp-label">Schedule</p>
-          <h2 className="xp-panel__head">All times Lima, UTC&minus;5</h2>
+          <h2 className="xp-label">Schedule</h2>
+          <p className="xp-panel__head">All times Lima, UTC&minus;5</p>
           <ol className="xp-schedule">
             {SCHEDULE.map(([when, what]) => (
               <li className="xp-schedule__row" key={when}>
@@ -478,10 +554,10 @@ export function Experience() {
 
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: `${heightOf("questions")}svh` }}
+          style={{ minHeight: `${span("questions")}svh` }}
         >
-          <p className="xp-label">Questions</p>
-          <h2 className="xp-panel__head">Before you register</h2>
+          <h2 className="xp-label">Questions</h2>
+          <p className="xp-panel__head">Before you register</p>
           <dl className="xp-faq">
             {FAQ.map(([q, a]) => (
               <div className="xp-faq__row" key={q}>
@@ -495,14 +571,19 @@ export function Experience() {
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}
         <div
           className="xp-gap--arrive"
-          style={{ height: `${heightOf("arrive")}svh` }}
+          style={{ height: `${span("arrive")}svh` }}
           aria-hidden
         />
         <section
+          id="register"
           className="xp-section xp-finale"
-          style={{ minHeight: `${heightOf("finale")}svh` }}
+          style={{ minHeight: `${span("finale")}svh` }}
         >
-          <h2 className="xp-huge xp-huge--outline">Register</h2>
+          {/* The plate says the name of the thing, not the name of the button.
+              `Register` was the headline and the CTA directly under it — the
+              same word twice, where the last full-width line of the page is the
+              one place the event should be named outright. */}
+          <h2 className="xp-huge xp-huge--outline">The realtime hackathon</h2>
           <p className="xp-beat-line">
             Aug 07–09 · online · teams of 1–4 · free
           </p>
@@ -541,34 +622,35 @@ export function Experience() {
         tell people how deep they are, and let them out whenever they want.
       */}
       <div className="xp-hud" ref={hud}>
-        <p className="xp-hud__read">
-          <span ref={depthValue} className="xp-hud__depth">
-            000
-          </span>
-          <span className="xp-hud__unit">% depth</span>
-        </p>
-        <a
-          className="xp-register xp-register--sm"
-          href={REGISTER_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Register free →
-        </a>
-      </div>
+        {/*
+          Everything that is allowed to leave, and nothing else.
 
-      {/*
-        Outside the HUD on purpose. The HUD stands down at the finale so it does
-        not compete with the giant Register — but the drone is still audible
-        there, and a control that disappears while the thing it controls is
-        still running is not reversible. It follows the HUD while silent, and
-        stays put the moment there is something to switch off.
-      */}
-      <div
-        className="xp-soundDock"
-        ref={soundDock}
-        data-sounding={sound === "on" ? "true" : undefined}
-      >
+          The sound control used to sit outside the HUD entirely, fixed to a
+          `right` offset guessed at the width of this row — which is a live
+          percentage next to a pill, so it was never going to be the 12.5rem it
+          was told. It overlapped the readout by 53px.
+
+          Fading this wrapper rather than the row means the button can stay a
+          flex item and have its position computed. The finale still clears the
+          readout and the small Register; the control over a drone that is still
+          audible there does not go with them.
+        */}
+        <div className="xp-hud__fading" ref={fading}>
+          <p className="xp-hud__read">
+            <span ref={depthValue} className="xp-hud__depth">
+              000
+            </span>
+            <span className="xp-hud__unit">% depth</span>
+          </p>
+          <a
+            className="xp-register xp-register--sm"
+            href={REGISTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Register free →
+          </a>
+        </div>
         <button
           type="button"
           className="xp-hud__sound"

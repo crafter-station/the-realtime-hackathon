@@ -153,24 +153,6 @@ a {
   text-decoration: none;
 }
 
-.external-link--collapse {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-}
-
-.external-link--lined {
-  border-bottom: 1px solid currentColor;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  line-height: 2.2;
-  text-transform: uppercase;
-  transition:
-    border-color 150ms ease,
-    color 150ms ease;
-}
-
 .external-link--lined:focus-visible {
   border-color: var(--signal);
   color: var(--signal);
@@ -309,37 +291,8 @@ h2 {
   line-height: 0.91;
 }
 
-.shell {
-  width: min(100%, var(--shell));
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-
-.skip-link {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 100;
-  padding: 0.8rem 1rem;
-  translate: 0 -180%;
-  background: var(--signal);
-  color: var(--night);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
 .skip-link:focus {
   translate: 0;
-}
-
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  border-bottom: 1px solid var(--rule);
-  background: var(--night);
 }
 
 .site-header::before {
@@ -348,14 +301,6 @@ h2 {
   width: 3px;
   background: var(--signal);
   content: "";
-}
-
-.site-header__inner {
-  display: grid;
-  min-height: 4.25rem;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 2rem;
 }
 
 .wordmark {
@@ -368,20 +313,6 @@ h2 {
   font-weight: 680;
   letter-spacing: 0.05em;
   line-height: 1;
-}
-
-.wordmark__slash {
-  color: var(--signal);
-}
-
-.site-nav {
-  display: flex;
-  align-items: center;
-  gap: clamp(1rem, 2.4vw, 2.25rem);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .site-nav a,
@@ -412,19 +343,6 @@ h2 {
   pointer-events: none;
 }
 
-.hero__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(25rem, 0.98fr);
-  align-items: center;
-  gap: clamp(2.5rem, 5vw, 6rem);
-}
-
-.hero__copy {
-  position: relative;
-  z-index: 1;
-  padding-left: clamp(0.8rem, 1.6vw, 1.5rem);
-}
-
 .hero__eyebrow,
 .eyebrow,
 .signal-engine__header,
@@ -442,14 +360,6 @@ h2 {
   text-transform: uppercase;
 }
 
-.hero__eyebrow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin-bottom: clamp(2rem, 4vw, 3.5rem);
-  color: var(--muted);
-}
-
 .hero__eyebrow span {
   padding-right: 0.9rem;
 }
@@ -459,131 +369,14 @@ h2 {
   border-left: 1px solid var(--rule);
 }
 
-.hero__title {
-  display: flex;
-  max-width: 8.3ch;
-  flex-direction: column;
-  font-size: clamp(4.5rem, 7.45vw, 7.65rem);
-  font-weight: 820;
-  letter-spacing: -0.078em;
-  line-height: 0.82;
-}
-
 .hero__title span {
   display: block;
   white-space: nowrap;
 }
 
-.hero__title-accent {
-  color: var(--signal);
-}
-
-.hero__lede {
-  max-width: 35rem;
-  margin-top: clamp(2rem, 3.5vw, 3.25rem);
-  color: var(--gray);
-  font-size: clamp(1rem, 1.35vw, 1.18rem);
-  letter-spacing: -0.015em;
-  line-height: 1.55;
-}
-
-.hero__actions {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-  margin-top: 2rem;
-}
-
-.text-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--muted);
-  color: var(--paper);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  line-height: 2.2;
-  text-transform: uppercase;
-  transition:
-    border-color 150ms ease,
-    color 150ms ease;
-}
-
 .text-link:hover {
   border-color: var(--signal);
   color: var(--signal);
-}
-
-.hero__clock {
-  display: flex;
-  max-width: 35rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 2.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--rule);
-  color: var(--muted);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.event-clock {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: var(--paper);
-  font-variant-numeric: tabular-nums;
-}
-
-.event-clock__dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  background: var(--signal);
-}
-
-.hero__visual {
-  min-width: 0;
-}
-
-.signal-engine {
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.signal-engine__header,
-.signal-engine__footer {
-  display: flex;
-  min-height: 2.9rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.7rem 0;
-  color: var(--muted);
-}
-
-.signal-engine__header {
-  border-bottom: 1px solid var(--rule);
-}
-
-.signal-engine__footer {
-  border-top: 1px solid var(--rule);
-  font-size: 0.62rem;
-}
-
-.signal-engine__status {
-  color: var(--paper);
-  text-align: right;
-}
-
-.signal-engine__live {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--paper);
 }
 
 .signal-engine__live > span {
@@ -593,22 +386,6 @@ h2 {
   box-shadow: 0 0 0.75rem rgba(255, 77, 0, 0.75);
 }
 
-.signal-engine__stage {
-  position: relative;
-  display: block;
-  width: 100%;
-  min-height: 31rem;
-  padding: 0;
-  overflow: hidden;
-  isolation: isolate;
-  background-color: var(--night);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-  color: var(--paper);
-  cursor: crosshair;
-  touch-action: manipulation;
-}
-
 .signal-engine__stage canvas {
   position: absolute;
   inset: 0;
@@ -616,59 +393,6 @@ h2 {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.signal-engine__axis,
-.signal-engine__hint,
-.signal-engine__portal {
-  position: absolute;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.signal-engine__axis {
-  color: rgba(255, 255, 255, 0.56);
-}
-
-.signal-engine__axis--input {
-  top: 1rem;
-  left: 1rem;
-}
-
-.signal-engine__axis--model {
-  bottom: 1rem;
-  left: 1rem;
-}
-
-.signal-engine__axis--action {
-  top: 1rem;
-  right: 1rem;
-}
-
-.signal-engine__axis--feedback {
-  right: 1rem;
-  bottom: 1rem;
-}
-
-.signal-engine__portal {
-  top: 50%;
-  left: 50%;
-  color: rgba(255, 77, 0, 0.82);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.52rem;
-  letter-spacing: 0.22em;
-  text-shadow: 0 0 0.65rem var(--night);
-  text-transform: uppercase;
-  transform: translate(-50%, -50%) rotate(-90deg);
-}
-
-.signal-engine__hint {
-  bottom: 2.8rem;
-  left: 50%;
-  color: var(--signal);
-  font-size: 0.58rem;
-  transform: translateX(-50%);
-  white-space: nowrap;
 }
 
 .facts {
@@ -693,62 +417,8 @@ h2 {
   border-left: 1px solid var(--rule);
 }
 
-.fact__value {
-  font-size: clamp(2.1rem, 3.6vw, 3.65rem);
-  font-weight: 730;
-  letter-spacing: -0.06em;
-  line-height: 1;
-}
-
-.paper-section,
-.portal-section,
-.host-section {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.paper-section,
-.signal-flow-section,
-.missions-section,
-.portal-section,
-.schedule-section,
-.prizes-section,
-.faq-section {
-  padding-block: clamp(5.5rem, 10vw, 10rem);
-  scroll-margin-top: 4rem;
-}
-
-.editorial-grid {
-  display: grid;
-  grid-template-columns: minmax(8rem, 2fr) minmax(0, 10fr);
-  gap: clamp(2rem, 6vw, 7rem);
-}
-
-.brief-copy,
-.editorial-copy {
-  grid-column: 2;
-}
-
 .brief-copy h2 {
   max-width: 12ch;
-}
-
-.brief-copy__body {
-  display: grid;
-  max-width: 63rem;
-  margin-top: clamp(2.5rem, 5vw, 5rem);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(2rem, 5vw, 5rem);
-  font-size: clamp(1.05rem, 1.65vw, 1.35rem);
-  letter-spacing: -0.025em;
-  line-height: 1.5;
-}
-
-.section-heading-row {
-  display: grid;
-  grid-template-columns: minmax(0, 8fr) minmax(16rem, 4fr);
-  align-items: end;
-  gap: clamp(2rem, 5vw, 6rem);
 }
 
 .section-heading-row h2 {
@@ -766,15 +436,6 @@ h2 {
   line-height: 1.55;
 }
 
-.signal-flow {
-  position: relative;
-  display: grid;
-  margin: clamp(3.5rem, 7vw, 7rem) 0 0;
-  padding: 0;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  list-style: none;
-}
-
 .signal-flow li {
   position: relative;
   display: flex;
@@ -783,20 +444,6 @@ h2 {
   justify-content: flex-end;
   gap: 0.45rem;
   padding: 1rem;
-}
-
-.signal-flow__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.signal-flow__icon {
-  width: 1.35rem;
-  height: 1.35rem;
-  flex: none;
-  color: var(--muted);
-  stroke-width: 1.5;
 }
 
 .signal-flow strong {
@@ -811,30 +458,8 @@ h2 {
   line-height: 1.45;
 }
 
-.missions-section {
-  background: var(--surface);
-}
-
-.section-heading-row--missions {
-  align-items: end;
-}
-
 .section-heading-row--missions h2 {
   max-width: 10ch;
-}
-
-.mission-list {
-  margin-top: clamp(4rem, 8vw, 8rem);
-}
-
-.mission {
-  display: grid;
-  min-height: 15rem;
-  padding-block: 2rem;
-  grid-template-columns: 0.8fr 2fr 3.4fr 2fr;
-  align-items: start;
-  gap: clamp(1.5rem, 4vw, 4rem);
-  transition: background 180ms ease;
 }
 
 .mission:hover {
@@ -849,11 +474,6 @@ h2 {
   line-height: 0.95;
 }
 
-.mission__copy,
-.mission__prompt {
-  max-width: 32rem;
-}
-
 .mission__copy > p:last-child,
 .mission__prompt {
   color: var(--muted);
@@ -861,37 +481,8 @@ h2 {
   line-height: 1.55;
 }
 
-.mission__headline {
-  margin-bottom: 1rem;
-  color: var(--paper);
-  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.3;
-}
-
-.mission__prompt {
-  padding-left: 1rem;
-  border-left: 2px solid var(--signal);
-}
-
 .portal-section h2 {
   max-width: 10ch;
-}
-
-.portal-section__lede {
-  max-width: 36rem;
-  margin-top: 2.25rem;
-  color: var(--gray);
-}
-
-.capability-list {
-  display: grid;
-  max-width: 62rem;
-  margin-top: clamp(3rem, 6vw, 5.5rem);
-  padding: 0;
-  list-style: none;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .capability-list li {
@@ -908,35 +499,8 @@ h2 {
   letter-spacing: 0.06em;
 }
 
-.portal-docs-link {
-  margin-top: 2.25rem;
-  border-color: var(--link-muted);
-  color: var(--link-muted);
-}
-
-.schedule-grid {
-  display: grid;
-  margin-top: clamp(3.5rem, 7vw, 7rem);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--rule);
-}
-
-.schedule-day {
-  min-height: 32rem;
-  padding-inline: clamp(1.25rem, 2.5vw, 2.25rem);
-}
-
 .schedule-day + .schedule-day {
   border-left: 1px solid var(--rule);
-}
-
-.schedule-day__header {
-  display: flex;
-  min-height: 10rem;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-block: 1.25rem;
 }
 
 .schedule-day__header > div {
@@ -987,33 +551,6 @@ h2 {
   line-height: 1.4;
 }
 
-.prizes-section {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.prize-grid {
-  display: grid;
-  grid-template-columns: 1.25fr 1fr 1fr;
-  border-top: 1px solid var(--paper-rule);
-}
-
-.prize-copy,
-.prize-card {
-  min-height: 24rem;
-  padding: clamp(1.5rem, 3vw, 2.5rem);
-}
-
-.prize-card {
-  border-left: 1px solid var(--paper-rule);
-}
-
-.prize-copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .prize-copy h2 {
   max-width: 8ch;
   font-size: clamp(2.75rem, 5vw, 5rem);
@@ -1022,17 +559,6 @@ h2 {
 .prize-copy > p:last-child {
   max-width: 30rem;
   color: var(--gray);
-}
-
-.prize-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.prize-card--first {
-  background: var(--signal);
-  color: var(--night);
 }
 
 .prize-card strong {
@@ -1059,14 +585,6 @@ h2 {
   margin-inline: auto;
 }
 
-.judging__header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-block: 1.5rem;
-}
-
 .judging__header h3 {
   margin: 0;
   font-size: clamp(1.5rem, 2.5vw, 2.25rem);
@@ -1082,15 +600,6 @@ h2 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.judging__list {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: clamp(2rem, 6vw, 6rem);
-  list-style: none;
 }
 
 .judging__list li {
@@ -1111,24 +620,6 @@ h2 {
   white-space: nowrap;
 }
 
-@media (max-width: 40rem) {
-  .judging__list {
-    grid-template-columns: 1fr;
-  }
-}
-
-.host-section {
-  padding-block: clamp(4rem, 8vw, 7rem);
-  border-top: 1px solid var(--paper-rule);
-}
-
-.host-section__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  align-items: end;
-  gap: clamp(3rem, 7vw, 8rem);
-}
-
 .host-section__inner > div:first-child {
   max-width: 37rem;
 }
@@ -1144,44 +635,8 @@ h2 {
   line-height: 1.55;
 }
 
-.host-marks {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: clamp(1.5rem, 4vw, 4rem);
-  font-size: clamp(2.25rem, 5vw, 5.5rem);
-  font-weight: 780;
-  letter-spacing: -0.07em;
-  line-height: 0.78;
-  text-align: right;
-}
-
-.host-marks__x {
-  color: var(--signal);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.42em;
-}
-
 .faq-section h2 {
   font-size: clamp(2.75rem, 5vw, 5rem);
-}
-
-.faq-list {
-  border-top: 1px solid var(--rule);
-}
-
-.apply-section {
-  padding-block: clamp(5rem, 9vw, 8rem);
-  scroll-margin-top: 4rem;
-  background: var(--signal);
-  color: var(--night);
-}
-
-.apply-section__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(19rem, 5fr);
-  align-items: end;
-  gap: clamp(3rem, 8vw, 9rem);
 }
 
 .apply-section .eyebrow {
@@ -1204,24 +659,6 @@ h2 {
   color: var(--black);
 }
 
-.site-footer {
-  border-top: 1px solid var(--rule);
-  background: var(--night);
-}
-
-.site-footer__top {
-  display: grid;
-  min-height: 11rem;
-  grid-template-columns: 1.2fr 1fr 1fr;
-  align-items: center;
-  gap: 2rem;
-  border-bottom: 1px solid var(--rule);
-}
-
-.wordmark--footer {
-  font-size: 1rem;
-}
-
 .site-footer__top p,
 .site-footer__bottom {
   color: var(--muted);
@@ -1230,14 +667,6 @@ h2 {
   letter-spacing: 0.06em;
   line-height: 1.5;
   text-transform: uppercase;
-}
-
-.site-footer__bottom {
-  display: grid;
-  min-height: 4.5rem;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 2rem;
 }
 
 .site-footer__bottom > div {
@@ -1257,22 +686,6 @@ h2 {
   animation: reveal-up 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.reveal--one {
-  animation-delay: 40ms;
-}
-
-.reveal--two {
-  animation-delay: 90ms;
-}
-
-.reveal--three {
-  animation-delay: 140ms;
-}
-
-.reveal--four {
-  animation-delay: 190ms;
-}
-
 @keyframes reveal-up {
   from {
     opacity: 0;
@@ -1284,59 +697,7 @@ h2 {
   }
 }
 
-@media (max-width: 72rem) {
-  .hero__grid {
-    grid-template-columns: minmax(0, 1.04fr) minmax(22rem, 0.96fr);
-    gap: 2.5rem;
-  }
-
-  .hero__title {
-    font-size: clamp(4rem, 7.2vw, 6.4rem);
-  }
-
-  .signal-engine__stage {
-    min-height: 27rem;
-  }
-
-  .mission {
-    grid-template-columns: 0.6fr 1.5fr 3fr;
-  }
-
-  .mission__prompt {
-    grid-column: 3;
-  }
-}
-
 @media (max-width: 62rem) {
-  .site-header__inner {
-    grid-template-columns: 1fr auto;
-  }
-
-  .site-nav {
-    display: none;
-  }
-
-  .hero__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .hero__copy {
-    max-width: 49rem;
-  }
-
-  .hero__title {
-    font-size: clamp(4.8rem, 12vw, 7.75rem);
-  }
-
-  .hero__visual {
-    max-width: 48rem;
-    margin-left: auto;
-  }
-
-  .signal-engine__stage {
-    min-height: 33rem;
-  }
-
   .facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1349,30 +710,9 @@ h2 {
     border-top: 1px solid var(--rule);
   }
 
-  .section-heading-row,
-  .prize-grid,
-  .host-section__inner,
-  .apply-section__inner {
-    grid-template-columns: 1fr;
-  }
-
   .section-heading-row > p,
   .section-heading-row > div + p {
     max-width: 35rem;
-  }
-
-  .prize-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .prize-copy {
-    grid-column: 1 / -1;
-    min-height: 20rem;
-  }
-
-  .host-marks {
-    justify-content: flex-start;
-    text-align: left;
   }
 }
 
@@ -1385,11 +725,6 @@ h2 {
     font-size: clamp(2.65rem, 13vw, 4.5rem);
   }
 
-  .site-header__inner {
-    min-height: 3.85rem;
-    gap: 1rem;
-  }
-
   .wordmark {
     font-size: 0.68rem;
   }
@@ -1398,64 +733,8 @@ h2 {
     padding-top: 3.5rem;
   }
 
-  .hero__copy {
-    padding-left: 0.5rem;
-  }
-
-  .hero__eyebrow {
-    margin-bottom: 2.5rem;
-    gap: 0.5rem 0;
-  }
-
-  .hero__title {
-    max-width: 7ch;
-    font-size: clamp(4rem, 19vw, 6.6rem);
-    line-height: 0.83;
-  }
-
   .hero__title span {
     white-space: normal;
-  }
-
-  .hero__lede {
-    max-width: 29rem;
-    margin-top: 2rem;
-  }
-
-  .hero__actions {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .text-link {
-    width: fit-content;
-  }
-
-  .hero__clock {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .hero__visual {
-    width: 100%;
-  }
-
-  .signal-engine__stage {
-    min-height: 20rem;
-  }
-
-  .signal-engine__axis--feedback {
-    display: none;
-  }
-
-  .signal-engine__footer {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .signal-engine__status {
-    text-align: left;
   }
 
   .facts {
@@ -1465,38 +744,6 @@ h2 {
   .fact {
     min-height: 7rem;
     padding: 1rem;
-  }
-
-  .fact__value {
-    font-size: clamp(1.8rem, 8vw, 2.6rem);
-  }
-
-  .paper-section,
-  .signal-flow-section,
-  .missions-section,
-  .portal-section,
-  .schedule-section,
-  .prizes-section,
-  .faq-section {
-    padding-block: 5.5rem;
-  }
-
-  .editorial-grid {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .brief-copy,
-  .editorial-copy {
-    grid-column: 1;
-  }
-
-  .brief-copy__body {
-    grid-template-columns: 1fr;
-  }
-
-  .signal-flow {
-    grid-template-columns: 1fr;
   }
 
   .signal-flow li {
@@ -1510,37 +757,8 @@ h2 {
     border-bottom: 0;
   }
 
-  .mission-list {
-    margin-top: 4rem;
-  }
-
-  .mission {
-    min-height: 0;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
   .mission h3 {
     max-width: none;
-  }
-
-  .mission__copy,
-  .mission__prompt,
-  .mission__prompt {
-    grid-column: 1;
-  }
-
-  .capability-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .schedule-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .schedule-day {
-    min-height: 0;
-    padding-inline: 0;
   }
 
   .schedule-day + .schedule-day {
@@ -1549,56 +767,12 @@ h2 {
     border-left: 0;
   }
 
-  .schedule-day__header {
-    min-height: 8rem;
-  }
-
   .schedule-day__header strong {
     font-size: 3.2rem;
   }
 
-  .prize-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .prize-card {
-    border-top: 1px solid var(--paper-rule);
-    border-left: 0;
-  }
-
-  .prize-copy,
-  .prize-card {
-    min-height: 18rem;
-  }
-
-  .prize-copy {
-    grid-column: auto;
-  }
-
-  .host-marks {
-    flex-wrap: wrap;
-    font-size: clamp(2.25rem, 13vw, 4.5rem);
-  }
-
   .apply-section h2 {
     font-size: clamp(4rem, 18vw, 6.5rem);
-  }
-
-  .site-footer__top,
-  .site-footer__bottom {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .site-footer__top {
-    min-height: 0;
-    padding-block: 3.5rem;
-  }
-
-  .site-footer__bottom {
-    min-height: 0;
-    padding-block: 1.5rem;
-    gap: 1rem;
   }
 
   .site-footer__bottom > a:last-child {
@@ -1607,18 +781,8 @@ h2 {
 }
 
 /* Schedule slide */
-.schedule-section {
-  --schedule-ink: #111111;
-  --schedule-muted: #676767;
-  --schedule-rule: rgb(9 9 9 / 0.18);
-  --schedule-card: rgb(255 255 255 / 0.78);
-}
 
 .schedule-section > .shell {
-  min-width: 0;
-}
-
-.schedule-heading {
   min-width: 0;
 }
 
@@ -1637,15 +801,6 @@ h2 {
 .schedule-heading .eyebrow {
   margin-top: 1rem;
   color: var(--text-secondary);
-}
-
-.schedule-day__index {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1.3;
-  text-transform: uppercase;
 }
 
 .schedule-section .schedule-grid {
@@ -1826,14 +981,6 @@ h2 {
   .hero__eyebrow span + span {
     padding-left: 0.55rem;
   }
-
-  .fact__value {
-    font-size: 1.65rem;
-  }
-
-  .capability-list {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1948,20 +1095,8 @@ h2 {
   text-wrap: balance;
 }
 
-.site-header {
-  border-top: 0.25rem solid var(--signal);
-  border-bottom: 2px solid var(--paper);
-  background-color: rgba(9, 9, 9, 0.96);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-}
-
 .site-header::before {
   display: none;
-}
-
-.site-header__inner {
-  min-height: 4.65rem;
 }
 
 .wordmark {
@@ -1969,14 +1104,6 @@ h2 {
   border: 1px solid var(--paper);
   background: var(--night);
   font-family: var(--font-geist-pixel), monospace;
-}
-
-.wordmark__slash {
-  color: var(--signal-hover);
-}
-
-.site-nav {
-  gap: 0.35rem;
 }
 
 .site-nav a {
@@ -2035,61 +1162,6 @@ h2 {
   );
 }
 
-.hero__eyebrow {
-  width: fit-content;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--rule);
-  background: var(--surface);
-  color: var(--signal-hover);
-}
-
-.hero__title {
-  letter-spacing: -0.09em;
-}
-
-.hero__title-accent {
-  width: fit-content;
-  margin-top: 0.14em;
-  padding: 0.06em 0.12em 0.1em 0.08em;
-  background: var(--signal);
-  color: var(--night);
-  text-shadow: none;
-  transform: rotate(-1deg);
-}
-
-.hero__lede {
-  color: var(--paper);
-  font-size: clamp(1.02rem, 1.35vw, 1.2rem);
-}
-
-.hero__clock {
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--rule);
-  background: var(--surface);
-}
-
-.event-clock {
-  color: var(--signal-hover);
-}
-
-.event-clock__dot {
-  background: var(--signal-hover);
-  box-shadow: 0 0 0.7rem var(--signal-hover);
-}
-
-.signal-engine {
-  border: 2px solid var(--paper);
-  background: var(--night);
-}
-
-.signal-engine__header {
-  min-height: 2.5rem;
-  padding-inline: 0.8rem;
-  border-bottom: 2px solid var(--paper);
-  background: var(--signal);
-  color: var(--night);
-}
-
 .signal-engine__header span:first-child::before {
   display: inline-block;
   width: 0.45rem;
@@ -2097,25 +1169,6 @@ h2 {
   margin-right: 0.55rem;
   background: var(--night);
   content: "";
-}
-
-.signal-engine__stage {
-  background-color: var(--night);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-  box-shadow: inset 0 0 3rem rgba(255, 77, 0, 0.05);
-}
-
-.signal-engine__footer {
-  padding-inline: 0.8rem;
-  border-top: 2px solid var(--paper);
-  color: var(--signal-hover);
-}
-
-.signal-engine__hint {
-  padding: 0.4rem 0.55rem;
-  border: 1px solid var(--signal);
-  background: var(--night);
 }
 
 .facts {
@@ -2137,44 +1190,6 @@ h2 {
   content: "";
 }
 
-.fact__value {
-  color: var(--paper);
-}
-
-.paper-section,
-.portal-section,
-.host-section,
-.prizes-section {
-  background-color: var(--paper);
-  background-image: var(--mesh-light);
-  background-size: var(--mesh-size);
-}
-
-.paper-section,
-.signal-flow-section,
-.missions-section,
-.portal-section,
-.schedule-section,
-.prizes-section,
-.host-section,
-.faq-section,
-.apply-section {
-  position: relative;
-}
-
-.signal-flow-section,
-.schedule-section,
-.faq-section {
-  background-color: var(--night);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-}
-
-.signal-flow {
-  gap: 0.75rem;
-  border: 0;
-}
-
 .signal-flow::before {
   display: none;
 }
@@ -2188,21 +1203,6 @@ h2 {
 .signal-flow strong {
   color: var(--signal-hover);
   font-family: var(--font-geist-pixel), monospace;
-}
-
-.missions-section {
-  background-color: var(--black);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-}
-
-.mission-list {
-  border-top: 2px solid var(--paper);
-}
-
-.mission {
-  padding-inline: 1rem;
-  border-bottom: 2px solid var(--rule);
 }
 
 .mission:hover {
@@ -2223,10 +1223,6 @@ h2 {
   color: var(--night);
 }
 
-.capability-list {
-  gap: 0.6rem;
-}
-
 .capability-list li {
   border: 2px solid var(--ink);
   background: rgba(255, 255, 255, 0.25);
@@ -2243,11 +1239,6 @@ h2 {
   padding-left: 1.3rem;
 }
 
-.schedule-grid {
-  gap: 0.85rem;
-  border: 0;
-}
-
 .schedule-day,
 .schedule-day + .schedule-day {
   border: 2px solid var(--rule);
@@ -2260,25 +1251,6 @@ h2 {
 
 .schedule-day ol {
   border-top: 2px dashed var(--rule);
-}
-
-.prize-grid {
-  gap: 0.75rem;
-  border: 0;
-}
-
-.prize-copy,
-.prize-card {
-  border: 2px solid var(--ink);
-}
-
-.prize-card {
-  background: var(--white);
-}
-
-.prize-card--first {
-  border-color: var(--ink);
-  background: var(--signal);
 }
 
 [data-slot="accordion-item"] {
@@ -2301,18 +1273,6 @@ h2 {
   color: var(--paper);
 }
 
-.apply-section {
-  background-color: var(--signal);
-  background-image: var(--mesh-accent);
-  background-size: var(--mesh-size);
-}
-
-.site-footer {
-  border-top: 0.65rem solid var(--signal-hover);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-}
-
 @media (max-width: 48rem) {
   .hero::before {
     right: 1.25rem;
@@ -2324,10 +1284,6 @@ h2 {
   .signal-flow,
   .schedule-grid {
     gap: 0.65rem;
-  }
-
-  .mission {
-    padding-inline: 0.75rem;
   }
 }
 
@@ -2349,66 +1305,11 @@ h2 {
   display: none;
 }
 
-.portal-particles {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  overflow: hidden;
-  background-color: var(--black);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-  animation: landing-scene-in 500ms ease-out both;
-}
-
 .portal-particles canvas {
   display: block;
   width: 100%;
   height: 100%;
   touch-action: pan-y;
-}
-
-.hero-landing__masthead {
-  position: absolute;
-  z-index: 2;
-  top: clamp(3.5rem, 7svh, 5.5rem);
-  right: 0;
-  left: 0;
-  text-align: center;
-  pointer-events: none;
-  animation: landing-copy-in 650ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
-}
-
-.hero-landing__title {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.24em;
-  color: var(--paper);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: clamp(2.25rem, 7.2vw, 7rem);
-  font-weight: 700;
-  letter-spacing: -0.075em;
-  line-height: 0.86;
-  text-shadow: none;
-  white-space: nowrap;
-}
-
-.hero-landing__slash {
-  color: var(--signal);
-}
-
-.hero-landing__meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.5rem, 1.2vw, 1rem);
-  margin-top: clamp(1rem, 2.2vh, 1.5rem);
-  color: var(--muted);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: clamp(0.58rem, 0.85vw, 0.78rem);
-  letter-spacing: 0.1em;
-  line-height: 1.5;
-  text-transform: uppercase;
 }
 
 .hero-landing__meta strong {
@@ -2421,31 +1322,8 @@ h2 {
   color: var(--gray);
 }
 
-.hero-landing__action {
-  position: absolute;
-  z-index: 2;
-  bottom: clamp(3.1rem, 6.5svh, 5rem);
-  left: 50%;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: clamp(1.25rem, 2.5svh, 1.75rem);
-  translate: -50% 0;
-  animation: landing-copy-in 650ms cubic-bezier(0.22, 1, 0.36, 1) 240ms both;
-}
-
 .hero-landing__action .hero-landing__meta {
   margin-top: 0;
-}
-
-.hero-landing__cta {
-  position: relative;
-  min-width: 18rem;
-  justify-content: center;
-  border: 1px solid var(--signal);
-  background: var(--signal);
-  color: var(--night);
-  box-shadow: none;
 }
 
 .hero-landing__cta .external-link-icon__frame {
@@ -2459,19 +1337,6 @@ h2 {
   background: var(--signal-hover);
   box-shadow: none;
   translate: 0;
-}
-
-.hero-details {
-  padding-top: clamp(5rem, 9vw, 9rem);
-  scroll-margin-top: 1rem;
-  background: var(--night);
-}
-
-.hero-details__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(18rem, 5fr);
-  align-items: end;
-  gap: clamp(3rem, 8vw, 9rem);
 }
 
 .hero-details h2 {
@@ -2516,24 +1381,6 @@ h2 {
 }
 
 @media (max-width: 48rem) {
-  .hero-landing__masthead {
-    top: clamp(3rem, 7svh, 4.5rem);
-    padding-inline: 1rem;
-  }
-
-  .hero-landing__title {
-    gap: 0.2em;
-    font-size: clamp(2rem, 8.3vw, 3.2rem);
-  }
-
-  .hero-landing__meta {
-    max-width: 22rem;
-    flex-wrap: wrap;
-    gap: 0.15rem 0.6rem;
-    margin-inline: auto;
-    font-size: 0.56rem;
-  }
-
   .hero-landing__meta span[aria-hidden="true"] {
     display: none;
   }
@@ -2542,48 +1389,8 @@ h2 {
     flex: 1 0 100%;
   }
 
-  .hero-landing__action {
-    bottom: 3.2rem;
-    width: calc(100% - 2.5rem);
-  }
-
-  .hero-landing__cta {
-    width: min(100%, 20rem);
-    min-width: 0;
-  }
-
-  .hero-details__intro {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
   .hero-details .facts {
     margin-top: 4rem;
-  }
-}
-
-@media (max-width: 30rem) {
-  .hero-landing__title {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.08em;
-    font-size: clamp(2.5rem, 13vw, 4rem);
-    line-height: 0.78;
-    white-space: normal;
-  }
-}
-
-@media (max-height: 42rem) and (min-width: 48.01rem) {
-  .hero-landing__masthead {
-    top: 2.25rem;
-  }
-
-  .hero-landing__title {
-    font-size: clamp(3rem, 6.5vw, 5rem);
-  }
-
-  .hero-landing__action {
-    bottom: 2.75rem;
   }
 }
 
@@ -2596,19 +1403,9 @@ h2 {
   .external-link-icon {
     transform: translate(0, 1px);
   }
-
-  .portal-particles,
-  .hero-landing__masthead,
-  .hero-landing__action {
-    animation: none;
-  }
 }
 
 /* Compact event content built from shared label and control primitives. */
-
-.hero-details__aside {
-  align-self: end;
-}
 
 .hero-details .hero__clock {
   margin-top: 0;
@@ -2632,45 +1429,8 @@ h2 {
   display: none;
 }
 
-.fact__value {
-  font-size: clamp(1.65rem, 3vw, 2.65rem);
-}
-
-.paper-section,
-.signal-flow-section,
-.missions-section,
-.portal-section,
-.schedule-section,
-.prizes-section,
-.faq-section {
-  padding-block: clamp(4.5rem, 7vw, 7rem);
-}
-
-.signal-flow {
-  margin-top: clamp(3rem, 5vw, 5rem);
-}
-
 .signal-flow li {
   min-height: 9rem;
-}
-
-.mission-list {
-  display: grid;
-  margin-top: clamp(3rem, 5vw, 5rem);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
-  border: 0;
-}
-
-.mission {
-  display: grid;
-  min-height: 13rem;
-  padding: 1.5rem;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto;
-  align-items: start;
-  border: 2px solid var(--rule);
-  background: var(--surface);
 }
 
 .mission h3 {
@@ -2679,48 +1439,17 @@ h2 {
   grid-row: 1;
 }
 
-.capability-list {
-  max-width: none;
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-}
-
 .capability-list li {
   padding: 1rem;
   background-image: none;
-}
-
-.schedule-grid {
-  margin-top: clamp(3rem, 5vw, 5rem);
-}
-
-.schedule-day {
-  min-height: 27rem;
-}
-
-.schedule-day__header {
-  min-height: 8rem;
 }
 
 .schedule-day li {
   min-height: 4.2rem;
 }
 
-.prize-copy,
-.prize-card {
-  min-height: 18rem;
-}
-
-.prize-copy {
-  justify-content: flex-end;
-}
-
 [data-slot="accordion-trigger"] {
   min-height: 4.75rem;
-}
-
-.apply-section__action {
-  width: fit-content;
-  justify-self: end;
 }
 
 @media (max-width: 48rem) {
@@ -2735,105 +1464,15 @@ h2 {
     gap: 0.6rem;
   }
 
-  .fact__value {
-    font-size: clamp(1.45rem, 7vw, 2.25rem);
-  }
-
-  .paper-section,
-  .signal-flow-section,
-  .missions-section,
-  .portal-section,
-  .schedule-section,
-  .prizes-section,
-  .faq-section {
-    padding-block: 4.5rem;
-  }
-
-  .mission-list {
-    grid-template-columns: 1fr;
-  }
-
-  .mission {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
-  }
-
   .mission h3 {
     grid-column: 1;
-  }
-
-  .capability-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .schedule-day {
-    min-height: 0;
-  }
-
-  .schedule-day__header {
-    min-height: 7rem;
-  }
-
-  .prize-copy,
-  .prize-card {
-    min-height: 15rem;
-  }
-
-  .apply-section__action {
-    justify-self: start;
-  }
-}
-
-@media (max-width: 25rem) {
-  .capability-list {
-    grid-template-columns: 1fr;
   }
 }
 
 /* Final particle countdown */
-.countdown-slide {
-  --countdown-glow: var(--orange);
-
-  position: relative;
-  display: grid;
-  min-height: 100svh;
-  overflow: hidden;
-  isolation: isolate;
-  grid-template-rows: auto 1fr;
-  border-top: 0.65rem solid var(--countdown-glow);
-  background-color: var(--black);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-  color: var(--paper);
-  scroll-margin-top: 1rem;
-}
 
 .countdown-slide::after {
   display: none;
-}
-
-.countdown-slide__chrome {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  min-height: 3.25rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid var(--rule);
-  color: var(--muted);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.countdown-slide__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: var(--countdown-glow);
-  text-align: right;
 }
 
 .countdown-slide__status i {
@@ -2842,23 +1481,6 @@ h2 {
   background: var(--countdown-glow);
   box-shadow: 0 0 0.75rem rgba(255, 77, 0, 0.85);
   animation: terminal-blink 1.1s steps(1) infinite;
-}
-
-.countdown-slide__body {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  min-height: calc(100svh - 3.9rem);
-  align-content: center;
-  padding-block: clamp(2rem, 4.5svh, 4rem);
-}
-
-.countdown-slide__heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-bottom: clamp(1.25rem, 2.8svh, 2.25rem);
 }
 
 .countdown-slide__heading p {
@@ -2882,18 +1504,6 @@ h2 {
   letter-spacing: -0.075em;
   line-height: 0.82;
   text-transform: uppercase;
-}
-
-.particle-countdown {
-  position: relative;
-  min-height: clamp(18rem, 44svh, 32rem);
-  overflow: hidden;
-  isolation: isolate;
-  border: 2px solid var(--paper);
-  background-color: var(--black);
-  background-image: var(--mesh-dark);
-  background-size: var(--mesh-size);
-  touch-action: pan-y;
 }
 
 .particle-countdown::before,
@@ -2929,25 +1539,6 @@ h2 {
   height: 100%;
 }
 
-.particle-countdown__fallback {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  display: grid;
-  padding-inline: clamp(1rem, 4vw, 4rem);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: center;
-  color: var(--countdown-glow);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: clamp(2.4rem, 7.8vw, 7.75rem);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.08em;
-  line-height: 1;
-  opacity: 1;
-  text-shadow: 0 0 1.2rem rgba(255, 77, 0, 0.22);
-  transition: opacity 180ms ease;
-}
-
 .particle-countdown__fallback span {
   position: relative;
   display: block;
@@ -2967,50 +1558,8 @@ h2 {
   opacity: 0;
 }
 
-.particle-countdown__hint {
-  position: absolute;
-  z-index: 2;
-  bottom: 0.85rem;
-  left: 50%;
-  padding: 0.38rem 0.52rem;
-  border: 1px solid var(--rule);
-  background: rgba(9, 9, 9, 0.84);
-  color: var(--signal-hover);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-.particle-countdown__labels {
-  display: grid;
-  min-height: 3.5rem;
-  margin-top: 0.75rem;
-  padding-inline: clamp(1rem, 4vw, 4rem);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: center;
-  border: 1px solid var(--rule);
-  background: var(--surface);
-  color: var(--muted);
-  font-family: var(--font-geist-pixel), monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
 .particle-countdown__labels span + span {
   border-left: 1px dashed var(--rule);
-}
-
-.countdown-slide__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  margin-top: clamp(1.5rem, 3svh, 2.5rem);
 }
 
 .countdown-slide__footer p {
@@ -3046,23 +1595,6 @@ h2 {
 }
 
 @media (max-width: 48rem) {
-  .countdown-slide__chrome {
-    min-height: 3rem;
-    font-size: 0.52rem;
-  }
-
-  .countdown-slide__body {
-    min-height: calc(100svh - 3.65rem);
-    padding-block: 2rem;
-  }
-
-  .countdown-slide__heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.85rem;
-    margin-bottom: 1.5rem;
-  }
-
   .countdown-slide__heading p {
     order: 0;
     padding: 0;
@@ -3076,34 +1608,6 @@ h2 {
     line-height: 0.68;
   }
 
-  .particle-countdown {
-    min-height: clamp(16rem, 42svh, 22rem);
-  }
-
-  .particle-countdown__fallback {
-    padding-inline: 0.5rem;
-    font-size: clamp(1.9rem, 10.5vw, 3.5rem);
-  }
-
-  .particle-countdown__labels {
-    min-height: 3rem;
-    padding-inline: 0.25rem;
-    font-size: 0.5rem;
-    letter-spacing: 0.06em;
-  }
-
-  .particle-countdown__hint {
-    bottom: 0.65rem;
-    font-size: 0.48rem;
-  }
-
-  .countdown-slide__footer {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 1.25rem;
-    margin-top: 1.5rem;
-  }
-
   .countdown-slide__footer a {
     width: 100%;
     min-width: 0;
@@ -3111,24 +1615,8 @@ h2 {
 }
 
 @media (max-height: 46rem) and (min-width: 48.01rem) {
-  .countdown-slide__body {
-    padding-block: 1.5rem;
-  }
-
-  .countdown-slide__heading {
-    margin-bottom: 1rem;
-  }
-
   .countdown-slide__heading h2 {
     font-size: clamp(2.2rem, 4.8vw, 4rem);
-  }
-
-  .particle-countdown {
-    min-height: 15rem;
-  }
-
-  .countdown-slide__footer {
-    margin-top: 1rem;
   }
 }
 
@@ -3144,31 +1632,9 @@ h2 {
 }
 
 /* Minimal final slide: mirror the opening particle object. */
-.countdown-slide {
-  display: grid;
-  min-height: 100svh;
-  grid-template-rows: minmax(0, 1fr) auto;
-  border: 0;
-  scroll-margin-top: 0;
-}
 
 .countdown-slide::after {
   display: none;
-}
-
-.countdown-slide__body {
-  display: flex;
-  min-height: 0;
-  align-items: stretch;
-  justify-content: center;
-  flex-direction: column;
-  padding-block: clamp(2.5rem, 8svh, 6rem);
-}
-
-.countdown-slide__heading {
-  display: block;
-  margin: 0;
-  text-align: center;
 }
 
 .countdown-slide__heading h2 {
@@ -3183,25 +1649,9 @@ h2 {
   line-height: 0.9;
 }
 
-.particle-countdown {
-  width: 100%;
-  min-height: clamp(19rem, 50svh, 34rem);
-  margin-top: clamp(2.5rem, 7svh, 5rem);
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
 .particle-countdown::before,
 .particle-countdown::after {
   display: none;
-}
-
-.particle-countdown__fallback {
-  padding-inline: 0;
-  color: var(--slide-foreground);
-  letter-spacing: 0.08em;
-  text-shadow: none;
 }
 
 .particle-countdown__fallback b {
@@ -3218,57 +1668,8 @@ h2 {
 }
 
 @media (max-width: 48rem) {
-  .countdown-slide__body {
-    min-height: 0;
-    padding-block: 2.5rem;
-  }
-
-  .countdown-slide__heading {
-    display: block;
-    margin: 0;
-  }
-
   .countdown-slide__heading h2 {
     font-size: clamp(2.25rem, 11vw, 3.75rem);
-  }
-
-  .particle-countdown {
-    min-height: clamp(15rem, 44svh, 22rem);
-    margin-top: 2.5rem;
-    box-shadow: none;
-  }
-
-  .particle-countdown__fallback {
-    padding-inline: 0;
-    font-size: clamp(1.65rem, 9vw, 3.25rem);
-    letter-spacing: 0.06em;
-  }
-}
-
-@media (max-height: 46rem) and (min-width: 48.01rem) {
-  .countdown-slide__body {
-    min-height: 0;
-    padding-block: 1.5rem;
-  }
-
-  .countdown-slide__heading {
-    margin: 0;
-  }
-
-  .particle-countdown {
-    min-height: 15rem;
-    margin-top: 1.5rem;
-  }
-}
-
-@media (max-width: 48rem) and (max-height: 46rem) {
-  .countdown-slide__body {
-    padding-block: 1.25rem;
-  }
-
-  .particle-countdown {
-    min-height: clamp(12rem, 35svh, 16rem);
-    margin-top: 1.25rem;
   }
 }
 
@@ -3374,34 +1775,12 @@ h2 {
     padding-block: 2rem;
   }
 
-  .section-heading-row,
-  .editorial-grid,
-  .hero-details__intro {
-    gap: 1.5rem;
-  }
-
   .hero-details .facts,
   .signal-flow,
   .mission-list,
   .capability-list,
   .schedule-grid {
     margin-top: 1.5rem;
-  }
-
-  .mission-list {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .capability-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .mission {
-    min-height: 0;
-    padding: 0.85rem;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.6rem;
   }
 
   .mission h3 {
@@ -3412,33 +1791,9 @@ h2 {
     min-height: clamp(5.25rem, 12dvh, 7.5rem);
   }
 
-  .schedule-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .schedule-day {
-    width: 100%;
-  }
-
   .schedule-day + .schedule-day {
     margin-top: 0;
     border-top: 2px solid var(--rule);
-  }
-
-  .prize-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-  }
-
-  .prize-copy {
-    min-height: 0;
-    padding: 1rem;
-    grid-column: 1 / -1;
-  }
-
-  .prize-card {
-    min-height: 8rem;
-    padding: 1rem;
   }
 
   .prize-card strong {
@@ -3449,17 +1804,8 @@ h2 {
     margin-top: 1.5rem;
   }
 
-  .judging__header {
-    padding-block: 0.75rem;
-  }
-
   .judging__header h3 {
     font-size: 1.25rem;
-  }
-
-  .judging__list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1rem;
   }
 
   .judging__list li {
@@ -3482,12 +1828,6 @@ h2 {
   }
 }
 
-@media (min-width: 40.0625rem) and (max-width: 48rem) {
-  .schedule-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 /*
  * Slide typography assignments. Component-specific role names above alias
  * these four visible styles so hierarchy stays identical across every slide.
@@ -3500,15 +1840,6 @@ h2 {
 
 #main-content > section:nth-of-type(even) {
   --text-primary: var(--black);
-}
-
-.hero-landing__title {
-  color: var(--text-primary);
-  font-family: var(--type-font);
-  font-size: var(--type-display-size);
-  font-weight: var(--type-display-weight);
-  letter-spacing: var(--type-display-tracking);
-  line-height: var(--type-display-leading);
 }
 
 #main-content > section h2 {
@@ -3548,10 +1879,6 @@ h2 {
   font-weight: var(--type-subheading-weight);
   letter-spacing: var(--type-subheading-tracking);
   line-height: var(--type-subheading-leading);
-}
-
-.fact__value {
-  color: var(--text-primary);
 }
 
 :is(.fact__value, .prize-card strong) {
@@ -3628,45 +1955,12 @@ h2 {
   height: 100%;
 }
 
-.trophy-particles {
-  touch-action: pan-y;
-}
-
 .trophy-particles canvas {
   display: block;
 }
 
-.trophy-particles__fallback {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(48%, 18rem);
-  overflow: visible;
-  stroke: var(--slide-foreground);
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-  stroke-width: 4;
-  transform: translate(-50%, -50%);
-  transition: opacity 180ms ease;
-}
-
 .trophy-particles[data-renderer="ready"] .trophy-particles__fallback {
   opacity: 0;
-}
-
-.prize-slide__awards {
-  position: absolute;
-  z-index: 2;
-  bottom: clamp(2rem, 7dvh, 4rem);
-  left: 50%;
-  display: grid;
-  width: min(calc(100% - 2.5rem), 28rem);
-  margin: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  color: var(--slide-foreground);
-  text-align: center;
-  transform: translateX(-50%);
-  pointer-events: none;
 }
 
 .prize-slide__awards > div {
@@ -3705,26 +1999,9 @@ h2 {
   padding-block: clamp(2.5rem, 7dvh, 6rem);
 }
 
-.judging-slide {
-  min-width: 0;
-}
-
-.judging-slide__header {
-  display: block;
-}
-
 #main-content .judging-slide__header h2 {
   max-width: 11ch;
   color: var(--text-primary);
-}
-
-.judging-slide__list {
-  display: grid;
-  margin: clamp(2.5rem, 6dvh, 5rem) 0 0;
-  padding: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: clamp(4rem, 12vw, 12rem);
-  list-style: none;
 }
 
 .judging-slide__list li {
@@ -3751,25 +2028,12 @@ h2 {
 }
 
 @media (max-width: 48rem) {
-  .prize-slide__awards {
-    bottom: 15dvh;
-  }
-
   #main-content > .judging-section {
     padding-block: 1.5rem;
   }
 
-  .judging-slide__header {
-    display: block;
-  }
-
   #main-content .judging-slide__header h2 {
     font-size: clamp(2.5rem, 11vw, 3.75rem);
-  }
-
-  .judging-slide__list {
-    margin-top: 1.5rem;
-    grid-template-columns: 1fr;
   }
 
   .judging-slide__list li {
@@ -3782,34 +2046,12 @@ h2 {
 }
 
 @media (max-height: 42rem) and (min-width: 48.01rem) {
-  .judging-slide__list {
-    margin-top: 1.5rem;
-  }
-
   .judging-slide__list li {
     min-height: 3.5rem;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .trophy-particles__fallback {
-    transition: none;
-  }
-}
-
 /* Fixed section controls mirror the full-screen slide keyboard navigation. */
-.keyboard-navigation {
-  position: fixed;
-  z-index: 50;
-  right: clamp(0.75rem, 2vw, 1.5rem);
-  bottom: clamp(0.75rem, 2vw, 1.5rem);
-  display: flex;
-  align-items: stretch;
-  border: 1px solid rgb(184 184 184 / 0.45);
-  background: rgb(9 9 9 / 0.88);
-  color: var(--white);
-  backdrop-filter: blur(0.5rem);
-}
 
 .keyboard-navigation button {
   display: grid;
@@ -3833,12 +2075,6 @@ h2 {
 .keyboard-navigation svg {
   width: 1rem;
   height: 1rem;
-}
-
-@media (max-width: 48rem) {
-  .keyboard-navigation {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4036,44 +2272,12 @@ h2 {
   grid-column: 2;
 }
 
-.track-particles {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  grid-column: 2;
-  grid-row: 1 / 3;
-  isolation: isolate;
-  touch-action: pan-y;
-  -webkit-mask-image: radial-gradient(
-    ellipse 70% 76%,
-    black 42%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(ellipse 70% 76%, black 42%, transparent 100%);
-}
-
 .track-particles canvas {
   position: absolute;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.track-particles__fallback {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(86%, 38rem);
-  overflow: visible;
-  stroke: var(--text-secondary);
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-  stroke-width: 2;
-  transform: translate(-50%, -50%) scale(1.2);
-  transition: opacity 180ms ease;
-  vector-effect: non-scaling-stroke;
 }
 
 .track-particles[data-renderer="ready"] .track-particles__fallback {
@@ -4158,12 +2362,6 @@ h2 {
 
   #main-content > .missions-section > .missions-slide > .mission-list .mission {
     min-height: 5.5rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .track-particles__fallback {
-    transition: none;
   }
 }
 
@@ -4280,23 +2478,6 @@ h2 {
   transition: opacity 150ms ease;
 }
 
-.partner-links__mark {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-items: center;
-}
-
-.partner-links--featured {
-  position: static;
-  display: flex;
-  width: fit-content;
-  align-items: center;
-  gap: 0.65rem;
-  margin: clamp(0.75rem, 1.6svh, 1rem) auto 0;
-  pointer-events: auto;
-}
-
 .partner-links--featured .partner-links__by,
 .partner-links--featured .partner-links__and,
 .partner-links--featured .partner-links__name {
@@ -4368,11 +2549,6 @@ h2 {
     height: 1.125rem;
   }
 
-  .partner-links--featured {
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-  }
-
   .partner-links--featured a {
     width: auto;
     height: auto;
@@ -4387,10 +2563,6 @@ h2 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .partner-links--featured {
-    animation: none;
-  }
-
   .partner-links--featured .partner-links__mark {
     transition: none;
   }
@@ -4438,62 +2610,8 @@ html.xp body {
 }
 
 /* Top chrome: wordmark + pill nav, Lusion-style. */
-.xp-topbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: clamp(1rem, 2.4vw, 1.6rem) clamp(1.1rem, 3vw, 2.2rem);
-  color: var(--ink);
-}
-.xp-wordmark {
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  letter-spacing: 0.02em;
-}
-.xp-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.xp-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 2.6rem;
-  padding: 0 1.1rem;
-  border-radius: 999px;
-  font-family: var(--sans);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  transition:
-    transform var(--dur-fast) var(--ease-out),
-    background var(--dur-ui) var(--ease-out);
-}
-.xp-pill--solid {
-  background: var(--ink);
-  color: var(--paper);
-}
-.xp-pill--ghost {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--ink);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-}
 .xp-pill:active {
   transform: scale(0.97);
-}
-.xp-pill__dot {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: var(--orange);
 }
 
 /* Content overlay. */
@@ -4503,23 +2621,8 @@ html.xp body {
 }
 
 /* Editorial hero — huge type left, body column right, portal card center/bg. */
-.xp-hero {
-  position: relative;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(2rem, 5vw, 4rem);
-  padding: clamp(6rem, 14vh, 10rem) clamp(1.25rem, 5vw, 4rem)
-    clamp(3rem, 8vh, 6rem);
-}
 
 /* Content floats over the continuous space — never covers the canvas. */
-.xp-editorial {
-  position: relative;
-  z-index: 2;
-  background: transparent;
-}
 /* Soft legibility scrim behind each floating section's copy. */
 .xp-editorial .xp-section {
   background: radial-gradient(
@@ -4582,7 +2685,11 @@ html.xp body {
   max-width: 17ch;
   margin: 0.6rem 0 1.8rem;
   font-family: var(--font-space), var(--sans);
-  font-weight: 600;
+  /* Declared 600 here for a long time and rendered 560, because the old
+     `.xp-section h2` outranked it. Pinned to what it has always actually looked
+     like, so retiring that rule stays a structural change and nothing else.
+     Making it 600 on purpose is a separate call for someone to take. */
+  font-weight: 560;
   font-size: clamp(1.5rem, 3.2vw, 2.6rem);
   line-height: 1.08;
   letter-spacing: -0.01em;
@@ -4649,20 +2756,12 @@ html.xp body {
    comment describes it. It sits in its own dock rather than inside the HUD,
    because the HUD stands down at the finale and a control for something still
    audible must not go with it. */
-.xp-soundDock {
-  position: fixed;
-  top: clamp(1rem, 3vh, 2rem);
-  right: calc(clamp(1.25rem, 4vw, 3rem) + 12.5rem);
-  z-index: 30;
-  opacity: 0;
-  transition: opacity var(--dur-ui) var(--ease-out);
-}
-@media (max-width: 40rem) {
-  .xp-soundDock {
-    right: calc(clamp(1.25rem, 4vw, 3rem) + 10.5rem);
-  }
-}
+/* The pill stays 2.3rem because that is what the HUD row is drawn around; the
+   `::after` below is what the finger actually lands on. Same trick on
+   `.xp-register--sm`. Both clear WCAG's 24px floor already — this is the 44px
+   touch guidance, which is a comfort threshold rather than a conformance one. */
 .xp-hud__sound {
+  position: relative;
   display: inline-flex;
   align-items: center;
   height: 2.3rem;
@@ -4690,10 +2789,47 @@ html.xp body {
   outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
+/* Hit area only — no paint, no layout, no effect on the visible pill. */
+.xp-hud__sound::after,
+.xp-register--sm::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2.75rem;
+  transform: translateY(-50%);
+}
 @media (hover: hover) and (pointer: fine) {
   .xp-hud__sound:hover {
     color: #ffffff;
   }
+}
+
+/* The escape hatch. Off-screen until focused, then it lands in the top-left
+   above everything — z-index 60 clears the HUD at 30 and the cue at 50.
+   Square, like everything else here: `visual-reference.md` says radius 0. */
+.xp-skip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid var(--orange);
+  background: var(--night);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--orange);
+  text-decoration: none;
+  /* Moved rather than hidden: `display: none` and `visibility: hidden` both
+     take it out of the focus order, which is the one thing it needs to be in. */
+  transform: translateY(-130%);
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.xp-skip:focus-visible {
+  transform: translateY(0);
 }
 
 /* Organiser credit under the finale CTA. Quiet on purpose — it is a colophon,
@@ -4713,6 +2849,15 @@ html.xp body {
   text-decoration-color: rgba(255, 255, 255, 0.3);
   pointer-events: auto;
   transition: color var(--dur-ui) var(--ease-out);
+  /* These measured 53×15 and 127×15 — under WCAG 2.5.8's 24×24 floor, and the
+     two credit links for the organisations running the event.
+
+     Vertical padding on an *inline* box extends the hit area without entering
+     layout at all, so the ink does not move; the horizontal padding does enter
+     layout, hence the negative margin cancelling it. Nothing here changes what
+     the colophon looks like. */
+  padding: 0.95rem 0.4rem;
+  margin-inline: -0.4rem;
 }
 @media (hover: hover) and (pointer: fine) {
   .xp-colophon a:hover {
@@ -4723,11 +2868,24 @@ html.xp body {
 /* Depth readout + persistent Register, top right. Mono, hairline, small — it
    is instrumentation, not chrome, and it must never compete with the centre
    band the vanishing point lives in. */
+/* The row itself no longer fades — `.xp-hud__fading` does. The sound control is
+   a flex item in here, so its position is computed rather than guessed at; the
+   previous arrangement fixed it to a `right` offset told the row was 12.5rem
+   wide, and a row holding a live percentage and a pill is not. It overlapped
+   the readout by 53px. */
 .xp-hud {
   position: fixed;
   top: clamp(1rem, 3vh, 2rem);
   right: clamp(1.25rem, 4vw, 3rem);
   z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
+}
+/* Everything that stands down at the finale, so the giant Register is alone —
+   which is the readout and the small Register, and not the control over a drone
+   that is still playing. */
+.xp-hud__fading {
   display: flex;
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.4rem);
@@ -4808,18 +2966,6 @@ html.xp body {
   -webkit-text-stroke: 2px #ffffff;
 }
 
-.xp-herorow {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1.5rem, 4vw, 3rem);
-  align-items: end;
-}
-@media (min-width: 60rem) {
-  .xp-herorow {
-    grid-template-columns: 1.4fr 1fr;
-  }
-}
-
 .xp-body {
   max-width: 44ch;
   font-size: clamp(1rem, 1.4vw, 1.2rem);
@@ -4837,14 +2983,16 @@ html.xp body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink);
-}
-
-.xp-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.6rem;
+  /* These eyebrows are the section headings now — the label carries the meaning
+     while the display line carries the drama, and the outline was keeping the
+     drama. Stated explicitly because `<h2>` brings bold from the user agent and
+     this must not change by a pixel; the global reset already handles margin. */
+  font-weight: 400;
+  /* And the bare `h2` rule caps headings at 13ch, which is generous for a
+     display line and half a word for a tracking-heavy micro-label: it broke
+     "Five tracks" over two lines and "The other side" over three. Specificity
+     never came into it — this property simply had no opinion here to win with. */
+  max-width: none;
 }
 .xp-register {
   display: inline-flex;
@@ -4852,7 +3000,10 @@ html.xp body {
   gap: 0.6rem;
   height: 3.2rem;
   padding: 0 1.6rem;
-  border-radius: 999px;
+  /* Radius 0. `docs/visual-reference.md`: "This style has no rounded corners."
+     The pill shape was the loudest exception left, and it sat on the final
+     plate — the last full-width thing anyone sees. */
+  border-radius: 0;
   background: #ffffff;
   color: #0e0e10;
   font-family: var(--sans);
@@ -4871,31 +3022,13 @@ html.xp body {
   transform: scale(0.97);
 }
 .xp-register--sm {
+  position: relative;
   height: 2.6rem;
   padding: 0 1.2rem;
   font-size: 0.82rem;
 }
 
 /* Scroll cue + corner ticks. */
-.xp-cue {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: clamp(1rem, 3vh, 2rem);
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(1.1rem, 3vw, 2.2rem);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-.xp-cue__center {
-  animation: xp-bob 2.4s var(--ease-in-out) infinite;
-}
 @keyframes xp-bob {
   0%,
   100% {
@@ -4917,7 +3050,14 @@ html.xp body {
   gap: 1.4rem;
   padding: clamp(4rem, 10vh, 8rem) clamp(1.25rem, 5vw, 4rem);
 }
-.xp-section h2 {
+/* The display line in a beat.
+
+   This targeted `.xp-section h2` on the assumption that every heading inside a
+   section was the big one. That stopped being true when the eyebrows became the
+   section headings: at (0,1,1) this beat `.xp-label` at (0,1,0) and rendered
+   every label at 89.6px. Naming the thing it means instead of inferring it from
+   the tag is both the fix and what it should always have said. */
+.xp-section .xp-huge {
   margin: 0;
   max-width: 16ch;
   font-family: var(--sans);
@@ -4926,16 +3066,10 @@ html.xp body {
   line-height: 0.95;
   letter-spacing: -0.03em;
 }
-.xp-section h2 em {
+.xp-section .xp-huge em {
   font-style: normal;
   color: transparent;
   -webkit-text-stroke: 1.5px #ffffff;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .xp-cue__center {
-    animation: none;
-  }
 }
 
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
@@ -4958,6 +3092,12 @@ html.xp body {
   display: block;
   padding: 0;
 }
+/* The world draws these once the ride is running — see `wire-count.tsx`. Hidden
+   rather than removed so the server still sends them and a visitor without
+   WebGL, or with reduced motion, still gets the count. */
+.xp-count__n[data-inworld="true"] {
+  visibility: hidden;
+}
 .xp-count__n {
   position: sticky;
   top: 0;
@@ -4978,13 +3118,35 @@ html.xp body {
   display: block;
   padding: 0;
 }
+/* Signage on the world, not a panel over it.
+
+   These are still DOM and still the weakest stretch of the ride — the plan is
+   for the tracks to arrive on falling glass instead. Until then, what made them
+   read as *interface* rather than as part of the scene was the box: a
+   translucent fill and a 6px backdrop blur, which turned the streak field behind
+   each card into grey mush and announced a UI surface.
+
+   Fill and blur are gone. What is left is a hairline rule down the leading edge
+   — the same vocabulary `visual-reference.md` §4 asks for, where type behaves
+   like wayfinding stencilled on a wall. The streaks now run straight through
+   behind the words, which is the whole point: nothing is floating.
+
+   Legibility was the reason the fill existed, and it is bought back with a
+   shadow on the text rather than a slab behind it. */
 .xp-trackCard {
   max-width: min(30rem, 84vw);
-  padding: 1.5rem 1.6rem 1.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
-  background: rgba(10, 10, 12, 0.72);
-  backdrop-filter: blur(6px);
+  padding: 1.4rem 1.6rem 1.5rem;
+  border: 0;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0;
+  background: none;
+  /* Three stops rather than two: the streak field is white lines on black, so
+     the words need a pool of dark that reaches past the glyphs themselves.
+     Cheaper than a slab and it moves with the type. */
+  text-shadow:
+    0 0 6px rgba(8, 8, 10, 1),
+    0 1px 16px rgba(8, 8, 10, 0.98),
+    0 0 40px rgba(8, 8, 10, 0.9);
 }
 .xp-trackCard__head {
   display: flex;
@@ -4993,13 +3155,15 @@ html.xp body {
   justify-content: space-between;
   margin: 0 0 1.1rem;
   font-family: var(--mono);
+  /* An `<h3>` now — see `.xp-label`. Same reason for pinning the weight. */
+  font-weight: 400;
   font-size: 0.95rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #ffffff;
 }
 .xp-trackCard__n {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.78rem;
 }
 .xp-trackCard__copy {
@@ -5009,7 +3173,8 @@ html.xp body {
   line-height: 1.7;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  /* Was 0.72, which held up against a slab and not against moving streaks. */
+  color: rgba(255, 255, 255, 0.88);
 }
 .xp-trackSlot .xp-trackCard {
   position: sticky;
@@ -5072,11 +3237,66 @@ html.xp body {
 }
 
 /* Finale: giant register. */
+/* The plate.
+
+   After twenty-six viewports of continuous motion the last thing the page does
+   is hold still, and that contrast is the beat — it is a full stop, not a
+   background treatment.
+
+   The gradient is drawn by the section itself and starts a viewport *above* it,
+   so the black rises to meet you as you scroll in and there is nothing to drive
+   from JS: no new beat, no scroll listener, no state. `z-index: -1` puts it
+   behind this section's own copy while still covering the scene, which is the
+   whole job — the world goes quiet, the words stay. */
 .xp-finale {
+  position: relative;
   align-content: center;
   justify-items: center;
   text-align: center;
   gap: 2rem;
+}
+.xp-finale::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  /* Starts one viewport up, so the rise is already underway on arrival.
+
+     It does *not* overhang the bottom: an absolutely-positioned box that
+     extends past the last section adds real scrollable page. A first pass hung
+     it 20svh low and bought exactly 160px of extra scroll, which pushed the
+     whole plate off the top of the viewport at rest. */
+  top: -100svh;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 10, 0) 0%,
+    rgba(8, 8, 10, 0.72) 34%,
+    rgba(8, 8, 10, 0.97) 52%,
+    #08080a 62%
+  );
+  pointer-events: none;
+}
+/* The lift: a soft grey haze behind the title, so the plate is not a flat
+   rectangle of black. Mid grey rather than white — white behind an outlined
+   headline eats the stroke. */
+.xp-finale::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(
+    62% 46% at 50% 38%,
+    rgba(150, 152, 158, 0.26) 0%,
+    rgba(120, 122, 130, 0.1) 45%,
+    rgba(8, 8, 10, 0) 78%
+  );
+  pointer-events: none;
+}
+.xp-finale .xp-huge {
+  max-width: 14ch;
 }
 .xp-register--giant {
   height: clamp(4rem, 8vh, 5.4rem);
@@ -5097,7 +3317,103 @@ html.xp body {
    point is its throat — `docs/visual-reference.md` calls keeping that band open
    "the single most important layout rule", and centred type breaks it by
    sitting exactly on the thing you are meant to be looking at. */
+/* The scroll cue.
+
+   Bottom centre, clear of the hero copy which sits in columns 1–5 and clear of
+   the vanishing point, which `visual-reference.md` §4.4 asks to keep open. A
+   micro-label over a hairline rail with a travelling highlight — the same
+   vocabulary as the rest: mono, uppercase, wide tracking, radius 0, no icon.
+
+   The rail is 1px and the highlight is a gradient sliding down it, so the motion
+   is a value changing rather than an element moving. Under reduced motion the
+   animation stops and the rail simply stands there, which still reads as a
+   direction. */
+.xp-cue {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vh, 3rem);
+  /* Aligned with the hero copy, not centred.
+
+     Centred was the first attempt and it was wrong twice over: it landed on top
+     of the companion sphere, and it sat in the middle band that
+     `visual-reference.md` §4.4 asks to keep clear for the vanishing point —
+     which the comment above this block already said, while the code did the
+     opposite. Same variable as the hero's own padding so the two cannot drift. */
+  inset-inline-start: var(--hero-pad);
+  display: grid;
+  justify-items: start;
+  gap: 0.7rem;
+}
+.xp-cue__label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  /* The well's glow is behind this at its brightest; 50% white vanished into it. */
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 1px 12px rgba(8, 8, 10, 0.9);
+}
+.xp-cue__rail {
+  position: relative;
+  width: 1px;
+  height: clamp(2.4rem, 6vh, 3.6rem);
+  background: rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
+.xp-cue__rail::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -60%;
+  height: 60%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.9)
+  );
+  animation: xp-cue-fall 2.1s var(--ease-out) infinite;
+}
+@keyframes xp-cue-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(266%);
+    opacity: 0;
+  }
+}
+/* On a phone the hero block is tall against the viewport and there is no room
+   left under it: pinned to the bottom, the cue overlapped the Register button by
+   26px at 390x844. It joins the flow instead and sits under the CTA, which keeps
+   it on the small screens that arguably need it most. */
+@media (max-width: 48rem) {
+  .xp-cue {
+    position: static;
+    margin-top: 0.4rem;
+  }
+  .xp-cue__rail {
+    height: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-cue__rail::after {
+    animation: none;
+    top: 0;
+    height: 100%;
+    opacity: 0.5;
+  }
+}
+
 .xp-heroLayer {
+  /* Declared once, used by the padding below and by `.xp-cue`'s offset. */
+  --hero-pad: max(
+    clamp(1.25rem, 4vw, 3rem),
+    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
+  );
   position: fixed;
   inset: 0;
   z-index: 6;
@@ -5105,10 +3421,7 @@ html.xp body {
   align-content: center;
   justify-items: start;
   gap: clamp(1.2rem, 3vh, 2.2rem);
-  padding-inline: max(
-    clamp(1.25rem, 4vw, 3rem),
-    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
-  );
+  padding-inline: var(--hero-pad);
   text-align: left;
   pointer-events: none;
 }
