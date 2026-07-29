@@ -342,6 +342,23 @@ export function Experience() {
             Register free →
           </a>
         </div>
+
+        {/*
+          The one thing the page never said in its own language.
+
+          Everything here is driven by scrolling and the only signal to scroll
+          was a sentence inside the body copy. There was CSS for a cue and no
+          markup — it was planned and never built, and the orphaned rules were
+          swept out with the rest of the previous design.
+
+          Decorative on purpose: the sentence above already tells a screen reader
+          what to do, and a second voice saying "scroll" is noise. It rides the
+          hero, so it leaves exactly when the hero does.
+        */}
+        <div className="xp-cue" aria-hidden>
+          <span className="xp-cue__label">Scroll</span>
+          <span className="xp-cue__rail" />
+        </div>
       </header>
 
       <main className="xp-overlay" id="top">

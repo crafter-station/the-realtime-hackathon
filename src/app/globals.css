@@ -3317,7 +3317,103 @@ html.xp body {
    point is its throat — `docs/visual-reference.md` calls keeping that band open
    "the single most important layout rule", and centred type breaks it by
    sitting exactly on the thing you are meant to be looking at. */
+/* The scroll cue.
+
+   Bottom centre, clear of the hero copy which sits in columns 1–5 and clear of
+   the vanishing point, which `visual-reference.md` §4.4 asks to keep open. A
+   micro-label over a hairline rail with a travelling highlight — the same
+   vocabulary as the rest: mono, uppercase, wide tracking, radius 0, no icon.
+
+   The rail is 1px and the highlight is a gradient sliding down it, so the motion
+   is a value changing rather than an element moving. Under reduced motion the
+   animation stops and the rail simply stands there, which still reads as a
+   direction. */
+.xp-cue {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vh, 3rem);
+  /* Aligned with the hero copy, not centred.
+
+     Centred was the first attempt and it was wrong twice over: it landed on top
+     of the companion sphere, and it sat in the middle band that
+     `visual-reference.md` §4.4 asks to keep clear for the vanishing point —
+     which the comment above this block already said, while the code did the
+     opposite. Same variable as the hero's own padding so the two cannot drift. */
+  inset-inline-start: var(--hero-pad);
+  display: grid;
+  justify-items: start;
+  gap: 0.7rem;
+}
+.xp-cue__label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  /* The well's glow is behind this at its brightest; 50% white vanished into it. */
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 1px 12px rgba(8, 8, 10, 0.9);
+}
+.xp-cue__rail {
+  position: relative;
+  width: 1px;
+  height: clamp(2.4rem, 6vh, 3.6rem);
+  background: rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
+.xp-cue__rail::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -60%;
+  height: 60%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.9)
+  );
+  animation: xp-cue-fall 2.1s var(--ease-out) infinite;
+}
+@keyframes xp-cue-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(266%);
+    opacity: 0;
+  }
+}
+/* On a phone the hero block is tall against the viewport and there is no room
+   left under it: pinned to the bottom, the cue overlapped the Register button by
+   26px at 390x844. It joins the flow instead and sits under the CTA, which keeps
+   it on the small screens that arguably need it most. */
+@media (max-width: 48rem) {
+  .xp-cue {
+    position: static;
+    margin-top: 0.4rem;
+  }
+  .xp-cue__rail {
+    height: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-cue__rail::after {
+    animation: none;
+    top: 0;
+    height: 100%;
+    opacity: 0.5;
+  }
+}
+
 .xp-heroLayer {
+  /* Declared once, used by the padding below and by `.xp-cue`'s offset. */
+  --hero-pad: max(
+    clamp(1.25rem, 4vw, 3rem),
+    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
+  );
   position: fixed;
   inset: 0;
   z-index: 6;
@@ -3325,10 +3421,7 @@ html.xp body {
   align-content: center;
   justify-items: start;
   gap: clamp(1.2rem, 3vh, 2.2rem);
-  padding-inline: max(
-    clamp(1.25rem, 4vw, 3rem),
-    calc((100% - 86rem) / 2 + clamp(1.25rem, 4vw, 3rem))
-  );
+  padding-inline: var(--hero-pad);
   text-align: left;
   pointer-events: none;
 }
