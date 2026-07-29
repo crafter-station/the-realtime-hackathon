@@ -190,3 +190,65 @@ Concrete deltas from the current build:
 4. **Layout** — pull content off center into columns 1–5 / 8–12; keep the vanishing point clear.
 5. **Marginalia** — add rotated vertical edge labels (date, venue, coordinates) and corner registration marks.
 6. **Bilingual** — introduce the ES primary / EN secondary pairing on hero and section headings.
+
+---
+
+## The closing act — the hands, the break, the plate
+
+Added after review of five reference frames (hands reaching, a "TAP HOLD" ring, a
+shattering screen carrying stats on glass, a dark plate with a single glowing word).
+This section describes the ending the page is being taken toward.
+
+### Why it belongs to this style rather than fighting it
+
+The reference frames are a warmer, softer, more photographic language than anything
+above: script serif, volumetric light, pastel and blood-red washes. Imported wholesale
+they would read as a second website stapled to the first.
+
+One reading reconciles them, and the build should follow it: **you have spent the whole
+ride inside a world made of wire, and at the end that world reaches back.** The mesh hand
+is the corridor, the grid, the constructed thing. The real hand is the person holding the
+mouse. The gesture is the payoff of the transit, not a change of subject.
+
+Two consequences:
+
+- **The script serif does not come across.** The type system in §3 stands. The hands, the
+  light and the break carry the feeling; the lettering stays installed rather than
+  written.
+- **Broken glass is already on-style.** §4 asks for radius 0 and hard edges. A shard has
+  nothing but hard edges. The tracks arriving on glass is a *better* fit for this
+  vocabulary than the rounded, blurred cards that carry them today.
+
+### The three moments, in order
+
+**1. The reach.** Two hands entering from opposite edges, not touching. One is the
+existing procedural wireframe (`wire-hand.tsx`) — the world. One reads as real — the
+person. They hold apart, close enough that the gap is the subject.
+
+**2. TAP TO HOLD.** A ring between the fingertips, and the page stops scrolling until it
+is pressed. This is the interaction the brief has been missing: `portal-experience-brief.md`
+§0 asks for an `ENTER THE PORTAL` gate and there has never been one. Moving it to the
+*end* is better than the front — the page earns the gesture instead of demanding it.
+
+On hold, the hands close the gap and the screen breaks.
+
+**3. The break, and what falls out.** The frame shatters and the shards fall carrying the
+five tracks — one track per shard, set on glass, tumbling. This replaces the five sticky
+DOM cards, and with them five of the ride's eighteen beats.
+
+**4. The plate.** Everything settles to black, a gradient lifting to white or a mid grey.
+The title, the dates, and Register. Nothing else. After twenty-six viewports of motion the
+last thing the page does is hold still.
+
+### The open asset question
+
+The mesh hand exists and is procedural. **The real hand is an asset the repo does not
+have** — no photograph, no model. It cannot be conjured, and the choice changes the whole
+act:
+
+- a photograph on an alpha plane — warmest, needs a shot with clean edge separation;
+- a shaded mesh with subsurface light — stays in-engine, needs a hand model;
+- rendered out through Remotion (already a dependency) as a short loop — richest, but it
+  is video, so it cannot respond to the hold.
+
+Only the first two can react to the press. That is the deciding constraint, not the look.
