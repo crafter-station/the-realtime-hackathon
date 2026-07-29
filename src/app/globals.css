@@ -4653,18 +4653,7 @@ html.xp body {
    comment describes it. It sits in its own dock rather than inside the HUD,
    because the HUD stands down at the finale and a control for something still
    audible must not go with it. */
-.xp-soundDock {
-  position: fixed;
-  top: clamp(1rem, 3vh, 2rem);
-  right: calc(clamp(1.25rem, 4vw, 3rem) + 12.5rem);
-  z-index: 30;
-  opacity: 0;
-  transition: opacity var(--dur-ui) var(--ease-out);
-}
 @media (max-width: 40rem) {
-  .xp-soundDock {
-    right: calc(clamp(1.25rem, 4vw, 3rem) + 10.5rem);
-  }
 }
 /* The pill stays 2.3rem because that is what the HUD row is drawn around; the
    `::after` below is what the finger actually lands on. Same trick on
@@ -4778,11 +4767,24 @@ html.xp body {
 /* Depth readout + persistent Register, top right. Mono, hairline, small — it
    is instrumentation, not chrome, and it must never compete with the centre
    band the vanishing point lives in. */
+/* The row itself no longer fades — `.xp-hud__fading` does. The sound control is
+   a flex item in here, so its position is computed rather than guessed at; the
+   previous arrangement fixed it to a `right` offset told the row was 12.5rem
+   wide, and a row holding a live percentage and a pill is not. It overlapped
+   the readout by 53px. */
 .xp-hud {
   position: fixed;
   top: clamp(1rem, 3vh, 2rem);
   right: clamp(1.25rem, 4vw, 3rem);
   z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
+}
+/* Everything that stands down at the finale, so the giant Register is alone —
+   which is the readout and the small Register, and not the control over a drone
+   that is still playing. */
+.xp-hud__fading {
   display: flex;
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.4rem);
@@ -4897,6 +4899,11 @@ html.xp body {
      drama. Stated explicitly because `<h2>` brings bold from the user agent and
      this must not change by a pixel; the global reset already handles margin. */
   font-weight: 400;
+  /* And the bare `h2` rule caps headings at 13ch, which is generous for a
+     display line and half a word for a tracking-heavy micro-label: it broke
+     "Five tracks" over two lines and "The other side" over three. Specificity
+     never came into it — this property simply had no opinion here to win with. */
+  max-width: none;
 }
 
 .xp-actions {

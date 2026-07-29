@@ -2,7 +2,7 @@
 
 import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
-import { heightOf } from "./journey";
+import { heightOf, reducedSvh } from "./journey";
 import { CRAFTER_URL, PORTAL_URL, REGISTER_URL } from "./links";
 import { PortalCanvas } from "./portal-canvas";
 import { browserGraph, createSoundscape } from "./soundscape";
@@ -141,14 +141,25 @@ export function Experience() {
   const hud = useRef<HTMLDivElement>(null);
   const depthValue = useRef<HTMLSpanElement>(null);
   const [sound, setSound] = useState<"idle" | "on" | "off">("idle");
-  // Built once and kept for the life of the page. The engine itself creates
-  // nothing until `toggle` is first called from the button, so holding it here
-  // costs an object and no audio machinery.
-  const soundDock = useRef<HTMLDivElement>(null);
-  // Lazily, so the factory runs once rather than on every render — the previous
-  // `useRef(createSoundscape(...))` built one each time and threw all but the
-  // first away, which the comment beside it claimed it did not.
+  /*
+    `scroll.reduce` is read by the renderers inside the frame loop, which never
+    re-renders React. The section heights are rendered markup, so they need the
+    same fact as state — resolved in the same place, from the same query, so the
+    two cannot disagree.
+  */
+  const [reduce, setReduce] = useState(false);
+  // The part of the HUD that is allowed to leave at the finale. The row itself
+  // stays, because the sound control lives in it and the drone outlasts the
+  // ride.
+  const fading = useRef<HTMLDivElement>(null);
+  // Built once and kept for the life of the page, lazily so the factory runs
+  // once rather than on every render — the previous `useRef(createSoundscape(…))`
+  // built one each time and threw all but the first away, which the comment
+  // beside it claimed it did not.
   const soundscape = useRef<ReturnType<typeof createSoundscape> | null>(null);
+  /** How tall a stretch is for this visitor. The ride, or the document. */
+  const span = (id: string) => (reduce ? reducedSvh(id) : heightOf(id));
+
   const engineOf = () => {
     soundscape.current ??= createSoundscape(browserGraph);
     return soundscape.current;
@@ -165,6 +176,7 @@ export function Experience() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     scroll.reduce = reduce;
+    setReduce(reduce);
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
 
     let raf = 0;
@@ -211,7 +223,7 @@ export function Experience() {
       // the finale's arrives. Its whole job is to offer a way out *during* the
       // ride — at the end the giant one is right there, and two Registers on
       // screen at once is just the page competing with itself.
-      if (hud.current) {
+      if (fading.current) {
         const inA = Math.min(
           1,
           Math.max(0, (scroll.progress - HERO_FADE_END) * 14),
@@ -227,23 +239,10 @@ export function Experience() {
             ),
           );
         const o = inA * outA;
-        hud.current.style.opacity = String(o);
+        fading.current.style.opacity = String(o);
         // Not merely transparent: an invisible link is still clickable and
         // still in the tab order. The finale's own CTA takes over both jobs.
-        hud.current.style.visibility = o < 0.02 ? "hidden" : "visible";
-        // The dock rides along until the engine exists, and stops hiding from
-        // then on — engaged, not merely audible. Muting is exactly when the
-        // control is most likely to be wanted again, and keying this to "is
-        // sound coming out" made it vanish the instant someone switched it off
-        // at the top of the page, with no way to change their mind.
-        const dock = soundDock.current;
-        if (dock && dock.dataset.engaged !== "true") {
-          dock.style.opacity = String(o);
-          dock.style.visibility = o < 0.02 ? "hidden" : "visible";
-        } else if (dock) {
-          dock.style.opacity = "1";
-          dock.style.visibility = "visible";
-        }
+        fading.current.style.visibility = o < 0.02 ? "hidden" : "visible";
       }
 
       raf = requestAnimationFrame(loop);
@@ -349,7 +348,7 @@ export function Experience() {
         {/* 02 — Ride the grid, into the curves. Long. */}
         <div
           className="xp-gap--ride"
-          style={{ height: `${heightOf("ride")}svh` }}
+          style={{ height: `${span("ride")}svh` }}
           aria-hidden
         />
 
@@ -357,7 +356,7 @@ export function Experience() {
             tracks in the streaks. */}
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("holdOn")}svh` }}
+          style={{ minHeight: `${span("holdOn")}svh` }}
         >
           <h2 className="xp-label">Hold on</h2>
           <p className="xp-beat-line xp-beat-line--wide">
@@ -367,7 +366,7 @@ export function Experience() {
         {[3, 2, 1].map((n) => (
           <section
             className="xp-section xp-count"
-            style={{ minHeight: `${heightOf(`count${n}`)}svh` }}
+            style={{ minHeight: `${span(`count${n}`)}svh` }}
             key={n}
           >
             <p className="xp-count__n">{n}</p>
@@ -375,13 +374,13 @@ export function Experience() {
         ))}
         <div
           className="xp-gap--jump"
-          style={{ height: `${heightOf("jump")}svh` }}
+          style={{ height: `${span("jump")}svh` }}
           aria-hidden
         />
 
         <section
           className="xp-section xp-section--beat xp-tracksIntro"
-          style={{ minHeight: `${heightOf("tracksIntro")}svh` }}
+          style={{ minHeight: `${span("tracksIntro")}svh` }}
         >
           <h2 className="xp-label">Five tracks</h2>
           <p className="xp-beat-line">
@@ -391,7 +390,7 @@ export function Experience() {
         {TRACKS.map((track, i) => (
           <section
             className={`xp-section xp-trackSlot xp-trackSlot--${track.side}`}
-            style={{ minHeight: `${heightOf(`track${i + 1}`)}svh` }}
+            style={{ minHeight: `${span(`track${i + 1}`)}svh` }}
             key={track.name}
           >
             <article className="xp-trackCard">
@@ -407,14 +406,14 @@ export function Experience() {
         ))}
         <div
           className="xp-gap--jumpOut"
-          style={{ height: `${heightOf("jumpOut")}svh` }}
+          style={{ height: `${span("jumpOut")}svh` }}
           aria-hidden
         />
 
         {/* 03 — The curve closes: PRIZES appear. */}
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("prizes")}svh` }}
+          style={{ minHeight: `${span("prizes")}svh` }}
         >
           <h2 className="xp-label">Prizes</h2>
           <p className="xp-huge">US$800</p>
@@ -427,14 +426,14 @@ export function Experience() {
         {/* 04 — Through the tunnel. */}
         <div
           className="xp-gap--tunnel"
-          style={{ height: `${heightOf("tunnel")}svh` }}
+          style={{ height: `${span("tunnel")}svh` }}
           aria-hidden
         />
 
         {/* 05 — COUNTDOWN, live. */}
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("kickoff")}svh` }}
+          style={{ minHeight: `${span("kickoff")}svh` }}
         >
           <h2 className="xp-label">Kickoff</h2>
           <p className="xp-clock">
@@ -448,12 +447,12 @@ export function Experience() {
         {/* 05.5 — Into the wormhole: the grid folds into the vortex. */}
         <div
           className="xp-gap--wormhole"
-          style={{ height: `${heightOf("wormhole")}svh` }}
+          style={{ height: `${span("wormhole")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("anotherDimension")}svh` }}
+          style={{ minHeight: `${span("anotherDimension")}svh` }}
         >
           <h2 className="xp-label">Another dimension</h2>
           <p className="xp-huge xp-huge--outline">Warp</p>
@@ -467,12 +466,12 @@ export function Experience() {
             portal you fall into and never come out of is not a portal. */}
         <div
           className="xp-gap--emerge"
-          style={{ height: `${heightOf("emerge")}svh` }}
+          style={{ height: `${span("emerge")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--beat"
-          style={{ minHeight: `${heightOf("otherSide")}svh` }}
+          style={{ minHeight: `${span("otherSide")}svh` }}
         >
           <h2 className="xp-label">The other side</h2>
           <p className="xp-huge">You&rsquo;re through</p>
@@ -490,12 +489,12 @@ export function Experience() {
             questions start — and because the stretch was empty scroll anyway. */}
         <div
           className="xp-gap--brief"
-          style={{ height: `${heightOf("brief")}svh` }}
+          style={{ height: `${span("brief")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: `${heightOf("format")}svh` }}
+          style={{ minHeight: `${span("format")}svh` }}
         >
           <h2 className="xp-label">The format</h2>
           <p className="xp-panel__head">39 hours, start to submission</p>
@@ -511,7 +510,7 @@ export function Experience() {
 
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: `${heightOf("schedule")}svh` }}
+          style={{ minHeight: `${span("schedule")}svh` }}
         >
           <h2 className="xp-label">Schedule</h2>
           <p className="xp-panel__head">All times Lima, UTC&minus;5</p>
@@ -527,7 +526,7 @@ export function Experience() {
 
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: `${heightOf("questions")}svh` }}
+          style={{ minHeight: `${span("questions")}svh` }}
         >
           <h2 className="xp-label">Questions</h2>
           <p className="xp-panel__head">Before you register</p>
@@ -544,13 +543,13 @@ export function Experience() {
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}
         <div
           className="xp-gap--arrive"
-          style={{ height: `${heightOf("arrive")}svh` }}
+          style={{ height: `${span("arrive")}svh` }}
           aria-hidden
         />
         <section
           id="register"
           className="xp-section xp-finale"
-          style={{ minHeight: `${heightOf("finale")}svh` }}
+          style={{ minHeight: `${span("finale")}svh` }}
         >
           {/* The plate says the name of the thing, not the name of the button.
               `Register` was the headline and the CTA directly under it — the
@@ -595,34 +594,35 @@ export function Experience() {
         tell people how deep they are, and let them out whenever they want.
       */}
       <div className="xp-hud" ref={hud}>
-        <p className="xp-hud__read">
-          <span ref={depthValue} className="xp-hud__depth">
-            000
-          </span>
-          <span className="xp-hud__unit">% depth</span>
-        </p>
-        <a
-          className="xp-register xp-register--sm"
-          href={REGISTER_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Register free →
-        </a>
-      </div>
+        {/*
+          Everything that is allowed to leave, and nothing else.
 
-      {/*
-        Outside the HUD on purpose. The HUD stands down at the finale so it does
-        not compete with the giant Register — but the drone is still audible
-        there, and a control that disappears while the thing it controls is
-        still running is not reversible. It follows the HUD while silent, and
-        stays put the moment there is something to switch off.
-      */}
-      <div
-        className="xp-soundDock"
-        ref={soundDock}
-        data-engaged={sound !== "idle" ? "true" : undefined}
-      >
+          The sound control used to sit outside the HUD entirely, fixed to a
+          `right` offset guessed at the width of this row — which is a live
+          percentage next to a pill, so it was never going to be the 12.5rem it
+          was told. It overlapped the readout by 53px.
+
+          Fading this wrapper rather than the row means the button can stay a
+          flex item and have its position computed. The finale still clears the
+          readout and the small Register; the control over a drone that is still
+          audible there does not go with them.
+        */}
+        <div className="xp-hud__fading" ref={fading}>
+          <p className="xp-hud__read">
+            <span ref={depthValue} className="xp-hud__depth">
+              000
+            </span>
+            <span className="xp-hud__unit">% depth</span>
+          </p>
+          <a
+            className="xp-register xp-register--sm"
+            href={REGISTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Register free →
+          </a>
+        </div>
         <button
           type="button"
           className="xp-hud__sound"
