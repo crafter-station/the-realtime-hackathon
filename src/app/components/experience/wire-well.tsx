@@ -5,10 +5,11 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { scroll } from "./store";
 import {
+  handoverDim,
   surfacePoint,
   WELL_RADIUS,
   WELL_Z,
-  wellPresence,
+  wellCoverage,
   wellThroatY,
 } from "./wire-surface";
 
@@ -32,12 +33,15 @@ import {
  */
 
 /**
- * The one hue in the opening. Note this is *not* Portal orange — the reference
- * this frame is matched against is cyan, and the brief's rule that orange is
- * the only chromatic thing in the world still holds everywhere downstream.
- * Swapping the opening back to orange is this constant and `PORTAL_GLOW`.
+ * The mesh is white, like every other line in this world.
+ *
+ * It was cyan, matched to a reference image. Portal is orange, and the colour
+ * belongs to the light rather than to the lines: `wire-light.tsx` puts it at the
+ * two throats and nowhere else, which is what stops one accent becoming a colour
+ * scheme. A white grid around an orange throat is the design the art direction
+ * describes; a coloured grid is a tint over everything.
  */
-export const WELL_CYAN = "#6ff0e6";
+export const WELL_LINE = "#ffffff";
 
 /** Reaches well past the rim so the plain around the well is ruled too. */
 const R_MAX = 190;
@@ -49,57 +53,146 @@ const RING_BIAS = 1.15;
 const ringRadius = (i: number) => R_MAX * (i / RINGS) ** RING_BIAS;
 
 /**
- * A person, standing on the floor of the well.
+ * Cursor gravity.
  *
- * Doing all the work of scale. Without it the well is an abstract funnel and
- * could be a metre across or a light-year; with it the walls read as enormous
- * and the whole frame acquires a horizon. It is a silhouette rather than a
- * model on purpose — anything with detail would invite you to look at *it*,
- * and the subject is the portal it is standing in.
+ * The one thing on the page that answers back. A gravity well is a mass bending
+ * the sheet it sits in, so the honest interaction is to let the visitor be a
+ * second mass: the grid dips toward the pointer, and the dip follows.
  *
- * Billboarded, because a flat cut-out seen from the side stops being a person.
+ * Done on the GPU, in the vertex stage, because it has to be. The mesh is
+ * ~15,000 segments baked once; re-walking 30,000 vertices in JavaScript every
+ * frame to move them a few units would cost more than the entire rest of the
+ * frame. `onBeforeCompile` lets the displacement ride along in the shader for
+ * free, and the geometry stays static and uploaded exactly once.
+ *
+ * The falloff is Gaussian rather than the well's own `1 - sqrt` profile: this
+ * is a dent, not a second portal, and a sharp throat here would compete with
+ * the real one three metres away.
  */
-function WellFigure() {
-  const texture = useMemo(() => {
-    const w = 64;
-    const h = 128;
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.fillStyle = "#05070a";
-      // head, torso, legs — a stance, not an anatomy
-      ctx.beginPath();
-      ctx.arc(w / 2, h * 0.13, w * 0.11, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillRect(w * 0.37, h * 0.22, w * 0.26, h * 0.4);
-      ctx.fillRect(w * 0.4, h * 0.6, w * 0.08, h * 0.38);
-      ctx.fillRect(w * 0.52, h * 0.6, w * 0.08, h * 0.38);
-    }
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
-  }, []);
+const POINTER = new THREE.Vector2();
 
-  const height = 3.4;
-  return (
-    <sprite
-      position={[0, wellThroatY() + height / 2, WELL_Z]}
-      scale={[height / 2, height, 1]}
-    >
-      <spriteMaterial
-        map={texture}
-        transparent
-        depthWrite={false}
-        fog={false}
-      />
-    </sprite>
+/**
+ * `String.replace` on a miss returns the string unchanged, which for a shader
+ * patch is the worst possible failure: three.js renames a chunk, the injection
+ * silently does nothing, `vReveal` is declared but never written, and the grid
+ * either vanishes or stops responding — with no error anywhere. Fail loudly at
+ * compile time instead.
+ */
+function inject(src: string, marker: string, body: string): string {
+  if (!src.includes(marker)) {
+    throw new Error(`wire-well: shader marker "${marker}" not found`);
+  }
+  return src.replace(marker, body);
+}
+/** Past the outermost ring, so the wave finishes clear of the drawn mesh. */
+const REVEAL_MAX = 230;
+
+function useCursorGravity(strength: number) {
+  const uniforms = useRef({
+    uCursor: { value: new THREE.Vector2(9999, 9999) },
+    uPull: { value: 0 },
+    // Radius the reveal wave has reached, in world units. Starts inside the
+    // throat so the very first frame is dark but for the light itself.
+    uReveal: { value: 0 },
+  });
+
+  const onBeforeCompile = useMemo(
+    () => (shader: THREE.WebGLProgramParametersWithUniforms) => {
+      shader.uniforms.uCursor = uniforms.current.uCursor;
+      shader.uniforms.uPull = uniforms.current.uPull;
+      shader.uniforms.uReveal = uniforms.current.uReveal;
+      let vert = inject(
+        shader.vertexShader,
+        "#include <common>",
+        `#include <common>
+         uniform vec2 uCursor;
+         uniform float uPull;
+         uniform float uReveal;
+         varying float vReveal;`,
+      );
+      vert = inject(
+        vert,
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+         float gd = distance(vec2(transformed.x, transformed.z), uCursor);
+         transformed.y -= uPull * exp(-(gd * gd) / 1500.0);
+         // The opening wave: the throat lights first and the sheet resolves
+         // outward from it, so the world reads as switching on rather than
+         // as having been there all along.
+         float rr = distance(vec2(transformed.x, transformed.z),
+                             vec2(0.0, ${WELL_Z.toFixed(1)}));
+         vReveal = 1.0 - smoothstep(uReveal - 26.0, uReveal, rr);`,
+      );
+      shader.vertexShader = vert;
+
+      let frag = inject(
+        shader.fragmentShader,
+        "#include <common>",
+        `#include <common>
+         varying float vReveal;`,
+      );
+      frag = inject(
+        frag,
+        "#include <color_fragment>",
+        `#include <color_fragment>
+         diffuseColor.a *= vReveal;`,
+      );
+      shader.fragmentShader = frag;
+    },
+    [],
   );
+
+  useFrame((state, dt) => {
+    // The reveal runs once, on its own clock, and is the only thing here not
+    // driven by scroll — an entrance is a thing that happens *to* you, not
+    // something you have to do. Reduced motion gets the same wave at four
+    // times the speed rather than none: it is an opacity ramp, not a rush.
+    const rv = uniforms.current.uReveal;
+    if (rv.value < REVEAL_MAX) {
+      rv.value = Math.min(
+        REVEAL_MAX,
+        rv.value + dt * (scroll.reduce ? 900 : 175),
+      );
+    }
+
+    // Pointer is NDC; the well lies flat, so a ray onto the y = throat plane is
+    // the honest mapping from screen to sheet. Without it the dip drifts away
+    // from the cursor as the camera pitches down toward the throat.
+    const target = uniforms.current.uCursor.value;
+    if (scroll.reduce || scroll.quality === "lite" || !scroll.pointerMoved) {
+      uniforms.current.uPull.value = 0;
+      return;
+    }
+    const ray = state.raycaster;
+    ray.setFromCamera(
+      POINTER.set(scroll.pointer.x, scroll.pointer.y),
+      state.camera,
+    );
+    const dir = ray.ray.direction;
+    const origin = ray.ray.origin;
+    const planeY = wellThroatY();
+    if (Math.abs(dir.y) > 1e-4) {
+      const t = (planeY - origin.y) / dir.y;
+      if (t > 0 && t < 400) {
+        target.set(origin.x + dir.x * t, origin.z + dir.z * t);
+      }
+    }
+    // Only while the well is the thing you are looking at.
+    const near = 1 - THREE.MathUtils.smoothstep(scroll.progress, 0.02, 0.13);
+    uniforms.current.uPull.value = THREE.MathUtils.damp(
+      uniforms.current.uPull.value,
+      strength * near,
+      6,
+      dt,
+    );
+  });
+
+  return onBeforeCompile;
 }
 
 export function WellGrid() {
   const material = useRef<THREE.LineBasicMaterial>(null);
+  const onBeforeCompile = useCursorGravity(15);
 
   const geometry = useMemo(() => {
     const pos: number[] = [];
@@ -123,12 +216,16 @@ export function WellGrid() {
     // Vertex colours above 1 clamp at render, which is exactly the over-exposed
     // band the reference has either side of the figure.
     const fade = (r: number, theta: number) => {
+      const x = r * Math.cos(theta);
       const z = WELL_Z + r * Math.sin(theta);
-      const out = 1 - THREE.MathUtils.smoothstep(r, WELL_RADIUS * 1.1, R_MAX);
       const lit =
         1 -
         THREE.MathUtils.smoothstep(r, WELL_RADIUS * 0.06, WELL_RADIUS * 0.9);
-      return wellPresence(z) * (0.22 + 0.78 * out) * (0.55 + 2.8 * lit);
+      // No brightness floor. A floor meant the rings never actually ended, so
+      // the outermost ones kept drawing at a fifth strength right across the
+      // Cartesian grid they were supposed to have handed over to.
+      const out = 1 - THREE.MathUtils.smoothstep(r, WELL_RADIUS * 1.1, R_MAX);
+      return wellCoverage(x, z) * handoverDim(x, z) * out * (0.55 + 2.8 * lit);
     };
 
     const seg = (
@@ -192,14 +289,14 @@ export function WellGrid() {
       <lineSegments geometry={geometry}>
         <lineBasicMaterial
           ref={material}
-          color={WELL_CYAN}
+          color={WELL_LINE}
           vertexColors
           transparent
           opacity={0.9}
           depthWrite={false}
+          onBeforeCompile={onBeforeCompile}
         />
       </lineSegments>
-      <WellFigure />
     </group>
   );
 }

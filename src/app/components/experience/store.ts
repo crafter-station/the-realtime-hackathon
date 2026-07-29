@@ -6,6 +6,9 @@
  * on every scroll tick — the canvas reacts through the animation loop instead.
  */
 
+import { warpWindow } from "./journey";
+import { smoothstep } from "./wire-surface";
+
 export type Quality = "high" | "lite";
 
 export const scroll = {
@@ -19,6 +22,33 @@ export const scroll = {
   warp: 0,
   /** Rendering budget chosen by capability detection. */
   quality: "high" as Quality,
+  /**
+   * `prefers-reduced-motion`, resolved once on mount.
+   *
+   * Lives here because four separate components were each running their own
+   * `matchMedia` call for it — four chances to disagree about one fact, and in
+   * practice they already did: the streak field checked the flag, then used it
+   * only to zero a velocity term while the full-field hyperspace jump played at
+   * full strength anyway.
+   */
+  reduce: false,
+  /**
+   * Pointer in normalised device coordinates, -1..1, y up.
+   *
+   * Tracked from `window` rather than read off r3f's `state.pointer`, because
+   * the overlay `<main>` covers the canvas edge to edge — every pointer event
+   * lands on a DOM section and the canvas below never hears about it. Anything
+   * that wants the cursor has to be told, not ask.
+   */
+  pointer: { x: 0, y: 0 },
+  /**
+   * Whether the pointer has ever moved.
+   *
+   * The default (0, 0) is dead centre of the screen, which is exactly where the
+   * portal is — so anything that follows the cursor would dent the subject of
+   * the opening frame before the visitor has touched anything.
+   */
+  pointerMoved: false,
 };
 
 export type ScrollState = typeof scroll;
@@ -39,20 +69,39 @@ export type ScrollState = typeof scroll;
  * Camera z is `lerp(TRACK_START, TRACK_END, progress)` in `portal-canvas.tsx`,
  * so these fractions also decide which world event each beat lands on.
  */
-const JUMP_IN = 0.185; // "3" — streaks begin stretching
-const JUMP_FULL = 0.356; // past "1", fully in hyperspace
-const JUMP_HOLD = 0.643; // last track card
-const JUMP_OUT = 0.7; // back out, the wire world returns
+const {
+  in: JUMP_IN,
+  full: JUMP_FULL,
+  hold: JUMP_HOLD,
+  out: JUMP_OUT,
+} = warpWindow();
 
-function smoothstep(edge0: number, edge1: number, x: number) {
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
-
-/** 0 → 1 → 0 across the hyperspace beat. */
+/**
+ * 0 → 1 → 0 across the hyperspace beat.
+ *
+ * The pure curve, and the thing the four thresholds above are reasoned about.
+ * Renderers want `warpRender` instead.
+ */
 export function warpAmount(progress: number): number {
   return (
     smoothstep(JUMP_IN, JUMP_FULL, progress) *
     (1 - smoothstep(JUMP_HOLD, JUMP_OUT, progress))
   );
+}
+
+/**
+ * What anything that draws should read.
+ *
+ * `prefers-reduced-motion` asks for less vestibular motion, not less content —
+ * so under it the beat still happens and the copy still lands on it, the
+ * streaks just stay short and the world never fully drops away. A full-field
+ * radial rush is the single most likely thing on this page to make someone ill,
+ * and until now it played at full strength no matter what the visitor asked
+ * their operating system for.
+ */
+export function warpRender(progress: number): number {
+  // Off, not quieter. The camera holds still under reduced motion, so a streak
+  // field firing past a stationary viewpoint is motion with nothing motivating
+  // it — the worst of both. 0.22 was a discount from when the ride still moved.
+  return scroll.reduce ? 0 : warpAmount(progress);
 }

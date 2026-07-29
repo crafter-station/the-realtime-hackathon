@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   closedAxisHeight,
+  emergence,
   FLOOR_HW,
   floorY,
   HW,
@@ -10,10 +11,14 @@ import {
   STEP_X,
   surfacePoint,
   WALL_H,
+  WELL_RADIUS,
+  WELL_Z,
   WORLD_Z_END,
   WORLD_Z_START,
   WORM_RADIUS,
   WORM_Z_IN,
+  wellCoverage,
+  wormholePresence,
   wrap,
 } from "./wire-surface";
 
@@ -177,5 +182,74 @@ describe("the ride", () => {
     const flying = rideY(0) - floorY(0, 0);
     expect(standing).toBeCloseTo(2.8, 1);
     expect(flying).toBeGreaterThan(7);
+  });
+});
+
+describe("the far side", () => {
+  test("the tube opens again, so the ride ends somewhere", () => {
+    // The bug this pins: the camera's track used to stop at z = -662, past the
+    // vortex being fully present and short of the vortex ending, so the page
+    // ran out while you were still inside the hole. A portal is only legible
+    // if there is something on the other side of it.
+    expect(wrap(-620)).toBeGreaterThan(0.99); // deep in the tube
+    expect(emergence(-620)).toBeLessThan(1e-4);
+    expect(wrap(-900)).toBeLessThan(1e-3); // out, and flat again
+    expect(emergence(-900)).toBeGreaterThan(0.99);
+    expect(wormholePresence(-900)).toBeLessThan(1e-4);
+  });
+
+  test("the camera stands on open ground at the end of the ride", () => {
+    const z = -898; // TRACK_END
+    expect(wrap(z)).toBeLessThan(1e-3);
+    expect(rideY(z) - floorY(0, z)).toBeCloseTo(2.8, 6);
+  });
+});
+
+describe("wellCoverage", () => {
+  test("coverage is decided per point, not per depth", () => {
+    // The invariant with teeth: at one depth, coverage must still vary with x,
+    // because the mesh it is splitting is radial. A depth-only predicate — the
+    // bug this replaced — returns the same value right across the frame, and
+    // that is what let both grids draw the same pixels.
+    const z = WELL_Z;
+    const near = wellCoverage(0, z);
+    const far = wellCoverage(240, z);
+    expect(near).toBeGreaterThan(0.9);
+    expect(far).toBeLessThan(1e-4);
+    // ...and it is monotonic outward, so there is no ring where it flickers
+    // back on beyond the handover.
+    let prev = Number.POSITIVE_INFINITY;
+    for (let x = 0; x <= 260; x += 5) {
+      const c = wellCoverage(x, z);
+      expect(c).toBeLessThanOrEqual(prev + 1e-9);
+      prev = c;
+    }
+  });
+
+  test("the well owns its own middle", () => {
+    expect(wellCoverage(0, WELL_Z)).toBeGreaterThan(0.99);
+  });
+
+  test("the arrival plain belongs to the Cartesian grid, not the well", () => {
+    // The bug this pins: coverage was a function of depth alone, and `wrap` is
+    // 0 in *two* places — the opening field and the country out the far side.
+    // So the far plain was handed to a polar mesh a thousand units away and the
+    // grid that should have drawn the ground you land on was culled. The
+    // arrival rendered black.
+    for (const z of [-880, -900, -1000, -1060]) {
+      expect(wellCoverage(0, z)).toBeLessThan(1e-4);
+    }
+  });
+
+  test("the well owns its wide rings, and nothing past them", () => {
+    // The bug this pins: the polar mesh is radial, so a ring of radius 170
+    // passes through z ~ WELL_Z far out at the frame edges. A depth-only
+    // predicate said the well owned 63% of that point and let the Cartesian
+    // grid draw the other 37% straight across it — two topologies at partial
+    // strength do not blend, they cross, and every crossing was visible.
+    expect(wellCoverage(170, WELL_Z)).toBeGreaterThan(0.9);
+    expect(wellCoverage(WELL_RADIUS * 0.5, WELL_Z)).toBeGreaterThan(0.9);
+    // Past the polar mesh's outermost ring it is the Cartesian grid's ground.
+    expect(wellCoverage(215, WELL_Z)).toBeLessThan(1e-4);
   });
 });

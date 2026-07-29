@@ -21,6 +21,8 @@
  * rather than by squinting at a canvas. `wire-world.tsx` draws what this says.
  */
 
+import { Z } from "./journey";
+
 export function clamp01(x: number): number {
   return x < 0 ? 0 : x > 1 ? 1 : x;
 }
@@ -39,14 +41,14 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
 // ---------------------------------------------------------------------------
 
 /** The field the well is sunk into sits out here, ahead of the corridor mouth. */
-export const WORLD_Z_START = 150;
-export const WORLD_Z_END = -600;
+export const WORLD_Z_START = Z.WORLD_Z_START;
+export const WORLD_Z_END = Z.WORLD_Z_END;
 
 // Wormhole stretch — the spiralling vortex the closed tube empties into.
-export const WORM_Z_IN = -580;
-export const WORM_Z_FULL = -620;
-export const WORM_Z_START = -580;
-export const WORM_Z_END = -760;
+export const WORM_Z_IN = Z.WORM_Z_IN;
+export const WORM_Z_FULL = Z.WORM_Z_FULL;
+export const WORM_Z_START = Z.WORM_Z_IN;
+export const WORM_Z_END = Z.WORM_Z_END;
 export const WORM_THROAT = 1.4;
 
 // ---------------------------------------------------------------------------
@@ -82,20 +84,39 @@ export const WORM_RADIUS = PERIMETER / (2 * Math.PI); // ≈ 13.4937
 // Where each stretch happens, in world z
 // ---------------------------------------------------------------------------
 
-const MOUTH_OPEN = 140; // plane dead flat: the field the well sits in
-const MOUTH_SHUT = 6; // closed into the corridor section
-const FLARE_START = -70; // corridor starts peeling open
-const FLARE_END = -132; // fully open country
-const CONE_START = -430; // the plane starts curling a second time
-const CONE_WRAPPED = -520; // closed into a circular tube
-const CONE_JOIN = -580; // tube sits on the wormhole's axis (= WORM_Z_IN)
+const MOUTH_OPEN = Z.MOUTH_OPEN; // plane dead flat: the field the well sits in
+const MOUTH_SHUT = Z.MOUTH_SHUT; // closed into the corridor section
+const FLARE_START = Z.FLARE_START; // corridor starts peeling open
+const FLARE_END = Z.FLARE_END; // fully open country
+const CONE_START = Z.CONE_START; // the plane starts curling a second time
+const CONE_WRAPPED = Z.CONE_WRAPPED; // closed into a circular tube
+const CONE_JOIN = Z.WORM_Z_IN; // tube sits on the wormhole's axis (= WORM_Z_IN)
+const EXIT_START = Z.EXIT_START; // the far mouth: the tube begins to open again
+const EXIT_OPEN = Z.EXIT_OPEN; // out the other side, flat country
+
+/**
+ * Coming out the far side of the wormhole.
+ *
+ * The reason this exists: a portal is only legible if there is something on the
+ * other side of it, and until now there was not. The camera's track ended at
+ * z = -662 — past `WORM_Z_FULL` and short of `WORM_Z_END` — so the page ran out
+ * while you were still inside the vortex. Two portals, no arrival, and the
+ * opening well and the closing wormhole read as the same gesture twice.
+ *
+ * So the tube opens again. This is what makes the second portal a *passage*
+ * rather than a second destination, and it is the only difference between a
+ * journey and a loop.
+ */
+export function emergence(z: number): number {
+  return smoothstep(EXIT_START, EXIT_OPEN, z);
+}
 
 /** 0 = flat plane, 1 = closed all the way round. */
 export function wrap(z: number): number {
   const opening =
     smoothstep(MOUTH_OPEN, MOUTH_SHUT, z) *
     (1 - smoothstep(FLARE_START, FLARE_END, z));
-  const closing = smoothstep(CONE_START, CONE_WRAPPED, z);
+  const closing = smoothstep(CONE_START, CONE_WRAPPED, z) * (1 - emergence(z));
   return Math.max(opening, closing);
 }
 
@@ -167,17 +188,63 @@ export function wellThroatY(): number {
   return floorY(0, WELL_Z);
 }
 
+/** Where the polar mesh's outer edge hands over to the Cartesian grid. */
+const COVER_IN = 168;
+const COVER_OUT = 190; // = R_MAX in `wire-well.tsx`
+
 /**
- * How much of the frame the well owns, by depth.
+ * Which of the two grids owns a point on the surface.
  *
- * The polar mesh and the Cartesian one both draw the opening, and this is what
- * splits the work: 1 while the plane is flat and the well is the subject, 0
- * once the curl has taken over. Fading on `wrap` rather than on a z threshold
- * means the handover tracks the geometry instead of a number that has to be
- * kept in step with it.
+ * 1 = the polar mesh draws it, 0 = the Cartesian one does. They read this same
+ * function of the same point and take complementary halves, so between them
+ * every point is drawn exactly once.
+ *
+ * It has to take x as well as z, and that is the whole reason it exists.
+ * A depth-only predicate is fine for a grid made of
+ * rows and columns and wrong for one made of rings: a ring of radius 170 passes
+ * through z ≈ WELL_Z out at the frame edges, where depth-only says "the well
+ * owns 63% of this" and the Cartesian grid happily draws the other 37% straight
+ * across it. Two topologies at partial strength do not blend — they cross, and
+ * you can see every crossing.
+ *
+ * The band is narrow and sits out where the polar mesh has already faded with
+ * radius, so the handover happens between two things that are both nearly gone.
  */
-export function wellPresence(z: number): number {
-  return 1 - smoothstep(0.05, 0.45, wrap(z));
+/**
+ * Darkens both grids across the seam between them.
+ *
+ * `wellCoverage` splits the frame, but a split is a crossfade, and a crossfade
+ * between two *topologies* does not blend — at coverage 0.5 you get the polar
+ * mesh at half strength and the Cartesian one at half strength drawn over each
+ * other, which reads as a second, finer mesh laid across the rings. Measured at
+ * (x = -6, z = 66) it was 0.62 against 0.60: both grids, both plainly visible,
+ * dead centre of frame.
+ *
+ * The band cannot be moved somewhere unseen, because the well spans z 38..162
+ * and the curl runs 140..6 — they overlap by construction, and the camera looks
+ * straight down the overlap. So instead of hiding the seam, both sides are dimmed
+ * across it: two grids at 15% read as nothing, where two at 60% read as a mistake.
+ *
+ * `4c(1-c)` peaks at exactly the coverage where the double-draw is worst and is
+ * zero wherever one grid owns the point outright, so nothing outside the seam
+ * loses any brightness.
+ */
+export function handoverDim(x: number, z: number): number {
+  const c = wellCoverage(x, z);
+  return 1 - 0.82 * (4 * c * (1 - c));
+}
+
+export function wellCoverage(x: number, z: number): number {
+  const r = Math.hypot(x, z - WELL_Z);
+  const inside = 1 - smoothstep(COVER_IN, COVER_OUT, r);
+  // The curl guard has to start *late*. `wrap` is already 0.21 at the well's
+  // own centre, so a window opening at 0.05 diluted the well's ownership of its
+  // own middle to 63% and let the Cartesian grid draw the other 37% right
+  // through the bowl. Invisible in a still, because the polar mesh is far
+  // brighter there — but it is two grids over one surface, which is the whole
+  // thing this function exists to prevent.
+  const flat = 1 - smoothstep(0.35, 0.75, wrap(z));
+  return inside * flat;
 }
 
 /**
@@ -245,7 +312,9 @@ export function closedAxisHeight(z: number): number {
  * distorting it.
  */
 export function railShift(z: number): number {
-  const g = smoothstep(CONE_WRAPPED, CONE_JOIN, z);
+  // Unwound on the way out, or the arrival plain would still be hanging on the
+  // wormhole's axis with the ground nowhere near the camera.
+  const g = smoothstep(CONE_WRAPPED, CONE_JOIN, z) * (1 - emergence(z));
   if (g < 1e-4) return 0;
   return -(floorY(0, z) + closedAxisHeight(z)) * g;
 }
@@ -291,7 +360,7 @@ export function enclosure(z: number): number {
 
 /** 0 → 1 as the closed tube hands over to the spiralling wormhole. */
 export function wormholePresence(z: number): number {
-  return smoothstep(WORM_Z_IN, WORM_Z_FULL, z);
+  return smoothstep(WORM_Z_IN, WORM_Z_FULL, z) * (1 - emergence(z));
 }
 
 /** The grid gives way to the vortex, which by then occupies the same surface. */
@@ -321,7 +390,11 @@ export function columnFade(index: number, z: number): number {
   const w = wrap(z);
   if (index % 2 === 1) return 1 - smoothstep(0.45, 0.75, w);
   if (index % 4 === 2) return 1 - smoothstep(0.8, 0.98, w);
-  return 1;
+  // The survivors dim too. Thinning three columns in four and leaving the
+  // fourth at full strength is what made the closed corridor read as a few
+  // bright scratches laid over a dense ring pattern rather than as one ruled
+  // surface — the rails have to sit at the rings' weight, not above it.
+  return 1 - 0.45 * smoothstep(0.5, 0.95, w);
 }
 
 /** Rings thin by the same rule, one stage later — they are what reads as speed. */

@@ -3,7 +3,9 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { scroll, warpAmount } from "./store";
+import { Z } from "./journey";
+import { scroll, warpRender } from "./store";
+import { WireCompanion } from "./wire-companion";
 import { WireHand } from "./wire-hand";
 import { PortalLight } from "./wire-light";
 import {
@@ -20,9 +22,43 @@ import { WireWormhole } from "./wire-wormhole";
 
 // Camera track: one long continuous ride (the well → the ground gives way →
 // corridor → open country → the ground closes → wormhole → end).
-const TRACK_START = 146;
-const TRACK_END = -662;
-const HAND_Z = -658;
+const TRACK_START = Z.TRACK_START;
+const TRACK_END = Z.TRACK_END;
+
+/**
+ * Where the camera stands still under `prefers-reduced-motion`.
+ *
+ * visual-reference §4.5 asks for exactly this: "corridor freezes at a static
+ * one-point plate; content cross-fades. **The still frame must be a good poster
+ * on its own.**" Scaling the streak field to 0.22 was a discount, not a freeze —
+ * the camera still travelled the full 1,106 units, which is the large-field
+ * motion the setting is actually about.
+ *
+ * The station is the corridor rather than the well, because the spec names the
+ * corridor and because a one-point plate is what a rectangular tunnel gives you
+ * and a funnel does not. The cost is real and worth stating: somebody who asks
+ * for reduced motion gets the tunnel but not the fall into the well — and the
+ * fall is the motion, which is the thing they asked us to remove.
+ */
+const POSTER_Z = -34;
+/**
+ * The hand sits a short way in front of where the ride stops.
+ *
+ * Two ways to get this wrong and I found both. At -940 it was 42 units out,
+ * past the fog's far plane at 105 and about 5% of frame height — visible in
+ * principle, unreadable in practice. At -884 it was *behind* the camera: travel
+ * is toward -z, so a z greater than `TRACK_END` is somewhere you have already
+ * been. Seventeen units ahead puts it inside the fog's near plane at 26, so it
+ * arrives clear rather than grey.
+ */
+const HAND_Z = -977;
+/**
+ * Off the centreline. Art-direction asks for the hand "beside a giant REGISTER
+ * button" — centred it lands on the finale's own line of copy and occludes it,
+ * which is the same mistake as the centred hero type the layout rule exists to
+ * prevent.
+ */
+const HAND_X = 7.6;
 /** How far above the rim the opening frame sits, in world units. */
 const OPENING_LIFT = 13;
 
@@ -54,7 +90,7 @@ function Starfield({ count }: { count: number }) {
     const camZ = state.camera.position.z;
     const arr = geometry.attributes.position.array as Float32Array;
     for (let i = 2; i < arr.length; i += 3) {
-      if (arr[i] > camZ + 8) arr[i] -= 88;
+      if (arr[i] > camZ - 10) arr[i] -= 88;
     }
     geometry.attributes.position.needsUpdate = true;
     // Stars dim inside the closed tunnel, then blaze back up around the
@@ -68,7 +104,7 @@ function Starfield({ count }: { count: number }) {
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
         THREE.MathUtils.lerp(base, 0.92, worm) *
-          (1 - warpAmount(scroll.progress)),
+          (1 - warpRender(scroll.progress)),
         3,
         dt,
       );
@@ -96,25 +132,29 @@ function Starfield({ count }: { count: number }) {
  */
 function Rig() {
   const { camera } = useThree();
-  const reduce = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  const reduce = scroll.reduce;
   useFrame((state, dt) => {
     const cdt = Math.min(dt, 0.05);
     const v = Math.min(Math.abs(scroll.velocity), 30);
 
-    // Forward travel + a velocity surge pushing you deeper.
-    const base = THREE.MathUtils.lerp(TRACK_START, TRACK_END, scroll.progress);
+    // Forward travel + a velocity surge pushing you deeper — or, for reduced
+    // motion, no travel at all: the camera holds its station and the copy
+    // scrolls over a still frame.
+    const base = reduce
+      ? POSTER_Z
+      : THREE.MathUtils.lerp(TRACK_START, TRACK_END, scroll.progress);
     const surge = reduce ? 0 : v * 0.12;
     const camZ = damp(camera.position.z, base - surge, 4.2, cdt);
     camera.position.z = camZ;
 
     // The run is dead straight down the centreline — only mouse parallax
     // shifts you off it.
-    camera.position.x = damp(camera.position.x, state.pointer.x * 0.35, 4, cdt);
+    camera.position.x = damp(
+      camera.position.x,
+      scroll.pointer.x * 0.35,
+      4,
+      cdt,
+    );
     // The opening frame looks at the well from above its rim, not from the
     // plain at standing height — a gravity well only reads as a well when you
     // can see into it. This is a camera move, not a change to where the ground
@@ -123,7 +163,7 @@ function Rig() {
     const aim = THREE.MathUtils.smoothstep(camZ, WELL_Z + 15, TRACK_START);
     camera.position.y = damp(
       camera.position.y,
-      rideY(camZ) + OPENING_LIFT * aim + state.pointer.y * 0.25,
+      rideY(camZ) + OPENING_LIFT * aim + scroll.pointer.y * 0.25,
       4,
       cdt,
     );
@@ -160,11 +200,26 @@ function Rig() {
 /** Activates the finale hand once the journey is nearly complete. */
 function FinaleHand() {
   const [active, setActive] = useState(false);
+  const { camera, size } = useThree();
   useFrame(() => {
     const shouldBeActive = scroll.progress > 0.9;
     if (shouldBeActive !== active) setActive(shouldBeActive);
   });
-  return <WireHand active={active} z={HAND_Z} />;
+
+  // `HAND_X` is a world offset, and a world offset is not a place on screen:
+  // the same 7.6 units that sits beside the CTA on a wide desktop is off the
+  // edge of a portrait phone, where the horizontal field of view is a fraction
+  // as wide. Solve for the frustum's half-width at the hand's own depth and
+  // keep it inside that.
+  const handX = useMemo(() => {
+    const cam = camera as THREE.PerspectiveCamera;
+    const distance = Math.abs(TRACK_END - HAND_Z);
+    const halfHeight = Math.tan((cam.fov * Math.PI) / 360) * distance;
+    const halfWidth = halfHeight * (size.width / Math.max(size.height, 1));
+    return Math.min(HAND_X, halfWidth * 0.56);
+  }, [camera, size]);
+
+  return <WireHand active={active} x={handX} z={HAND_Z} />;
 }
 
 export function PortalCanvas() {
@@ -190,6 +245,7 @@ export function PortalCanvas() {
         <Starfield count={stars} />
         <WireWorld />
         <WellGrid />
+        <WireCompanion />
         <PortalLight />
         <WireWarp />
         <WireWormhole />

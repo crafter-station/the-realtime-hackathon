@@ -8,11 +8,17 @@
 ## Non-negotiables
 
 - **Palette:** background pale/opaque black `#0e0e10`; lines + type white `#ffffff`
-  (with opacity tiers). NOTHING else — no orange, no color.
+  (with opacity tiers). One exception, and only one: **the portals are made of
+  Portal orange light.** It is emitted, never painted — the throat of the opening
+  well and the vortex at the end, and nowhere else. No orange surfaces, no orange
+  lines, no orange type. A grid tinted with the accent is a colour scheme; a
+  white grid around a glowing throat is not.
 - **Type:** hero title stays (Anomaly Nexus): "THE REALTIME" solid white,
   "HACKATHON" white **outline** (hollow) for B&W hierarchy. Body = Geist Sans.
   Mono pixel font for micro-labels.
-- **Kill:** Mars, astronaut, orange ring, all orange accents.
+- **Kill:** Mars, astronaut, the orange ring, and orange as an *accent* — a
+  border, a rule, a highlight. The portal light is not an accent; it is the
+  subject.
 - **Register CTA:** white pill, black text. One in the top bar + the giant one at
   the finale.
 

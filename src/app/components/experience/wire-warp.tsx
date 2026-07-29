@@ -3,7 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { scroll, warpAmount } from "./store";
+import { scroll, warpRender } from "./store";
 
 /**
  * The jump to hyperspace: a field of stars streaking radially out of the
@@ -42,12 +42,7 @@ export function WireWarp() {
 
   const count = scroll.quality === "lite" ? 190 : 520;
 
-  const reduce = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  const reduce = scroll.reduce;
 
   // Six vertices per star: two triangles spanning head → tail.
   const { geometry, seeds } = useMemo(() => {
@@ -81,7 +76,7 @@ export function WireWarp() {
   }, [count]);
 
   useFrame((_, dt) => {
-    const amount = warpAmount(scroll.progress);
+    const amount = warpRender(scroll.progress);
     const mat = material.current;
     if (mat) {
       mat.opacity = THREE.MathUtils.damp(mat.opacity, amount, 6, dt);
