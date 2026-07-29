@@ -8,6 +8,7 @@ import sharp from "sharp";
 const root = process.cwd();
 const brandDirectory = path.join(root, "public", "brand-assets");
 const role = process.argv[2];
+const personSlug = process.argv[3];
 const roleConfigs = {
   judges: {
     label: "OFFICIAL JUDGE",
@@ -34,7 +35,7 @@ const roleConfigs = {
         slug: "maria-cristina-ruelas",
       },
       {
-        firstName: "VICTOR",
+        firstName: "VÍCTOR",
         image: "victor-galvez.png",
         lastName: "GALVEZ",
         roles: ["TECH LEAD @ BCP"],
@@ -79,6 +80,12 @@ const roleConfigs = {
 const roleConfig = roleConfigs[role];
 if (!roleConfig) {
   throw new Error('Provide the role as "judges" or "mentors".');
+}
+const people = personSlug
+  ? roleConfig.people.filter((person) => person.slug === personSlug)
+  : roleConfig.people;
+if (people.length === 0) {
+  throw new Error(`No ${role} entry found for "${personSlug}".`);
 }
 const outputDirectory = path.join(brandDirectory, "social", "static", role);
 const portraitDirectory = path.join(
@@ -186,7 +193,7 @@ const width = 1_080;
 const height = 1_350;
 
 await mkdir(outputDirectory, { recursive: true });
-for (const person of roleConfig.people) {
+for (const person of people) {
   const portraitUri = asDataUri(
     await readFile(path.join(portraitDirectory, person.image)),
     "image/png",
