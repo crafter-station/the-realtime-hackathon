@@ -137,7 +137,7 @@ export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
   const progressFill = useRef<HTMLDivElement>(null);
-  const heroLayer = useRef<HTMLDivElement>(null);
+  const heroLayer = useRef<HTMLElement>(null);
   const hud = useRef<HTMLDivElement>(null);
   const depthValue = useRef<HTMLSpanElement>(null);
   const [sound, setSound] = useState<"idle" | "on" | "off">("idle");
@@ -275,8 +275,23 @@ export function Experience() {
     <>
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
 
-      {/* 01 — HERO layer (fixed over the grid horizon). */}
-      <div ref={heroLayer} className="xp-heroLayer">
+      {/*
+        The way out, for anyone who cannot or does not want to travel 21,400px
+        to reach it.
+
+        The ride is the point of this page, so nothing here shortens it — but a
+        keyboard or screen-reader user arriving at the top had no route to the
+        one action the page exists for except the whole journey. First focusable
+        thing on the page, invisible until focused.
+      */}
+      <a className="xp-skip" href="#register">
+        Skip the ride, go to register
+      </a>
+
+      {/* 01 — HERO layer (fixed over the grid horizon). A banner landmark: it
+          holds the page title and the first call to action, and `<main>` was
+          the only landmark on the page before it. */}
+      <header ref={heroLayer} className="xp-heroLayer">
         <h1 className="xp-display">The realtime hackathon</h1>
         <div className="xp-heroSub">
           <p className="xp-body">
@@ -294,7 +309,7 @@ export function Experience() {
             Register free →
           </a>
         </div>
-      </div>
+      </header>
 
       <main className="xp-overlay" id="top">
         {/* 02 — Ride the grid, into the curves. Long. */}
@@ -499,6 +514,7 @@ export function Experience() {
           aria-hidden
         />
         <section
+          id="register"
           className="xp-section xp-finale"
           style={{ minHeight: `${heightOf("finale")}svh` }}
         >

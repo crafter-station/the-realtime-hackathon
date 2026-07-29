@@ -225,7 +225,13 @@ function FinaleHand() {
 export function PortalCanvas() {
   const stars = scroll.quality === "lite" ? 2200 : 6500;
   return (
-    <div className="xp-stage">
+    // Decorative, and it has to say so. Every word of the ride lives in the
+    // overlay's DOM, so the scene carries nothing a reader would miss — but an
+    // unlabelled <canvas> is still a node a screen reader can stop on and
+    // announce as nothing in particular. The placeholder this replaces on mount
+    // was already `aria-hidden`; the real one being louder than its own
+    // placeholder was an oversight, not a decision.
+    <div className="xp-stage" aria-hidden>
       <Canvas
         dpr={scroll.quality === "lite" ? [1, 1.3] : [1, 1.8]}
         gl={{

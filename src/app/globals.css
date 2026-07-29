@@ -4662,7 +4662,12 @@ html.xp body {
     right: calc(clamp(1.25rem, 4vw, 3rem) + 10.5rem);
   }
 }
+/* The pill stays 2.3rem because that is what the HUD row is drawn around; the
+   `::after` below is what the finger actually lands on. Same trick on
+   `.xp-register--sm`. Both clear WCAG's 24px floor already — this is the 44px
+   touch guidance, which is a comfort threshold rather than a conformance one. */
 .xp-hud__sound {
+  position: relative;
   display: inline-flex;
   align-items: center;
   height: 2.3rem;
@@ -4690,10 +4695,47 @@ html.xp body {
   outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
+/* Hit area only — no paint, no layout, no effect on the visible pill. */
+.xp-hud__sound::after,
+.xp-register--sm::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2.75rem;
+  transform: translateY(-50%);
+}
 @media (hover: hover) and (pointer: fine) {
   .xp-hud__sound:hover {
     color: #ffffff;
   }
+}
+
+/* The escape hatch. Off-screen until focused, then it lands in the top-left
+   above everything — z-index 60 clears the HUD at 30 and the cue at 50.
+   Square, like everything else here: `visual-reference.md` says radius 0. */
+.xp-skip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid var(--orange);
+  background: var(--night);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--orange);
+  text-decoration: none;
+  /* Moved rather than hidden: `display: none` and `visibility: hidden` both
+     take it out of the focus order, which is the one thing it needs to be in. */
+  transform: translateY(-130%);
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.xp-skip:focus-visible {
+  transform: translateY(0);
 }
 
 /* Organiser credit under the finale CTA. Quiet on purpose — it is a colophon,
@@ -4713,6 +4755,15 @@ html.xp body {
   text-decoration-color: rgba(255, 255, 255, 0.3);
   pointer-events: auto;
   transition: color var(--dur-ui) var(--ease-out);
+  /* These measured 53×15 and 127×15 — under WCAG 2.5.8's 24×24 floor, and the
+     two credit links for the organisations running the event.
+
+     Vertical padding on an *inline* box extends the hit area without entering
+     layout at all, so the ink does not move; the horizontal padding does enter
+     layout, hence the negative margin cancelling it. Nothing here changes what
+     the colophon looks like. */
+  padding: 0.95rem 0.4rem;
+  margin-inline: -0.4rem;
 }
 @media (hover: hover) and (pointer: fine) {
   .xp-colophon a:hover {
@@ -4871,6 +4922,7 @@ html.xp body {
   transform: scale(0.97);
 }
 .xp-register--sm {
+  position: relative;
   height: 2.6rem;
   padding: 0 1.2rem;
   font-size: 0.82rem;
