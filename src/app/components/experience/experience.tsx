@@ -144,7 +144,6 @@ export function Experience() {
   // Built once and kept for the life of the page. The engine itself creates
   // nothing until `toggle` is first called from the button, so holding it here
   // costs an object and no audio machinery.
-  const soundDock = useRef<HTMLDivElement>(null);
   // Lazily, so the factory runs once rather than on every render — the previous
   // `useRef(createSoundscape(...))` built one each time and threw all but the
   // first away, which the comment beside it claimed it did not.
@@ -231,16 +230,6 @@ export function Experience() {
         // Not merely transparent: an invisible link is still clickable and
         // still in the tab order. The finale's own CTA takes over both jobs.
         hud.current.style.visibility = o < 0.02 ? "hidden" : "visible";
-        // The dock rides along while silent, and stops hiding as soon as there
-        // is something audible to switch off.
-        const dock = soundDock.current;
-        if (dock && dock.dataset.sounding !== "true") {
-          dock.style.opacity = String(o);
-          dock.style.visibility = o < 0.02 ? "hidden" : "visible";
-        } else if (dock) {
-          dock.style.opacity = "1";
-          dock.style.visibility = "visible";
-        }
       }
 
       raf = requestAnimationFrame(loop);
@@ -530,52 +519,46 @@ export function Experience() {
       </main>
 
       {/*
-        Depth readout + a Register that is always there.
+        Depth readout, a Register that is always there, and the sound control.
 
         Two problems, one element. The page had exactly two focusable things,
         both "Register free": one visible for the first tenth of the scroll and
-        the next at the very end — so for most of a thirty-screen ride there was
-        no way to act and no way to tab to anything. And the reference asks for
-        "a live % of scroll depth in a fixed corner, framing the page as literal
-        transit through the portal", which is the same corner and the same idea:
-        tell people how deep they are, and let them out whenever they want.
-      */}
-      <div className="xp-hud" ref={hud}>
-        <p className="xp-hud__read">
-          <span ref={depthValue} className="xp-hud__depth">
-            000
-          </span>
-          <span className="xp-hud__unit">% depth</span>
-        </p>
-        <a
-          className="xp-register xp-register--sm"
-          href={REGISTER_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Register free →
-        </a>
-      </div>
+        the next at the very end — so for most of the ride there was no way to
+        act and no way to tab to anything. And the reference asks for "a live %
+        of scroll depth in a fixed corner, framing the page as literal transit
+        through the portal", which is the same corner and the same idea.
 
-      {/*
-        Outside the HUD on purpose. The HUD stands down at the finale so it does
-        not compete with the giant Register — but the drone is still audible
-        there, and a control that disappears while the thing it controls is
-        still running is not reversible. It follows the HUD while silent, and
-        stays put the moment there is something to switch off.
+        The sound control sits in this row and does *not* fade with it. The row
+        stands down at the finale so it stops competing with the giant Register,
+        but the drone is still audible there and a control that disappears while
+        the thing it controls is running is not reversible. So the fade is
+        applied to the readout and the CTA rather than to the row — which also
+        means the button's position is a flex item rather than a guessed offset.
+        The guess is what put it on top of the readout.
       */}
-      <div
-        className="xp-soundDock"
-        ref={soundDock}
-        data-sounding={sound === "on" ? "true" : undefined}
-      >
+      <div className="xp-hud">
+        <div ref={hud} className="xp-hud__fading">
+          <p className="xp-hud__read">
+            <span ref={depthValue} className="xp-hud__depth">
+              000
+            </span>
+            <span className="xp-hud__unit">% depth</span>
+          </p>
+          <a
+            className="xp-register xp-register--sm"
+            href={REGISTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Register free →
+          </a>
+        </div>
         <button
           type="button"
           className="xp-hud__sound"
-          // `aria-pressed` already carries the state. Flipping the name as
-          // well made it announce "turn ambient sound off, pressed" — the state
-          // said twice, once as a verb. The name is the thing; the pressed
-          // state is the state.
+          // `aria-pressed` already carries the state. Flipping the name as well
+          // made it announce "turn ambient sound off, pressed" — the state said
+          // twice, once as a verb. The name is the thing; pressed is the state.
           aria-pressed={sound === "on"}
           aria-label="Ambient sound"
           onClick={() => {

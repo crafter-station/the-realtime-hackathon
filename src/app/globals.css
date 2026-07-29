@@ -4649,18 +4649,15 @@ html.xp body {
    comment describes it. It sits in its own dock rather than inside the HUD,
    because the HUD stands down at the finale and a control for something still
    audible must not go with it. */
-.xp-soundDock {
-  position: fixed;
-  top: clamp(1rem, 3vh, 2rem);
-  right: calc(clamp(1.25rem, 4vw, 3rem) + 12.5rem);
-  z-index: 30;
+/* The part of the row that is allowed to leave. The sound control is its
+   sibling, so it keeps its place by being a flex item rather than by an offset
+   guessed against the row's width — which is what put it on top of the readout. */
+.xp-hud__fading {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
   opacity: 0;
   transition: opacity var(--dur-ui) var(--ease-out);
-}
-@media (max-width: 40rem) {
-  .xp-soundDock {
-    right: calc(clamp(1.25rem, 4vw, 3rem) + 10.5rem);
-  }
 }
 .xp-hud__sound {
   display: inline-flex;
