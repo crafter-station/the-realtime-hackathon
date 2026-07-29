@@ -9,8 +9,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Use Bun; `bun.lock` is the lockfile. Install with `bun install`.
 - The site is Next.js 16.2.11 App Router. `bun dev` serves it on port 3000; `bun run email:dev` serves the separate React Email previews on port 3001.
 - There is no typecheck script. Run `bunx tsc --noEmit` explicitly.
-- Full verification is `bun run lint`, `bunx tsc --noEmit`, `bun test`, then `bun run build`.
+- Full verification is `bun run lint`, `bunx tsc --noEmit`, `bun run test`, then `bun run build`.
 - Focus checks with `bunx biome check <path>`, `bun test <test-file>`, or `bun test -t '<name regex>'`.
+- `bun run test` (not bare `bun test`) is the unit suite: the script scopes it to `src` and `emails`, because a bare run also sweeps up the Playwright specs in `e2e/` and cannot execute them.
+- `bun run test:e2e` runs Playwright against an already-running server — it does not start one. Point it somewhere with `QA_BASE_URL=http://localhost:3000`; the config defaults to port 3005. **The suite is currently stale**: it tests an ENTER gate and five worlds that no longer exist, and 28 of its 30 cases fail on a clean checkout.
 
 ## Structure
 
