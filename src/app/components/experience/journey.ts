@@ -280,6 +280,31 @@ export function heightOf(id: string): number {
   return s.svh;
 }
 
+/**
+ * The same ride for someone who asked for less motion.
+ *
+ * The camera already holds station under `scroll.reduce` — `Rig` parks it at
+ * `POSTER_Z` and the world stops travelling. What did not change was the
+ * *distance*: 21,400px of scrolling, now past a still frame, to reach about two
+ * thousand characters of text. Honouring the request for the transitions and
+ * ignoring it for the journey is honouring the smaller half.
+ *
+ * Everything collapses to zero, which is not the same as everything vanishing.
+ * The gaps are pure travel and have nothing to say, so they go entirely. The
+ * beats keep every word and simply stop reserving a viewport each — `min-height`
+ * of zero lets each one size to its own content, and `.xp-section`'s padding
+ * still separates them. The ride becomes the document it always had underneath.
+ *
+ * It lives here, next to `heightOf`, because this module owns the shape of the
+ * ride and a second opinion about it kept in a component is how the budget and
+ * the world drifted apart the last four times.
+ */
+export function reducedSvh(id: string): number {
+  const s = BUDGET.find((x) => x.id === id);
+  if (!s) throw new Error(`journey: no stretch named "${id}"`);
+  return 0;
+}
+
 /** Where a world event happens, as a fraction of the scrollable height. */
 export function worldFraction(event: WorldEvent): number {
   return (Z.TRACK_START - Z[event]) / (Z.TRACK_START - Z.TRACK_END);

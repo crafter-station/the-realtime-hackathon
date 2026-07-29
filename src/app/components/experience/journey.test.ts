@@ -3,7 +3,9 @@ import {
   BEAT_PINS,
   BUDGET,
   beatFraction,
+  heightOf,
   maxScrollSvh,
+  reducedSvh,
   totalSvh,
   UNPINNED,
   warpWindow,
@@ -141,6 +143,30 @@ describe("pinning", () => {
     // So a rename cannot quietly turn a waiver into a hole.
     const names = new Set(BUDGET.map((s) => s.id));
     for (const id of UNPINNED) expect(names.has(id)).toBe(true);
+  });
+});
+
+describe("less motion", () => {
+  /**
+   * The camera already parks at `POSTER_Z` under `scroll.reduce`, so the world
+   * stops travelling. The distance did not: 21,400px of scrolling, past a still
+   * frame, for about two thousand characters of text.
+   */
+  test("every stretch collapses, so the ride becomes the document", () => {
+    for (const s of BUDGET) expect(reducedSvh(s.id)).toBe(0);
+  });
+
+  test("the collapse covers the whole budget, including anything added later", () => {
+    // The failure this guards is a new section quietly keeping its full height
+    // because someone extended the budget and not the collapse.
+    const total = BUDGET.reduce((a, s) => a + reducedSvh(s.id), 0);
+    expect(total).toBe(0);
+    expect(totalSvh()).toBeGreaterThan(2000);
+  });
+
+  test("it holds the same contract as heightOf about names", () => {
+    expect(() => reducedSvh("nope")).toThrow();
+    expect(() => heightOf("nope")).toThrow();
   });
 });
 
