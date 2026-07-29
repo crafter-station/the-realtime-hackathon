@@ -223,3 +223,58 @@ describe("travel", () => {
     expect(Z.MOUTH_SHUT).toBeLessThan(wellNearRim);
   });
 });
+
+describe("hyperspace bracket", () => {
+  /**
+   * The conversion-relevant middle: punch → five tracks → drop-out.
+   *
+   * Scanners bounce here when empty travel around the cards outruns the cards
+   * themselves. These numbers are what a visitor feels — heights and shares —
+   * not streak geometry. Restore a long `jump` / `jumpOut` and the first test
+   * fails; starve the five slots and the second does.
+   */
+  const BRACKET = [
+    "jump",
+    "tracksIntro",
+    "track1",
+    "track2",
+    "track3",
+    "track4",
+    "track5",
+    "jumpOut",
+  ] as const;
+
+  const TRACK_CARDS = [
+    "track1",
+    "track2",
+    "track3",
+    "track4",
+    "track5",
+  ] as const;
+
+  test("empty travel around the cards stays a thin slice of the bracket", () => {
+    const bracket = BRACKET.reduce((a, id) => a + heightOf(id), 0);
+    const emptyAround = heightOf("jump") + heightOf("jumpOut");
+    // Landed near 8% after the cut. A ceiling of 12% still forbids the old
+    // ~20% padding without demanding a specific pair of gap heights.
+    expect(emptyAround / bracket).toBeLessThan(0.12);
+  });
+
+  test("the five track cards own most of the bracket", () => {
+    const bracket = BRACKET.reduce((a, id) => a + heightOf(id), 0);
+    const cards = TRACK_CARDS.reduce((a, id) => a + heightOf(id), 0);
+    // Cards were ~64% of the bracket; the cut puts them above 80%. A 75%
+    // floor is the property ("more present than the padding"), not the exact
+    // landing.
+    expect(cards / bracket).toBeGreaterThan(0.75);
+  });
+
+  test("each track slot holds at least as long as the intro beat", () => {
+    // So budget moved into the cards cannot quietly migrate back into a long
+    // "Five tracks" title screen that scanners skip.
+    const intro = heightOf("tracksIntro");
+    for (const id of TRACK_CARDS) {
+      expect(heightOf(id)).toBeGreaterThanOrEqual(intro);
+    }
+  });
+});

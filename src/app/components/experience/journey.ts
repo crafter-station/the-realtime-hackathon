@@ -72,14 +72,31 @@ export const BUDGET: readonly Stretch[] = [
   { id: "count3", copy: true, svh: 100, note: "3" },
   { id: "count2", copy: true, svh: 100, note: "2" },
   { id: "count1", copy: true, svh: 100, note: "1" },
-  { id: "jump", svh: 45, note: "the punch — streaks at full stretch, no copy" },
-  { id: "tracksIntro", copy: true, svh: 100, note: "FIVE TRACKS" },
-  { id: "track1", copy: true, svh: 75, note: "MULTIPLAYER" },
-  { id: "track2", copy: true, svh: 75, note: "LIVE STREAMING" },
-  { id: "track3", copy: true, svh: 75, note: "REAL-TIME LOCATION" },
-  { id: "track4", copy: true, svh: 75, note: "AI AGENTS" },
-  { id: "track5", copy: true, svh: 75, note: "WILD SIGNAL" },
-  { id: "jumpOut", svh: 70, note: "dropping back out of hyperspace" },
+  {
+    id: "jump",
+    svh: 18,
+    note:
+      "the punch — streaks at full stretch, no copy. Kept short so scanners " +
+      "reach the tracks before the empty corridor eats them.",
+  },
+  {
+    id: "tracksIntro",
+    copy: true,
+    svh: 70,
+    note: "FIVE TRACKS — a beat, not a second empty screen before the cards",
+  },
+  { id: "track1", copy: true, svh: 95, note: "MULTIPLAYER" },
+  { id: "track2", copy: true, svh: 95, note: "LIVE STREAMING" },
+  { id: "track3", copy: true, svh: 95, note: "REAL-TIME LOCATION" },
+  { id: "track4", copy: true, svh: 95, note: "AI AGENTS" },
+  { id: "track5", copy: true, svh: 95, note: "WILD SIGNAL" },
+  {
+    id: "jumpOut",
+    svh: 28,
+    note:
+      "dropping back out of hyperspace — thin on purpose; prizes should arrive " +
+      "while the last card is still in muscle memory",
+  },
   { id: "prizes", copy: true, svh: 100, note: "PRIZES" },
   { id: "tunnel", svh: 150, note: "the second curl, into the closed tube" },
   { id: "kickoff", copy: true, svh: 100, note: "KICKOFF — the live countdown" },
