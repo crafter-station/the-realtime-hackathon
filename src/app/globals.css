@@ -4642,15 +4642,32 @@ html.xp body {
   color: var(--ink-2);
 }
 
-/* The ambient-sound toggle, beside the depth readout. Mono and hairline like
-   the readout: it is instrumentation, not a second call to action. */
+/* The ambient-sound toggle.
+   Square, not a pill: `visual-reference.md` says "Radius 0. This style has no
+   rounded corners", and art-direction reserves the pill shape for the Register
+   CTA — a second pill beside it reads as a second call to action however the
+   comment describes it. It sits in its own dock rather than inside the HUD,
+   because the HUD stands down at the finale and a control for something still
+   audible must not go with it. */
+.xp-soundDock {
+  position: fixed;
+  top: clamp(1rem, 3vh, 2rem);
+  right: calc(clamp(1.25rem, 4vw, 3rem) + 12.5rem);
+  z-index: 30;
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+@media (max-width: 40rem) {
+  .xp-soundDock {
+    right: calc(clamp(1.25rem, 4vw, 3rem) + 10.5rem);
+  }
+}
 .xp-hud__sound {
   display: inline-flex;
   align-items: center;
   height: 2.3rem;
   padding: 0 0.7rem;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 999px;
   background: rgba(10, 12, 14, 0.6);
   backdrop-filter: blur(8px);
   font-family: var(--mono);
@@ -4665,6 +4682,13 @@ html.xp body {
 .xp-hud__sound[aria-pressed="true"] {
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.6);
+}
+/* The global focus ring is orange, which art-direction forbids outright
+   ("NOTHING else — no orange, no color" / "Kill: all orange accents"). White,
+   offset, so it reads against the dark chrome. */
+.xp-hud__sound:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 @media (hover: hover) and (pointer: fine) {
   .xp-hud__sound:hover {

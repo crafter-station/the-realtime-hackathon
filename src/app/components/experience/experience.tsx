@@ -144,7 +144,15 @@ export function Experience() {
   // Built once and kept for the life of the page. The engine itself creates
   // nothing until `toggle` is first called from the button, so holding it here
   // costs an object and no audio machinery.
-  const soundscape = useRef(createSoundscape(browserGraph));
+  const soundDock = useRef<HTMLDivElement>(null);
+  // Lazily, so the factory runs once rather than on every render — the previous
+  // `useRef(createSoundscape(...))` built one each time and threw all but the
+  // first away, which the comment beside it claimed it did not.
+  const soundscape = useRef<ReturnType<typeof createSoundscape> | null>(null);
+  const engineOf = () => {
+    soundscape.current ??= createSoundscape(browserGraph);
+    return soundscape.current;
+  };
 
   useEffect(() => {
     scroll.quality = detectQuality();
@@ -196,7 +204,7 @@ export function Experience() {
       }
       // The drone follows depth. It is silent — and does no work — until the
       // visitor has asked for it, so this runs unconditionally.
-      soundscape.current.setDepth(scroll.progress);
+      soundscape.current?.setDepth(scroll.progress);
 
       // The HUD is bracketed by the two big CTAs and never overlaps either: it
       // waits for the hero's own Register to leave, and stands down again as
@@ -223,6 +231,16 @@ export function Experience() {
         // Not merely transparent: an invisible link is still clickable and
         // still in the tab order. The finale's own CTA takes over both jobs.
         hud.current.style.visibility = o < 0.02 ? "hidden" : "visible";
+        // The dock rides along while silent, and stops hiding as soon as there
+        // is something audible to switch off.
+        const dock = soundDock.current;
+        if (dock && dock.dataset.sounding !== "true") {
+          dock.style.opacity = String(o);
+          dock.style.visibility = o < 0.02 ? "hidden" : "visible";
+        } else if (dock) {
+          dock.style.opacity = "1";
+          dock.style.visibility = "visible";
+        }
       }
 
       raf = requestAnimationFrame(loop);
@@ -236,10 +254,9 @@ export function Experience() {
     };
     window.addEventListener("pointermove", onPointer, { passive: true });
 
-    const engine = soundscape.current;
     return () => {
       cancelAnimationFrame(raf);
-      engine.dispose();
+      soundscape.current?.dispose();
       lenis.destroy();
       window.removeEventListener("pointermove", onPointer);
       document.documentElement.classList.remove("xp");
@@ -530,22 +547,6 @@ export function Experience() {
           </span>
           <span className="xp-hud__unit">% depth</span>
         </p>
-        <button
-          type="button"
-          className="xp-hud__sound"
-          // The name carries the state, so a screen reader announces what
-          // pressing it will do rather than just "sound".
-          aria-pressed={sound === "on"}
-          aria-label={
-            sound === "on" ? "Turn ambient sound off" : "Turn ambient sound on"
-          }
-          onClick={() => {
-            soundscape.current.toggle();
-            setSound(soundscape.current.state());
-          }}
-        >
-          <span aria-hidden>{sound === "on" ? "◼◼◼" : "◼──"}</span>
-        </button>
         <a
           className="xp-register xp-register--sm"
           href={REGISTER_URL}
@@ -554,6 +555,37 @@ export function Experience() {
         >
           Register free →
         </a>
+      </div>
+
+      {/*
+        Outside the HUD on purpose. The HUD stands down at the finale so it does
+        not compete with the giant Register — but the drone is still audible
+        there, and a control that disappears while the thing it controls is
+        still running is not reversible. It follows the HUD while silent, and
+        stays put the moment there is something to switch off.
+      */}
+      <div
+        className="xp-soundDock"
+        ref={soundDock}
+        data-sounding={sound === "on" ? "true" : undefined}
+      >
+        <button
+          type="button"
+          className="xp-hud__sound"
+          // `aria-pressed` already carries the state. Flipping the name as
+          // well made it announce "turn ambient sound off, pressed" — the state
+          // said twice, once as a verb. The name is the thing; the pressed
+          // state is the state.
+          aria-pressed={sound === "on"}
+          aria-label="Ambient sound"
+          onClick={() => {
+            const engine = engineOf();
+            engine.toggle();
+            setSound(engine.state());
+          }}
+        >
+          <span aria-hidden>{sound === "on" ? "◼◼◼" : "◼──"}</span>
+        </button>
       </div>
 
       <div className="xp-progress" aria-hidden>

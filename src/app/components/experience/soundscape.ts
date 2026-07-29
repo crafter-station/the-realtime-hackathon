@@ -44,6 +44,11 @@ export type GraphFactory = () => Graph;
  * easing once you are through — the arrival is meant to feel like coming up for
  * air, and a drone still climbing into the register would be scoring against
  * the thing it is there to support.
+ *
+ * The unit is 0..1 of *this curve's* range, not of output loudness: the peak is
+ * 0.9 and `browserGraph` scales again by `HEADROOM` on the way to the gain node.
+ * Two scalings, both deliberate — this one shapes the ride, that one decides how
+ * loud the loudest point is allowed to be.
  */
 export function intensityAt(progress: number): number {
   const p = Math.min(1, Math.max(0, progress));
@@ -51,7 +56,6 @@ export function intensityAt(progress: number): number {
   const peak = beatFraction("anotherDimension");
   const out = beatFraction("format");
 
-  if (p <= 0) return 0;
   if (p < start) {
     // Fading up out of nothing across the fall into the well.
     return 0.18 * (p / start);
@@ -121,6 +125,12 @@ export function createSoundscape(build: GraphFactory) {
  * Separated from `createSoundscape` so the engine never mentions `window` and
  * the tests never mention Web Audio.
  */
+/**
+ * How loud the loudest point of the ride is allowed to be, against a gain of 1.
+ * Ambient means ambient: this is a bed, not a soundtrack.
+ */
+const HEADROOM = 0.34;
+
 export function browserGraph(): Graph {
   const Ctx =
     window.AudioContext ||
@@ -150,7 +160,7 @@ export function browserGraph(): Graph {
   return {
     setGain(value) {
       // Ramped, never stepped: a gain jump on a sustained tone is a click.
-      gain.gain.setTargetAtTime(value * 0.34, ctx.currentTime, 0.25);
+      gain.gain.setTargetAtTime(value * HEADROOM, ctx.currentTime, 0.25);
     },
     stop() {
       for (const o of voices) o.stop();

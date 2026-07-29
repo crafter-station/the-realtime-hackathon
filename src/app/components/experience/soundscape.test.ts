@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { beatFraction } from "./journey";
 import { createSoundscape, intensityAt } from "./soundscape";
 
 /**
@@ -46,9 +47,24 @@ describe("intensity", () => {
   test("is loudest in the vortex, not at the end", () => {
     // The arrival is meant to feel like coming up for air. If the drone kept
     // climbing to the register it would fight the thing it is scoring.
-    const vortex = intensityAt(0.7);
-    expect(vortex).toBeGreaterThan(intensityAt(0.95));
-    expect(vortex).toBeGreaterThanOrEqual(intensityAt(0.5));
+    //
+    // Sampled at the beats themselves rather than at round numbers: 0.7 happens
+    // to sit on the plateau today, and would quietly start sampling the decay
+    // the first time the budget moves — which it has twice this week.
+    const vortex = intensityAt(beatFraction("anotherDimension"));
+    expect(vortex).toBeGreaterThan(intensityAt(1));
+    expect(vortex).toBeGreaterThanOrEqual(intensityAt(beatFraction("prizes")));
+  });
+
+  test("is continuous, so switching branches cannot click", () => {
+    // A step in a sustained tone is audible as a click, and the curve is
+    // piecewise — so the joins are the thing to hold.
+    let prev = intensityAt(0);
+    for (let p = 0.001; p <= 1; p += 0.001) {
+      const v = intensityAt(p);
+      expect(Math.abs(v - prev)).toBeLessThan(0.01);
+      prev = v;
+    }
   });
 
   test("never leaves the range a gain node can take", () => {
@@ -59,8 +75,17 @@ describe("intensity", () => {
     }
   });
 
-  test("is a pure function of depth", () => {
-    expect(intensityAt(0.42)).toBe(intensityAt(0.42));
+  test("depends on nothing but its argument", () => {
+    // The old version of this asserted `intensityAt(0.42) === intensityAt(0.42)`,
+    // which is true of any deterministic function including a stateful one that
+    // happens to repeat. Interleaving unrelated calls is what would actually
+    // catch a hidden accumulator.
+    const a = intensityAt(0.42);
+    intensityAt(0.1);
+    intensityAt(0.9);
+    intensityAt(0.42);
+    intensityAt(0.3);
+    expect(intensityAt(0.42)).toBe(a);
   });
 });
 
