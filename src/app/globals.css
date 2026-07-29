@@ -3118,16 +3118,35 @@ html.xp body {
   display: block;
   padding: 0;
 }
+/* Signage on the world, not a panel over it.
+
+   These are still DOM and still the weakest stretch of the ride — the plan is
+   for the tracks to arrive on falling glass instead. Until then, what made them
+   read as *interface* rather than as part of the scene was the box: a
+   translucent fill and a 6px backdrop blur, which turned the streak field behind
+   each card into grey mush and announced a UI surface.
+
+   Fill and blur are gone. What is left is a hairline rule down the leading edge
+   — the same vocabulary `visual-reference.md` §4 asks for, where type behaves
+   like wayfinding stencilled on a wall. The streaks now run straight through
+   behind the words, which is the whole point: nothing is floating.
+
+   Legibility was the reason the fill existed, and it is bought back with a
+   shadow on the text rather than a slab behind it. */
 .xp-trackCard {
   max-width: min(30rem, 84vw);
-  padding: 1.5rem 1.6rem 1.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  /* Radius 0, per `docs/visual-reference.md`. These cards are on their way out
-     entirely — the tracks become falling glass — but until then they should at
-     least stop being the one rounded thing floating over a hard-edged world. */
+  padding: 1.4rem 1.6rem 1.5rem;
+  border: 0;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 0;
-  background: rgba(10, 10, 12, 0.72);
-  backdrop-filter: blur(6px);
+  background: none;
+  /* Three stops rather than two: the streak field is white lines on black, so
+     the words need a pool of dark that reaches past the glyphs themselves.
+     Cheaper than a slab and it moves with the type. */
+  text-shadow:
+    0 0 6px rgba(8, 8, 10, 1),
+    0 1px 16px rgba(8, 8, 10, 0.98),
+    0 0 40px rgba(8, 8, 10, 0.9);
 }
 .xp-trackCard__head {
   display: flex;
@@ -3144,7 +3163,7 @@ html.xp body {
   color: #ffffff;
 }
 .xp-trackCard__n {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.78rem;
 }
 .xp-trackCard__copy {
@@ -3154,7 +3173,8 @@ html.xp body {
   line-height: 1.7;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  /* Was 0.72, which held up against a slab and not against moving streaks. */
+  color: rgba(255, 255, 255, 0.88);
 }
 .xp-trackSlot .xp-trackCard {
   position: sticky;
