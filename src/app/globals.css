@@ -4582,7 +4582,11 @@ html.xp body {
   max-width: 17ch;
   margin: 0.6rem 0 1.8rem;
   font-family: var(--font-space), var(--sans);
-  font-weight: 600;
+  /* Declared 600 here for a long time and rendered 560, because the old
+     `.xp-section h2` outranked it. Pinned to what it has always actually looked
+     like, so retiring that rule stays a structural change and nothing else.
+     Making it 600 on purpose is a separate call for someone to take. */
+  font-weight: 560;
   font-size: clamp(1.5rem, 3.2vw, 2.6rem);
   line-height: 1.08;
   letter-spacing: -0.01em;
@@ -4888,6 +4892,11 @@ html.xp body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink);
+  /* These eyebrows are the section headings now — the label carries the meaning
+     while the display line carries the drama, and the outline was keeping the
+     drama. Stated explicitly because `<h2>` brings bold from the user agent and
+     this must not change by a pixel; the global reset already handles margin. */
+  font-weight: 400;
 }
 
 .xp-actions {
@@ -4972,7 +4981,14 @@ html.xp body {
   gap: 1.4rem;
   padding: clamp(4rem, 10vh, 8rem) clamp(1.25rem, 5vw, 4rem);
 }
-.xp-section h2 {
+/* The display line in a beat.
+
+   This targeted `.xp-section h2` on the assumption that every heading inside a
+   section was the big one. That stopped being true when the eyebrows became the
+   section headings: at (0,1,1) this beat `.xp-label` at (0,1,0) and rendered
+   every label at 89.6px. Naming the thing it means instead of inferring it from
+   the tag is both the fix and what it should always have said. */
+.xp-section .xp-huge {
   margin: 0;
   max-width: 16ch;
   font-family: var(--sans);
@@ -4981,7 +4997,7 @@ html.xp body {
   line-height: 0.95;
   letter-spacing: -0.03em;
 }
-.xp-section h2 em {
+.xp-section .xp-huge em {
   font-style: normal;
   color: transparent;
   -webkit-text-stroke: 1.5px #ffffff;
@@ -5051,6 +5067,8 @@ html.xp body {
   justify-content: space-between;
   margin: 0 0 1.1rem;
   font-family: var(--mono);
+  /* An `<h3>` now — see `.xp-label`. Same reason for pinning the weight. */
+  font-weight: 400;
   font-size: 0.95rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;

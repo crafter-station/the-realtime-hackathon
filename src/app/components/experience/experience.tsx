@@ -359,7 +359,7 @@ export function Experience() {
           className="xp-section xp-section--beat"
           style={{ minHeight: `${heightOf("holdOn")}svh` }}
         >
-          <p className="xp-label">Hold on</p>
+          <h2 className="xp-label">Hold on</h2>
           <p className="xp-beat-line xp-beat-line--wide">
             You are about to enter <strong>another dimension</strong>.
           </p>
@@ -383,7 +383,7 @@ export function Experience() {
           className="xp-section xp-section--beat xp-tracksIntro"
           style={{ minHeight: `${heightOf("tracksIntro")}svh` }}
         >
-          <p className="xp-label">Five tracks</p>
+          <h2 className="xp-label">Five tracks</h2>
           <p className="xp-beat-line">
             Pick one, or ignore them all. <strong>Ship something live.</strong>
           </p>
@@ -395,12 +395,12 @@ export function Experience() {
             key={track.name}
           >
             <article className="xp-trackCard">
-              <p className="xp-trackCard__head">
+              <h3 className="xp-trackCard__head">
                 <span>{track.name}</span>
                 <span className="xp-trackCard__n">
                   [{String(i + 1).padStart(2, "0")}]
                 </span>
-              </p>
+              </h3>
               <p className="xp-trackCard__copy">{track.copy}</p>
             </article>
           </section>
@@ -416,8 +416,8 @@ export function Experience() {
           className="xp-section xp-section--beat"
           style={{ minHeight: `${heightOf("prizes")}svh` }}
         >
-          <p className="xp-label">Prizes</p>
-          <h2 className="xp-huge">US$800</h2>
+          <h2 className="xp-label">Prizes</h2>
+          <p className="xp-huge">US$800</p>
           <p className="xp-beat-line">
             <strong>1st — US$500</strong> · <strong>2nd — US$300</strong> ·
             cash, no strings
@@ -436,7 +436,7 @@ export function Experience() {
           className="xp-section xp-section--beat"
           style={{ minHeight: `${heightOf("kickoff")}svh` }}
         >
-          <p className="xp-label">Kickoff</p>
+          <h2 className="xp-label">Kickoff</h2>
           <p className="xp-clock">
             {clock}
             <small>
@@ -455,8 +455,8 @@ export function Experience() {
           className="xp-section xp-section--beat"
           style={{ minHeight: `${heightOf("anotherDimension")}svh` }}
         >
-          <p className="xp-label">Another dimension</p>
-          <h2 className="xp-huge xp-huge--outline">Warp</h2>
+          <h2 className="xp-label">Another dimension</h2>
+          <p className="xp-huge xp-huge--outline">Warp</p>
           <p className="xp-beat-line">
             The grid folds into a wormhole. <strong>Keep falling.</strong>
           </p>
@@ -474,8 +474,8 @@ export function Experience() {
           className="xp-section xp-section--beat"
           style={{ minHeight: `${heightOf("otherSide")}svh` }}
         >
-          <p className="xp-label">The other side</p>
-          <h2 className="xp-huge">You&rsquo;re through</h2>
+          <h2 className="xp-label">The other side</h2>
+          <p className="xp-huge">You&rsquo;re through</p>
           <p className="xp-beat-line">
             Open country, and a weekend to build in it.{" "}
             <strong>This is where it starts.</strong>
@@ -497,8 +497,8 @@ export function Experience() {
           className="xp-section xp-section--panel"
           style={{ minHeight: `${heightOf("format")}svh` }}
         >
-          <p className="xp-label">The format</p>
-          <h2 className="xp-panel__head">39 hours, start to submission</h2>
+          <h2 className="xp-label">The format</h2>
+          <p className="xp-panel__head">39 hours, start to submission</p>
           <dl className="xp-facts">
             {FORMAT_FACTS.map(([term, value]) => (
               <div className="xp-facts__row" key={term}>
@@ -513,8 +513,8 @@ export function Experience() {
           className="xp-section xp-section--panel"
           style={{ minHeight: `${heightOf("schedule")}svh` }}
         >
-          <p className="xp-label">Schedule</p>
-          <h2 className="xp-panel__head">All times Lima, UTC&minus;5</h2>
+          <h2 className="xp-label">Schedule</h2>
+          <p className="xp-panel__head">All times Lima, UTC&minus;5</p>
           <ol className="xp-schedule">
             {SCHEDULE.map(([when, what]) => (
               <li className="xp-schedule__row" key={when}>
@@ -529,8 +529,8 @@ export function Experience() {
           className="xp-section xp-section--panel"
           style={{ minHeight: `${heightOf("questions")}svh` }}
         >
-          <p className="xp-label">Questions</p>
-          <h2 className="xp-panel__head">Before you register</h2>
+          <h2 className="xp-label">Questions</h2>
+          <p className="xp-panel__head">Before you register</p>
           <dl className="xp-faq">
             {FAQ.map(([q, a]) => (
               <div className="xp-faq__row" key={q}>
