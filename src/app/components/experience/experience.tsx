@@ -277,14 +277,21 @@ export function Experience() {
 
         {/* 02.5 — The jump: count down, punch into hyperspace, meet the
             tracks in the streaks. */}
-        <section className="xp-section xp-section--beat">
+        <section
+          className="xp-section xp-section--beat"
+          style={{ minHeight: `${heightOf("holdOn")}svh` }}
+        >
           <p className="xp-label">Hold on</p>
           <p className="xp-beat-line xp-beat-line--wide">
             You are about to enter <strong>another dimension</strong>.
           </p>
         </section>
         {[3, 2, 1].map((n) => (
-          <section className="xp-section xp-count" key={n}>
+          <section
+            className="xp-section xp-count"
+            style={{ minHeight: `${heightOf(`count${n}`)}svh` }}
+            key={n}
+          >
             <p className="xp-count__n">{n}</p>
           </section>
         ))}
@@ -294,7 +301,10 @@ export function Experience() {
           aria-hidden
         />
 
-        <section className="xp-section xp-section--beat xp-tracksIntro">
+        <section
+          className="xp-section xp-section--beat xp-tracksIntro"
+          style={{ minHeight: `${heightOf("tracksIntro")}svh` }}
+        >
           <p className="xp-label">Five tracks</p>
           <p className="xp-beat-line">
             Pick one, or ignore them all. <strong>Ship something live.</strong>
@@ -303,6 +313,7 @@ export function Experience() {
         {TRACKS.map((track, i) => (
           <section
             className={`xp-section xp-trackSlot xp-trackSlot--${track.side}`}
+            style={{ minHeight: `${heightOf(`track${i + 1}`)}svh` }}
             key={track.name}
           >
             <article className="xp-trackCard">
@@ -323,7 +334,10 @@ export function Experience() {
         />
 
         {/* 03 — The curve closes: PRIZES appear. */}
-        <section className="xp-section xp-section--beat">
+        <section
+          className="xp-section xp-section--beat"
+          style={{ minHeight: `${heightOf("prizes")}svh` }}
+        >
           <p className="xp-label">Prizes</p>
           <h2 className="xp-huge">US$800</h2>
           <p className="xp-beat-line">
@@ -340,7 +354,10 @@ export function Experience() {
         />
 
         {/* 05 — COUNTDOWN, live. */}
-        <section className="xp-section xp-section--beat">
+        <section
+          className="xp-section xp-section--beat"
+          style={{ minHeight: `${heightOf("kickoff")}svh` }}
+        >
           <p className="xp-label">Kickoff</p>
           <p className="xp-clock">
             {clock}
@@ -356,7 +373,10 @@ export function Experience() {
           style={{ height: `${heightOf("wormhole")}svh` }}
           aria-hidden
         />
-        <section className="xp-section xp-section--beat">
+        <section
+          className="xp-section xp-section--beat"
+          style={{ minHeight: `${heightOf("anotherDimension")}svh` }}
+        >
           <p className="xp-label">Another dimension</p>
           <h2 className="xp-huge xp-huge--outline">Warp</h2>
           <p className="xp-beat-line">
@@ -372,7 +392,10 @@ export function Experience() {
           style={{ height: `${heightOf("emerge")}svh` }}
           aria-hidden
         />
-        <section className="xp-section xp-section--beat">
+        <section
+          className="xp-section xp-section--beat"
+          style={{ minHeight: `${heightOf("otherSide")}svh` }}
+        >
           <p className="xp-label">The other side</p>
           <h2 className="xp-huge">You&rsquo;re through</h2>
           <p className="xp-beat-line">
@@ -446,7 +469,10 @@ export function Experience() {
           style={{ height: `${heightOf("arrive")}svh` }}
           aria-hidden
         />
-        <section className="xp-section xp-finale">
+        <section
+          className="xp-section xp-finale"
+          style={{ minHeight: `${heightOf("finale")}svh` }}
+        >
           <h2 className="xp-huge xp-huge--outline">Register</h2>
           <p className="xp-beat-line">
             Aug 07–09 · online · teams of 1–4 · free

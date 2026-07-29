@@ -63,14 +63,23 @@ describe("fractions", () => {
   test("world events run in z order and stay inside the ride", () => {
     // The property that matters: the camera meets them in the order the world
     // declares them, and none falls outside the track it is measured against.
+    //
+    // Every event, not a chosen few. Re-pinning the cut moved `FLARE_END` and I
+    // moved `FLARE_START` the wrong way with it — past its own end, so the
+    // corridor would have finished opening before it started. No pin references
+    // `FLARE_START`, so nothing here noticed until the list was complete.
     const order = [
+      "MOUTH_OPEN",
       "MOUTH_SHUT",
+      "FLARE_START",
       "FLARE_END",
       "CONE_START",
       "CONE_WRAPPED",
+      "WORM_Z_IN",
       "WORM_Z_FULL",
       "EXIT_START",
       "EXIT_OPEN",
+      "WORM_Z_END",
     ] as const;
     let prev = 0;
     for (const e of order) {

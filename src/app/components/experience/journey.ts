@@ -55,8 +55,12 @@ export type Stretch = {
 export const BUDGET: readonly Stretch[] = [
   {
     id: "ride",
-    svh: 331,
-    note: "the well, and the plane curling up into the corridor",
+    svh: 300,
+    note:
+      "the well, then the plane curling up into the corridor. This one has a " +
+      "floor: it carries both, and the corridor cannot finish closing until it " +
+      "is clear of the well at z 38. Cut to 190 and MOUTH_SHUT has to move to " +
+      "z 61 — inside the funnel — which is what the wellCoverage tests catch.",
   },
   {
     id: "holdOn",
@@ -67,36 +71,36 @@ export const BUDGET: readonly Stretch[] = [
   { id: "count3", copy: true, svh: 100, note: "3" },
   { id: "count2", copy: true, svh: 100, note: "2" },
   { id: "count1", copy: true, svh: 100, note: "1" },
-  { id: "jump", svh: 60, note: "the punch — streaks at full stretch, no copy" },
+  { id: "jump", svh: 45, note: "the punch — streaks at full stretch, no copy" },
   { id: "tracksIntro", copy: true, svh: 100, note: "FIVE TRACKS" },
-  { id: "track1", copy: true, svh: 100, note: "MULTIPLAYER" },
-  { id: "track2", copy: true, svh: 100, note: "LIVE STREAMING" },
-  { id: "track3", copy: true, svh: 100, note: "REAL-TIME LOCATION" },
-  { id: "track4", copy: true, svh: 100, note: "AI AGENTS" },
-  { id: "track5", copy: true, svh: 100, note: "WILD SIGNAL" },
-  { id: "jumpOut", svh: 100, note: "dropping back out of hyperspace" },
+  { id: "track1", copy: true, svh: 75, note: "MULTIPLAYER" },
+  { id: "track2", copy: true, svh: 75, note: "LIVE STREAMING" },
+  { id: "track3", copy: true, svh: 75, note: "REAL-TIME LOCATION" },
+  { id: "track4", copy: true, svh: 75, note: "AI AGENTS" },
+  { id: "track5", copy: true, svh: 75, note: "WILD SIGNAL" },
+  { id: "jumpOut", svh: 70, note: "dropping back out of hyperspace" },
   { id: "prizes", copy: true, svh: 100, note: "PRIZES" },
-  { id: "tunnel", svh: 248, note: "the second curl, into the closed tube" },
+  { id: "tunnel", svh: 150, note: "the second curl, into the closed tube" },
   { id: "kickoff", copy: true, svh: 100, note: "KICKOFF — the live countdown" },
-  { id: "wormhole", svh: 228, note: "falling down the wormhole's throat" },
+  { id: "wormhole", svh: 130, note: "falling down the wormhole's throat" },
   {
     id: "anotherDimension",
     copy: true,
     svh: 100,
     note: "ANOTHER DIMENSION — the vortex",
   },
-  { id: "emerge", svh: 200, note: "still falling, before the far mouth opens" },
+  { id: "emerge", svh: 110, note: "still falling, before the far mouth opens" },
   {
     id: "otherSide",
     copy: true,
     svh: 100,
     note: "THE OTHER SIDE — the walls let go",
   },
-  { id: "brief", svh: 70, note: "a breath before the practical questions" },
+  { id: "brief", svh: 45, note: "a breath before the practical questions" },
   { id: "format", copy: true, svh: 125, note: "THE FORMAT" },
   { id: "schedule", copy: true, svh: 125, note: "SCHEDULE" },
   { id: "questions", copy: true, svh: 125, note: "QUESTIONS" },
-  { id: "arrive", svh: 120, note: "open ground before the finale" },
+  { id: "arrive", svh: 75, note: "open ground before the finale" },
   { id: "finale", copy: true, svh: 100, note: "REGISTER" },
 ];
 
@@ -117,25 +121,25 @@ export const Z = {
   /** Plane dead flat: the field the well sits in. */
   MOUTH_OPEN: 140,
   /** Closed into the corridor section. */
-  MOUTH_SHUT: 6,
+  MOUTH_SHUT: 17,
   /** Corridor starts peeling open. */
-  FLARE_START: -70,
+  FLARE_START: -112,
   /** Fully open country. */
-  FLARE_END: -132,
+  FLARE_END: -174,
   /** The plane starts curling a second time. */
-  CONE_START: -430,
+  CONE_START: -425,
   /** Closed into a circular tube. */
-  CONE_WRAPPED: -520,
+  CONE_WRAPPED: -515,
 
   /** The far mouth: the tube begins to open again. */
-  EXIT_START: -740,
+  EXIT_START: -704,
   /** Out the other side, flat country. */
-  EXIT_OPEN: -800,
+  EXIT_OPEN: -767,
 
   /** The tube sits on the wormhole's axis here, and the vortex takes over. */
-  WORM_Z_IN: -580,
-  WORM_Z_FULL: -620,
-  WORM_Z_END: -760,
+  WORM_Z_IN: -574,
+  WORM_Z_FULL: -614,
+  WORM_Z_END: -809,
 } as const;
 
 export type WorldEvent = keyof typeof Z;

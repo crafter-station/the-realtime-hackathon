@@ -4903,7 +4903,6 @@ html.xp body {
    ahead of it, not out of the numerals. */
 .xp-count {
   display: block;
-  min-height: 100svh;
   padding: 0;
 }
 .xp-count__n {
@@ -4924,7 +4923,6 @@ html.xp body {
    same reason as the numerals: each card holds its screen, then hands over. */
 .xp-trackSlot {
   display: block;
-  min-height: 100svh;
   padding: 0;
 }
 .xp-trackCard {
