@@ -32,6 +32,8 @@ export type SoundState = "idle" | "on" | "off";
 export type Graph = {
   setGain(value: number): void;
   stop(): void;
+  /** Optional: only the real graph has a context that can be suspended. */
+  resume?(): void;
 };
 
 export type GraphFactory = () => Graph;
@@ -97,6 +99,39 @@ export function createSoundscape(build: GraphFactory) {
     },
 
     /**
+     * Start unasked, on the first gesture that permits it.
+     *
+     * The room is meant to be there. Waiting for someone to find a 2.3rem
+     * button before the page has any atmosphere gets it heard by almost nobody.
+     *
+     * It cannot run any earlier than a gesture, though — an `AudioContext`
+     * built outside one is born suspended and never plays, so this is as close
+     * to "always" as a browser allows. Calling it repeatedly is free: it only
+     * does anything from `idle`, so once someone has muted by hand the state is
+     * `off` and no later gesture can undo their answer.
+     */
+    start() {
+      if (state !== "idle") return;
+      graph = build();
+      state = "on";
+      apply();
+    },
+
+    /**
+     * Ask a suspended context to resume.
+     *
+     * Separate from `start` because of the case that actually bites here: this
+     * page is driven by scrolling, and `wheel` and `scroll` are not user
+     * activation triggers. Somebody who only ever trackpad-scrolls can reach
+     * the bottom having produced no gesture that unlocks audio, so the context
+     * exists and stays suspended until a real one arrives. Cheap and idempotent
+     * — safe to call on every event.
+     */
+    nudge() {
+      graph?.resume?.();
+    },
+
+    /**
      * The one control. The first call is what builds the graph, which is why
      * it must be reached from a real gesture and not from an effect.
      */
@@ -157,10 +192,18 @@ export function browserGraph(): Graph {
   filter.connect(gain);
   gain.connect(ctx.destination);
 
+  // Built at the first gesture that reaches us, which is usually enough. When
+  // it is not — the context can still come up suspended — `resume` is how it
+  // gets asked again on the next one.
+  if (ctx.state === "suspended") void ctx.resume();
+
   return {
     setGain(value) {
       // Ramped, never stepped: a gain jump on a sustained tone is a click.
       gain.gain.setTargetAtTime(value * HEADROOM, ctx.currentTime, 0.25);
+    },
+    resume() {
+      if (ctx.state === "suspended") void ctx.resume();
     },
     stop() {
       for (const o of voices) o.stop();

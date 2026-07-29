@@ -231,10 +231,13 @@ export function Experience() {
         // Not merely transparent: an invisible link is still clickable and
         // still in the tab order. The finale's own CTA takes over both jobs.
         hud.current.style.visibility = o < 0.02 ? "hidden" : "visible";
-        // The dock rides along while silent, and stops hiding as soon as there
-        // is something audible to switch off.
+        // The dock rides along until the engine exists, and stops hiding from
+        // then on — engaged, not merely audible. Muting is exactly when the
+        // control is most likely to be wanted again, and keying this to "is
+        // sound coming out" made it vanish the instant someone switched it off
+        // at the top of the page, with no way to change their mind.
         const dock = soundDock.current;
-        if (dock && dock.dataset.sounding !== "true") {
+        if (dock && dock.dataset.engaged !== "true") {
           dock.style.opacity = String(o);
           dock.style.visibility = o < 0.02 ? "hidden" : "visible";
         } else if (dock) {
@@ -254,11 +257,42 @@ export function Experience() {
     };
     window.addEventListener("pointermove", onPointer, { passive: true });
 
+    /*
+      The room turns itself on.
+
+      It used to wait for someone to find a 2.3rem button, which meant almost
+      nobody heard it. It cannot start any earlier than a gesture — a context
+      built outside one is born suspended and never plays — so the first gesture
+      of any kind is the earliest "always" a browser permits.
+
+      Listening to more than the obvious events on purpose: this page is driven
+      by scrolling, and `wheel` and `scroll` are not user-activation triggers.
+      Somebody who only trackpad-scrolls can reach the bottom having never
+      unlocked audio, so every plausible gesture gets a try, and `nudge` asks a
+      still-suspended context again. Both calls are no-ops once it is running,
+      and `start` only acts from `idle` — so a visitor who mutes by hand is not
+      overruled by their next click.
+    */
+    const WAKERS = ["pointerdown", "keydown", "touchend", "click"] as const;
+    const wake = () => {
+      // The ref rather than `engineOf`, so this mount-once effect does not take
+      // a dependency on a closure that is rebuilt every render.
+      soundscape.current ??= createSoundscape(browserGraph);
+      const engine = soundscape.current;
+      engine.start();
+      engine.nudge();
+      setSound(engine.state());
+    };
+    for (const type of WAKERS) {
+      window.addEventListener(type, wake, { passive: true });
+    }
+
     return () => {
       cancelAnimationFrame(raf);
       soundscape.current?.dispose();
       lenis.destroy();
       window.removeEventListener("pointermove", onPointer);
+      for (const type of WAKERS) window.removeEventListener(type, wake);
       document.documentElement.classList.remove("xp");
     };
   }, []);
@@ -587,7 +621,7 @@ export function Experience() {
       <div
         className="xp-soundDock"
         ref={soundDock}
-        data-sounding={sound === "on" ? "true" : undefined}
+        data-engaged={sound !== "idle" ? "true" : undefined}
       >
         <button
           type="button"

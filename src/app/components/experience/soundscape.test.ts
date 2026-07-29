@@ -26,6 +26,9 @@ function fakeGraph() {
         setGain(v: number) {
           gain = v;
         },
+        resume() {
+          calls.push("resumed");
+        },
         stop() {
           calls.push("stopped");
         },
@@ -148,6 +151,59 @@ describe("the soundscape", () => {
     const shallow = g.gain;
     s.setDepth(0.7);
     expect(g.gain).toBeGreaterThan(shallow);
+  });
+
+  test("starts unasked, so the room is there without anyone finding a button", () => {
+    const g = fakeGraph();
+    const s = createSoundscape(g.factory);
+    s.start();
+    expect(s.state()).toBe("on");
+    expect(g.calls).toEqual(["built"]);
+  });
+
+  test("starting twice builds one graph", () => {
+    // `start` is wired to four different gesture events, all of which fire on
+    // an ordinary click, so it is called repeatedly by design.
+    const g = fakeGraph();
+    const s = createSoundscape(g.factory);
+    s.start();
+    s.start();
+    s.start();
+    expect(g.calls.filter((c) => c === "built")).toHaveLength(1);
+  });
+
+  test("never overrules someone who muted by hand", () => {
+    // The case that would make this feature hostile: mute the drone, click
+    // anything at all, and have it come back. `start` only acts from `idle`,
+    // and a hand mute leaves `off`.
+    const g = fakeGraph();
+    const s = createSoundscape(g.factory);
+    s.start();
+    s.toggle();
+    expect(s.state()).toBe("off");
+    s.start();
+    s.start();
+    expect(s.state()).toBe("off");
+    s.setDepth(0.6);
+    expect(g.gain).toBe(0);
+  });
+
+  test("a gesture before anything was built is harmless", () => {
+    const g = fakeGraph();
+    const s = createSoundscape(g.factory);
+    s.nudge();
+    expect(g.calls).toEqual([]);
+    expect(s.state()).toBe("idle");
+  });
+
+  test("nudging asks a live graph to resume", () => {
+    // Scrolling is not a user-activation trigger, so a trackpad-only visitor
+    // can leave the context suspended; this is the retry.
+    const g = fakeGraph();
+    const s = createSoundscape(g.factory);
+    s.start();
+    s.nudge();
+    expect(g.calls).toContain("resumed");
   });
 
   test("releases the graph when disposed", () => {
