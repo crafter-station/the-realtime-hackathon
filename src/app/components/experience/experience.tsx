@@ -369,7 +369,18 @@ export function Experience() {
             style={{ minHeight: `${span(`count${n}`)}svh` }}
             key={n}
           >
-            <p className="xp-count__n">{n}</p>
+            {/*
+              Present for the server, for no-JS, and for reduced motion — where
+              the camera never travels, so a glyph pinned to a z it never
+              reaches would never appear. Once the world is carrying the count,
+              this one stands down rather than doubling it.
+            */}
+            <p
+              className="xp-count__n"
+              data-inworld={reduce ? undefined : "true"}
+            >
+              {n}
+            </p>
           </section>
         ))}
         <div

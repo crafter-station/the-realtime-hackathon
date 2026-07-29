@@ -3092,6 +3092,12 @@ html.xp body {
   display: block;
   padding: 0;
 }
+/* The world draws these once the ride is running — see `wire-count.tsx`. Hidden
+   rather than removed so the server still sends them and a visitor without
+   WebGL, or with reduced motion, still gets the count. */
+.xp-count__n[data-inworld="true"] {
+  visibility: hidden;
+}
 .xp-count__n {
   position: sticky;
   top: 0;

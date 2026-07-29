@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { Z } from "./journey";
 import { scroll, warpRender } from "./store";
 import { WireCompanion } from "./wire-companion";
+import { WireCount } from "./wire-count";
 import { WireHand } from "./wire-hand";
 import { PortalLight } from "./wire-light";
 import {
@@ -252,6 +253,7 @@ export function PortalCanvas() {
         <WireWorld />
         <WellGrid />
         <WireCompanion />
+        <WireCount />
         <PortalLight />
         <WireWarp />
         <WireWormhole />
