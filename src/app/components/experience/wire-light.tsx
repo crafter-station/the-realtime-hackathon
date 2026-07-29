@@ -26,6 +26,28 @@ import { WELL_Z, WORM_Z_END, wellThroatY } from "./wire-surface";
  * have to be switched off on the `lite` tier, which is every phone — and this
  * is the first thing anyone sees. An additive sprite gets most of the way there
  * and looks identical on every device.
+ *
+ * TRIED IT, WITH NUMBERS — see #33
+ *
+ * `@react-three/postprocessing` is already a dependency, so a `Bloom` pass gated
+ * to the `high` tier was built and measured rather than argued about.
+ *
+ * The frame cost turned out to be nothing: 60.2fps median against a 59.9
+ * baseline, identical p95 at 17.2ms, at 1280×800. The original objection was
+ * wrong on that point.
+ *
+ * It looked worse anyway, and the reason is the palette rather than the
+ * settings. This style is white hairlines on near-black, so *the lines are the
+ * brightest thing in frame* — any threshold low enough to catch the orange
+ * throat also catches the grid, and the grid stops being hairline. Raising the
+ * threshold from 0.62 to 0.88 did not rescue it. Routing through an
+ * `EffectComposer` also shifted the whole image warmer and more saturated, not
+ * only the bright parts, which is a colour-management change and not bloom at
+ * all.
+ *
+ * The precision of the wireframe *is* the style — `visual-reference.md` calls it
+ * Wireframe Transit — and bloom trades exactly that away. So this stands, and
+ * now it stands on a measurement instead of an assumption.
  */
 
 const GLOW_RGBA = [
