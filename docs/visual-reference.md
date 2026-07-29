@@ -26,7 +26,8 @@ Reference document for the-realtime-hackathon. Derived from four source referenc
 
 ## 2. Color Palette
 
-Six values. Nothing else — no gradients as color, no secondary hues.
+Six values, plus the emitted portal light — see `art-direction.md`. Nothing
+else: no gradients as color, no secondary hues.
 
 | Name | Hex | Role |
 |---|---|---|

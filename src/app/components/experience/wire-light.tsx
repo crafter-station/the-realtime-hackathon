@@ -15,6 +15,9 @@ import { WELL_Z, WORM_Z_END, wellThroatY } from "./wire-surface";
  * at the end. Everywhere else the world is white hairlines on black, which is
  * what keeps this from reading as a colour scheme.
  *
+ * Both portals share one ramp. They had two while the opening was cyan, and the
+ * second was the only thing making the claim above false.
+ *
  * The core is white and only the falloff is orange. Saturated orange across a
  * whole surface reads as fire; a white-hot centre bleeding to orange reads as
  * energy. That distinction is doing most of the work.
@@ -31,15 +34,6 @@ const GLOW_RGBA = [
   [0.28, "rgba(255,150,70,0.55)"],
   [0.55, "rgba(255,77,0,0.18)"],
   [1, "rgba(255,77,0,0)"],
-] as const;
-
-/** The opening well's light. Cyan to match the reference, not Portal orange. */
-const WELL_GLOW_RGBA = [
-  [0, "rgba(255,255,255,1)"],
-  [0.14, "rgba(216,255,252,0.95)"],
-  [0.34, "rgba(120,240,230,0.6)"],
-  [0.62, "rgba(60,200,200,0.2)"],
-  [1, "rgba(40,170,180,0)"],
 ] as const;
 
 type GlowRamp = readonly (readonly [number, string])[];
@@ -80,7 +74,7 @@ function useGlowTexture(ramp: GlowRamp = GLOW_RGBA) {
  * is what squashes it into that band from the camera's point of view.
  */
 function WellPool({ z, y, radius }: { z: number; y: number; radius: number }) {
-  const texture = useGlowTexture(WELL_GLOW_RGBA);
+  const texture = useGlowTexture(GLOW_RGBA);
   return (
     <mesh position={[0, y + 0.15, z]} rotation={[-Math.PI / 2, 0, 0]}>
       <circleGeometry args={[radius, 64]} />
