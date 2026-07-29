@@ -518,7 +518,11 @@ export function Experience() {
           className="xp-section xp-finale"
           style={{ minHeight: `${heightOf("finale")}svh` }}
         >
-          <h2 className="xp-huge xp-huge--outline">Register</h2>
+          {/* The plate says the name of the thing, not the name of the button.
+              `Register` was the headline and the CTA directly under it — the
+              same word twice, where the last full-width line of the page is the
+              one place the event should be named outright. */}
+          <h2 className="xp-huge xp-huge--outline">The realtime hackathon</h2>
           <p className="xp-beat-line">
             Aug 07–09 · online · teams of 1–4 · free
           </p>

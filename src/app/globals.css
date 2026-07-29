@@ -4467,7 +4467,7 @@ html.xp body {
   gap: 0.5rem;
   height: 2.6rem;
   padding: 0 1.1rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-family: var(--sans);
   font-size: 0.8rem;
   font-weight: 600;
@@ -4903,7 +4903,10 @@ html.xp body {
   gap: 0.6rem;
   height: 3.2rem;
   padding: 0 1.6rem;
-  border-radius: 999px;
+  /* Radius 0. `docs/visual-reference.md`: "This style has no rounded corners."
+     The pill shape was the loudest exception left, and it sat on the final
+     plate — the last full-width thing anyone sees. */
+  border-radius: 0;
   background: #ffffff;
   color: #0e0e10;
   font-family: var(--sans);
@@ -5034,7 +5037,10 @@ html.xp body {
   max-width: min(30rem, 84vw);
   padding: 1.5rem 1.6rem 1.7rem;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
+  /* Radius 0, per `docs/visual-reference.md`. These cards are on their way out
+     entirely — the tracks become falling glass — but until then they should at
+     least stop being the one rounded thing floating over a hard-edged world. */
+  border-radius: 0;
   background: rgba(10, 10, 12, 0.72);
   backdrop-filter: blur(6px);
 }
@@ -5124,11 +5130,66 @@ html.xp body {
 }
 
 /* Finale: giant register. */
+/* The plate.
+
+   After twenty-six viewports of continuous motion the last thing the page does
+   is hold still, and that contrast is the beat — it is a full stop, not a
+   background treatment.
+
+   The gradient is drawn by the section itself and starts a viewport *above* it,
+   so the black rises to meet you as you scroll in and there is nothing to drive
+   from JS: no new beat, no scroll listener, no state. `z-index: -1` puts it
+   behind this section's own copy while still covering the scene, which is the
+   whole job — the world goes quiet, the words stay. */
 .xp-finale {
+  position: relative;
   align-content: center;
   justify-items: center;
   text-align: center;
   gap: 2rem;
+}
+.xp-finale::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  /* Starts one viewport up, so the rise is already underway on arrival.
+
+     It does *not* overhang the bottom: an absolutely-positioned box that
+     extends past the last section adds real scrollable page. A first pass hung
+     it 20svh low and bought exactly 160px of extra scroll, which pushed the
+     whole plate off the top of the viewport at rest. */
+  top: -100svh;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 8, 10, 0) 0%,
+    rgba(8, 8, 10, 0.72) 34%,
+    rgba(8, 8, 10, 0.97) 52%,
+    #08080a 62%
+  );
+  pointer-events: none;
+}
+/* The lift: a soft grey haze behind the title, so the plate is not a flat
+   rectangle of black. Mid grey rather than white — white behind an outlined
+   headline eats the stroke. */
+.xp-finale::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(
+    62% 46% at 50% 38%,
+    rgba(150, 152, 158, 0.26) 0%,
+    rgba(120, 122, 130, 0.1) 45%,
+    rgba(8, 8, 10, 0) 78%
+  );
+  pointer-events: none;
+}
+.xp-finale .xp-huge {
+  max-width: 14ch;
 }
 .xp-register--giant {
   height: clamp(4rem, 8vh, 5.4rem);
