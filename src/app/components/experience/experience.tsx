@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { heightOf } from "./journey";
 import { CRAFTER_URL, PORTAL_URL, REGISTER_URL } from "./links";
 import { PortalCanvas } from "./portal-canvas";
+import { browserGraph, createSoundscape } from "./soundscape";
 import { scroll } from "./store";
 
 const KICKOFF = new Date("2026-08-07T19:00:00-05:00").getTime();
@@ -139,6 +140,11 @@ export function Experience() {
   const heroLayer = useRef<HTMLDivElement>(null);
   const hud = useRef<HTMLDivElement>(null);
   const depthValue = useRef<HTMLSpanElement>(null);
+  const [sound, setSound] = useState<"idle" | "on" | "off">("idle");
+  // Built once and kept for the life of the page. The engine itself creates
+  // nothing until `toggle` is first called from the button, so holding it here
+  // costs an object and no audio machinery.
+  const soundscape = useRef(createSoundscape(browserGraph));
 
   useEffect(() => {
     scroll.quality = detectQuality();
@@ -188,6 +194,10 @@ export function Experience() {
         const pct = String(Math.round(scroll.progress * 100)).padStart(3, "0");
         if (depth.textContent !== pct) depth.textContent = pct;
       }
+      // The drone follows depth. It is silent — and does no work — until the
+      // visitor has asked for it, so this runs unconditionally.
+      soundscape.current.setDepth(scroll.progress);
+
       // The HUD is bracketed by the two big CTAs and never overlaps either: it
       // waits for the hero's own Register to leave, and stands down again as
       // the finale's arrives. Its whole job is to offer a way out *during* the
@@ -226,8 +236,10 @@ export function Experience() {
     };
     window.addEventListener("pointermove", onPointer, { passive: true });
 
+    const engine = soundscape.current;
     return () => {
       cancelAnimationFrame(raf);
+      engine.dispose();
       lenis.destroy();
       window.removeEventListener("pointermove", onPointer);
       document.documentElement.classList.remove("xp");
@@ -518,6 +530,22 @@ export function Experience() {
           </span>
           <span className="xp-hud__unit">% depth</span>
         </p>
+        <button
+          type="button"
+          className="xp-hud__sound"
+          // The name carries the state, so a screen reader announces what
+          // pressing it will do rather than just "sound".
+          aria-pressed={sound === "on"}
+          aria-label={
+            sound === "on" ? "Turn ambient sound off" : "Turn ambient sound on"
+          }
+          onClick={() => {
+            soundscape.current.toggle();
+            setSound(soundscape.current.state());
+          }}
+        >
+          <span aria-hidden>{sound === "on" ? "◼◼◼" : "◼──"}</span>
+        </button>
         <a
           className="xp-register xp-register--sm"
           href={REGISTER_URL}
