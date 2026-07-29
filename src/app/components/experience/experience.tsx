@@ -2,6 +2,7 @@
 
 import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
+import { heightOf } from "./journey";
 import { CRAFTER_URL, PORTAL_URL, REGISTER_URL } from "./links";
 import { PortalCanvas } from "./portal-canvas";
 import { scroll } from "./store";
@@ -268,7 +269,11 @@ export function Experience() {
 
       <main className="xp-overlay" id="top">
         {/* 02 — Ride the grid, into the curves. Long. */}
-        <div className="xp-gap--ride" aria-hidden />
+        <div
+          className="xp-gap--ride"
+          style={{ height: heightOf("ride") }}
+          aria-hidden
+        />
 
         {/* 02.5 — The jump: count down, punch into hyperspace, meet the
             tracks in the streaks. */}
@@ -283,7 +288,11 @@ export function Experience() {
             <p className="xp-count__n">{n}</p>
           </section>
         ))}
-        <div className="xp-gap--jump" aria-hidden />
+        <div
+          className="xp-gap--jump"
+          style={{ height: heightOf("jump") }}
+          aria-hidden
+        />
 
         <section className="xp-section xp-section--beat xp-tracksIntro">
           <p className="xp-label">Five tracks</p>
@@ -307,7 +316,11 @@ export function Experience() {
             </article>
           </section>
         ))}
-        <div className="xp-gap--jumpOut" aria-hidden />
+        <div
+          className="xp-gap--jumpOut"
+          style={{ height: heightOf("jumpOut") }}
+          aria-hidden
+        />
 
         {/* 03 — The curve closes: PRIZES appear. */}
         <section className="xp-section xp-section--beat">
@@ -320,7 +333,11 @@ export function Experience() {
         </section>
 
         {/* 04 — Through the tunnel. */}
-        <div className="xp-gap--tunnel" aria-hidden />
+        <div
+          className="xp-gap--tunnel"
+          style={{ height: heightOf("tunnel") }}
+          aria-hidden
+        />
 
         {/* 05 — COUNTDOWN, live. */}
         <section className="xp-section xp-section--beat">
@@ -334,7 +351,11 @@ export function Experience() {
         </section>
 
         {/* 05.5 — Into the wormhole: the grid folds into the vortex. */}
-        <div className="xp-gap--wormhole" aria-hidden />
+        <div
+          className="xp-gap--wormhole"
+          style={{ height: heightOf("wormhole") }}
+          aria-hidden
+        />
         <section className="xp-section xp-section--beat">
           <p className="xp-label">Another dimension</p>
           <h2 className="xp-huge xp-huge--outline">Warp</h2>
@@ -346,7 +367,11 @@ export function Experience() {
         {/* 05.75 — THE OTHER SIDE. The beat the page was missing: the tube
             opens, the vortex is behind you, and the ground comes back. A
             portal you fall into and never come out of is not a portal. */}
-        <div className="xp-gap--emerge" aria-hidden />
+        <div
+          className="xp-gap--emerge"
+          style={{ height: heightOf("emerge") }}
+          aria-hidden
+        />
         <section className="xp-section xp-section--beat">
           <p className="xp-label">The other side</p>
           <h2 className="xp-huge">You&rsquo;re through</h2>
@@ -362,8 +387,15 @@ export function Experience() {
             before they register. It sits here, on the open ground after the
             ride, because this is where the spectacle stops and the practical
             questions start — and because the stretch was empty scroll anyway. */}
-        <div className="xp-gap--brief" aria-hidden />
-        <section className="xp-section xp-section--panel">
+        <div
+          className="xp-gap--brief"
+          style={{ height: heightOf("brief") }}
+          aria-hidden
+        />
+        <section
+          className="xp-section xp-section--panel"
+          style={{ minHeight: heightOf("format") }}
+        >
           <p className="xp-label">The format</p>
           <h2 className="xp-panel__head">39 hours, start to submission</h2>
           <dl className="xp-facts">
@@ -376,7 +408,10 @@ export function Experience() {
           </dl>
         </section>
 
-        <section className="xp-section xp-section--panel">
+        <section
+          className="xp-section xp-section--panel"
+          style={{ minHeight: heightOf("schedule") }}
+        >
           <p className="xp-label">Schedule</p>
           <h2 className="xp-panel__head">All times Lima, UTC&minus;5</h2>
           <ol className="xp-schedule">
@@ -389,7 +424,10 @@ export function Experience() {
           </ol>
         </section>
 
-        <section className="xp-section xp-section--panel">
+        <section
+          className="xp-section xp-section--panel"
+          style={{ minHeight: heightOf("questions") }}
+        >
           <p className="xp-label">Questions</p>
           <h2 className="xp-panel__head">Before you register</h2>
           <dl className="xp-faq">
@@ -403,7 +441,11 @@ export function Experience() {
         </section>
 
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}
-        <div className="xp-gap--arrive" aria-hidden />
+        <div
+          className="xp-gap--arrive"
+          style={{ height: heightOf("arrive") }}
+          aria-hidden
+        />
         <section className="xp-section xp-finale">
           <h2 className="xp-huge xp-huge--outline">Register</h2>
           <p className="xp-beat-line">

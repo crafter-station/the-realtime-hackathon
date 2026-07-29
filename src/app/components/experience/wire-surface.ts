@@ -21,6 +21,8 @@
  * rather than by squinting at a canvas. `wire-world.tsx` draws what this says.
  */
 
+import { Z } from "./journey";
+
 export function clamp01(x: number): number {
   return x < 0 ? 0 : x > 1 ? 1 : x;
 }
@@ -39,14 +41,14 @@ export function smoothstep(edge0: number, edge1: number, x: number): number {
 // ---------------------------------------------------------------------------
 
 /** The field the well is sunk into sits out here, ahead of the corridor mouth. */
-export const WORLD_Z_START = 150;
-export const WORLD_Z_END = -1140;
+export const WORLD_Z_START = Z.WORLD_Z_START;
+export const WORLD_Z_END = Z.WORLD_Z_END;
 
 // Wormhole stretch — the spiralling vortex the closed tube empties into.
-export const WORM_Z_IN = -580;
-export const WORM_Z_FULL = -620;
-export const WORM_Z_START = -580;
-export const WORM_Z_END = -760;
+export const WORM_Z_IN = Z.WORM_Z_IN;
+export const WORM_Z_FULL = Z.WORM_Z_FULL;
+export const WORM_Z_START = Z.WORM_Z_IN;
+export const WORM_Z_END = Z.WORM_Z_END;
 export const WORM_THROAT = 1.4;
 
 // ---------------------------------------------------------------------------
@@ -82,15 +84,15 @@ export const WORM_RADIUS = PERIMETER / (2 * Math.PI); // ≈ 13.4937
 // Where each stretch happens, in world z
 // ---------------------------------------------------------------------------
 
-const MOUTH_OPEN = 140; // plane dead flat: the field the well sits in
-const MOUTH_SHUT = 6; // closed into the corridor section
-const FLARE_START = -70; // corridor starts peeling open
-const FLARE_END = -132; // fully open country
-const CONE_START = -430; // the plane starts curling a second time
-const CONE_WRAPPED = -520; // closed into a circular tube
-const CONE_JOIN = -580; // tube sits on the wormhole's axis (= WORM_Z_IN)
-const EXIT_START = -740; // the far mouth: the tube begins to open again
-const EXIT_OPEN = -800; // out the other side, flat country
+const MOUTH_OPEN = Z.MOUTH_OPEN; // plane dead flat: the field the well sits in
+const MOUTH_SHUT = Z.MOUTH_SHUT; // closed into the corridor section
+const FLARE_START = Z.FLARE_START; // corridor starts peeling open
+const FLARE_END = Z.FLARE_END; // fully open country
+const CONE_START = Z.CONE_START; // the plane starts curling a second time
+const CONE_WRAPPED = Z.CONE_WRAPPED; // closed into a circular tube
+const CONE_JOIN = Z.CONE_JOIN; // tube sits on the wormhole's axis (= WORM_Z_IN)
+const EXIT_START = Z.EXIT_START; // the far mouth: the tube begins to open again
+const EXIT_OPEN = Z.EXIT_OPEN; // out the other side, flat country
 
 /**
  * Coming out the far side of the wormhole.

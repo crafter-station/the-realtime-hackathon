@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { Z } from "./journey";
 import { scroll, warpRender } from "./store";
 import { WireCompanion } from "./wire-companion";
 import { WireHand } from "./wire-hand";
@@ -21,8 +22,8 @@ import { WireWormhole } from "./wire-wormhole";
 
 // Camera track: one long continuous ride (the well → the ground gives way →
 // corridor → open country → the ground closes → wormhole → end).
-const TRACK_START = 146;
-const TRACK_END = -960;
+const TRACK_START = Z.TRACK_START;
+const TRACK_END = Z.TRACK_END;
 
 /**
  * Where the camera stands still under `prefers-reduced-motion`.

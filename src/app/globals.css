@@ -4898,7 +4898,6 @@ html.xp body {
    ground giving way, short enough that the first beat arrives before the ride
    feels like it has stalled. */
 .xp-gap--ride {
-  height: 331svh;
 }
 
 /* -- The jump to hyperspace ------------------------------------------------
@@ -4936,7 +4935,6 @@ html.xp body {
 }
 /* The punch itself: no copy, just the streaks reaching full stretch. */
 .xp-gap--jump {
-  height: 60svh;
 }
 /* One card per slot, alternating sides of the vanishing point. Sticky for the
    same reason as the numerals: each card holds its screen, then hands over. */
@@ -4991,7 +4989,6 @@ html.xp body {
 }
 /* Room to drop back out of hyperspace before the grid returns. */
 .xp-gap--jumpOut {
-  height: 100svh;
 }
 .xp-beat-line--wide {
   max-width: 26ch;
@@ -5001,25 +4998,20 @@ html.xp body {
    gap has to span exactly that, because KICKOFF on the far side of it is
    supposed to land once the tube has closed. */
 .xp-gap--tunnel {
-  height: 248svh;
 }
 /* Extra room to fall down the wormhole's throat. */
 .xp-gap--wormhole {
-  height: 228svh;
 }
 /* Out the far side. Two gaps with the arrival beat between them: the first is
    the fall still going, the second is open country once the tube has let go.
    Without this stretch the page ends inside the vortex and the whole journey
    is a portal that opens onto another portal. */
 .xp-gap--emerge {
-  height: 200svh;
 }
 /* Short breath between "You're through" and the practical questions. */
 .xp-gap--brief {
-  height: 70svh;
 }
 .xp-gap--arrive {
-  height: 120svh;
 }
 
 /* Giant beat typography (prizes / countdown). */
