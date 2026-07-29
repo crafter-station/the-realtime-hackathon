@@ -90,7 +90,7 @@ const FLARE_START = Z.FLARE_START; // corridor starts peeling open
 const FLARE_END = Z.FLARE_END; // fully open country
 const CONE_START = Z.CONE_START; // the plane starts curling a second time
 const CONE_WRAPPED = Z.CONE_WRAPPED; // closed into a circular tube
-const CONE_JOIN = Z.CONE_JOIN; // tube sits on the wormhole's axis (= WORM_Z_IN)
+const CONE_JOIN = Z.WORM_Z_IN; // tube sits on the wormhole's axis (= WORM_Z_IN)
 const EXIT_START = Z.EXIT_START; // the far mouth: the tube begins to open again
 const EXIT_OPEN = Z.EXIT_OPEN; // out the other side, flat country
 

@@ -271,7 +271,7 @@ export function Experience() {
         {/* 02 — Ride the grid, into the curves. Long. */}
         <div
           className="xp-gap--ride"
-          style={{ height: heightOf("ride") }}
+          style={{ height: `${heightOf("ride")}svh` }}
           aria-hidden
         />
 
@@ -290,7 +290,7 @@ export function Experience() {
         ))}
         <div
           className="xp-gap--jump"
-          style={{ height: heightOf("jump") }}
+          style={{ height: `${heightOf("jump")}svh` }}
           aria-hidden
         />
 
@@ -318,7 +318,7 @@ export function Experience() {
         ))}
         <div
           className="xp-gap--jumpOut"
-          style={{ height: heightOf("jumpOut") }}
+          style={{ height: `${heightOf("jumpOut")}svh` }}
           aria-hidden
         />
 
@@ -335,7 +335,7 @@ export function Experience() {
         {/* 04 — Through the tunnel. */}
         <div
           className="xp-gap--tunnel"
-          style={{ height: heightOf("tunnel") }}
+          style={{ height: `${heightOf("tunnel")}svh` }}
           aria-hidden
         />
 
@@ -353,7 +353,7 @@ export function Experience() {
         {/* 05.5 — Into the wormhole: the grid folds into the vortex. */}
         <div
           className="xp-gap--wormhole"
-          style={{ height: heightOf("wormhole") }}
+          style={{ height: `${heightOf("wormhole")}svh` }}
           aria-hidden
         />
         <section className="xp-section xp-section--beat">
@@ -369,7 +369,7 @@ export function Experience() {
             portal you fall into and never come out of is not a portal. */}
         <div
           className="xp-gap--emerge"
-          style={{ height: heightOf("emerge") }}
+          style={{ height: `${heightOf("emerge")}svh` }}
           aria-hidden
         />
         <section className="xp-section xp-section--beat">
@@ -389,12 +389,12 @@ export function Experience() {
             questions start — and because the stretch was empty scroll anyway. */}
         <div
           className="xp-gap--brief"
-          style={{ height: heightOf("brief") }}
+          style={{ height: `${heightOf("brief")}svh` }}
           aria-hidden
         />
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: heightOf("format") }}
+          style={{ minHeight: `${heightOf("format")}svh` }}
         >
           <p className="xp-label">The format</p>
           <h2 className="xp-panel__head">39 hours, start to submission</h2>
@@ -410,7 +410,7 @@ export function Experience() {
 
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: heightOf("schedule") }}
+          style={{ minHeight: `${heightOf("schedule")}svh` }}
         >
           <p className="xp-label">Schedule</p>
           <h2 className="xp-panel__head">All times Lima, UTC&minus;5</h2>
@@ -426,7 +426,7 @@ export function Experience() {
 
         <section
           className="xp-section xp-section--panel"
-          style={{ minHeight: heightOf("questions") }}
+          style={{ minHeight: `${heightOf("questions")}svh` }}
         >
           <p className="xp-label">Questions</p>
           <h2 className="xp-panel__head">Before you register</h2>
@@ -443,7 +443,7 @@ export function Experience() {
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}
         <div
           className="xp-gap--arrive"
-          style={{ height: heightOf("arrive") }}
+          style={{ height: `${heightOf("arrive")}svh` }}
           aria-hidden
         />
         <section className="xp-section xp-finale">

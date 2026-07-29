@@ -29,7 +29,14 @@
 export type Stretch = {
   /** Unique; the overlay looks its height up by this. */
   id: string;
-  /** Height in `svh`. The overlay applies this; CSS no longer states it. */
+  /**
+   * Height in `svh`.
+   *
+   * The overlay applies this for the gaps and the briefing panels. The
+   * fixed-height beats — sections, numerals, track slots — are still sized by
+   * `globals.css` at one screen each, and the budget states the same number so
+   * the arithmetic is right. That is a duplication, and #17 is where it goes.
+   */
   svh: number;
   /** True when the stretch carries copy — the rest is travel. */
   copy?: true;
@@ -119,13 +126,13 @@ export const Z = {
   CONE_START: -430,
   /** Closed into a circular tube. */
   CONE_WRAPPED: -520,
-  /** Tube sits on the wormhole's axis. */
-  CONE_JOIN: -580,
+
   /** The far mouth: the tube begins to open again. */
   EXIT_START: -740,
   /** Out the other side, flat country. */
   EXIT_OPEN: -800,
 
+  /** The tube sits on the wormhole's axis here, and the vortex takes over. */
   WORM_Z_IN: -580,
   WORM_Z_FULL: -620,
   WORM_Z_END: -760,
@@ -186,6 +193,29 @@ export const BEAT_PINS: readonly {
   },
 ];
 
+/**
+ * Copy-bearing stretches deliberately not tied to a world event.
+ *
+ * A waiver rather than an omission: the countdown numerals and the track cards
+ * ride the hyperspace beat, which is derived from the budget itself, so pinning
+ * them to a z event would be pinning them to themselves. Naming them here is
+ * what lets the pinning test treat every *other* unpinned section as a mistake.
+ */
+export const UNPINNED = new Set([
+  "count3",
+  "count2",
+  "count1",
+  "track1",
+  "track2",
+  "track3",
+  "track4",
+  "track5",
+  "prizes",
+  "schedule",
+  "questions",
+  "finale",
+]);
+
 export function totalSvh(): number {
   return BUDGET.reduce((a, s) => a + s.svh, 0);
 }
@@ -208,7 +238,17 @@ export function beatFraction(beat: string): number {
   throw new Error(`journey: no stretch named "${beat}"`);
 }
 
-/** The height of a named stretch, as a CSS length the overlay can apply. */
+/** Where a stretch finishes, as a fraction of the scrollable height. */
+export function beatEnd(id: string): number {
+  let top = 0;
+  for (const s of BUDGET) {
+    top += s.svh;
+    if (s.id === id) return top / maxScrollSvh();
+  }
+  throw new Error(`journey: no stretch named "${id}"`);
+}
+
+/** The height of a named stretch, in `svh`. The caller writes the unit. */
 /**
  * The briefing panels are the one place the budget cannot fully dictate the
  * page: their height is content-driven, and at a short viewport the FAQ's five
@@ -217,10 +257,10 @@ export function beatFraction(beat: string): number {
  * budget predicts the page down to roughly a 440px-tall window and content
  * growth takes over below that. Every other stretch is exact.
  */
-export function heightOf(id: string): string {
+export function heightOf(id: string): number {
   const s = BUDGET.find((x) => x.id === id);
   if (!s) throw new Error(`journey: no stretch named "${id}"`);
-  return `${s.svh}svh`;
+  return s.svh;
 }
 
 /** Where a world event happens, as a fraction of the scrollable height. */
@@ -229,23 +269,24 @@ export function worldFraction(event: WorldEvent): number {
 }
 
 /**
- * The hyperspace beat, derived rather than hand-tuned.
+ * The hyperspace beat, anchored to the sections it belongs to.
  *
- * These four used to be literal decimals that had to be re-typed whenever a
- * section moved — the failure being silent, since the streaks and the copy
- * would simply drift apart. Anchored to the countdown and the track cards
- * instead, they follow the budget on their own.
+ * These were literal decimals, then briefly multipliers tuned to reproduce
+ * those decimals — which reproduced nothing the moment the total changed. That
+ * is the same silent drift this module exists to stop, so they are now stated
+ * as the boundaries they actually mean: the streaks start once "3" is on
+ * screen, reach full stretch as the tracks are introduced, hold while the last
+ * card is up, and are gone by the time PRIZES has had the frame to itself.
  */
 export function warpWindow() {
-  const gap = 100 / maxScrollSvh(); // one section, as a fraction
   return {
-    /** "3" — streaks begin stretching, just after the numeral lands. */
-    in: beatFraction("count3") + gap * 0.245,
-    /** Past "1", fully in hyperspace by the time the tracks are introduced. */
-    full: beatFraction("tracksIntro") + gap * 0.373,
-    /** Held through the last track card, then released. */
-    hold: beatFraction("track5") + gap * 1.425,
-    /** Back out mid-PRIZES; the wire world returns under the copy. */
-    out: beatFraction("prizes") + gap * 0.682,
+    /** "3" is up and the streaks begin to stretch. */
+    in: beatEnd("count3"),
+    /** Fully in hyperspace as the tracks are introduced. */
+    full: beatEnd("tracksIntro"),
+    /** Held until the last card has had its screen. */
+    hold: beatEnd("track5"),
+    /** Out again once PRIZES owns the frame. */
+    out: beatEnd("prizes"),
   };
 }

@@ -4514,11 +4514,6 @@ html.xp body {
     clamp(3rem, 8vh, 6rem);
 }
 
-/* Traversal gap — scroll here flies the camera through the portal. */
-.xp-gap {
-  height: 150svh;
-}
-
 /* Content floats over the continuous space — never covers the canvas. */
 .xp-editorial {
   position: relative;
@@ -4568,7 +4563,6 @@ html.xp body {
 }
 .xp-section--panel {
   position: relative;
-  min-height: 100svh;
   display: grid;
   align-content: center;
   justify-items: start;
@@ -4893,13 +4887,6 @@ html.xp body {
 
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
-/* Scroll room for the plane to curl up around you and close into the corridor
-   (`MOUTH_SHUT`, z = 6, lands at ~0.13 progress). Long enough to read as the
-   ground giving way, short enough that the first beat arrives before the ride
-   feels like it has stalled. */
-.xp-gap--ride {
-}
-
 /* -- The jump to hyperspace ------------------------------------------------
    These heights are what `warpAmount()` in store.ts is calibrated against:
    its four thresholds are these boundaries over the total scrollable height.
@@ -4932,9 +4919,6 @@ html.xp body {
   line-height: 0.9;
   color: #ffffff;
   font-variant-numeric: tabular-nums;
-}
-/* The punch itself: no copy, just the streaks reaching full stretch. */
-.xp-gap--jump {
 }
 /* One card per slot, alternating sides of the vanishing point. Sticky for the
    same reason as the numerals: each card holds its screen, then hands over. */
@@ -4987,31 +4971,8 @@ html.xp body {
 .xp-trackSlot--right .xp-trackCard {
   margin-left: auto;
 }
-/* Room to drop back out of hyperspace before the grid returns. */
-.xp-gap--jumpOut {
-}
 .xp-beat-line--wide {
   max-width: 26ch;
-}
-/* The second curl: the open country folds back into a circular tube
-   (`CONE_START` −430 → `CONE_WRAPPED` −520, i.e. ~0.55 → ~0.64 progress). This
-   gap has to span exactly that, because KICKOFF on the far side of it is
-   supposed to land once the tube has closed. */
-.xp-gap--tunnel {
-}
-/* Extra room to fall down the wormhole's throat. */
-.xp-gap--wormhole {
-}
-/* Out the far side. Two gaps with the arrival beat between them: the first is
-   the fall still going, the second is open country once the tube has let go.
-   Without this stretch the page ends inside the vortex and the whole journey
-   is a portal that opens onto another portal. */
-.xp-gap--emerge {
-}
-/* Short breath between "You're through" and the practical questions. */
-.xp-gap--brief {
-}
-.xp-gap--arrive {
 }
 
 /* Giant beat typography (prizes / countdown). */

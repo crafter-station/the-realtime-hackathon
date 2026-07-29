@@ -5,6 +5,8 @@ import {
   beatFraction,
   maxScrollSvh,
   totalSvh,
+  UNPINNED,
+  warpWindow,
   worldFraction,
   Z,
 } from "./journey";
@@ -23,15 +25,14 @@ import {
  */
 
 describe("the budget", () => {
-  test("the total is the sum of its parts", () => {
-    const sum = BUDGET.reduce((a, s) => a + s.svh, 0);
-    expect(totalSvh()).toBe(sum);
-  });
-
-  test("the scrollable height is the total less the last screen", () => {
-    // The finale is the last viewport, so progress reaches 1 when its top
-    // reaches the top of the window — not when the document ends.
-    expect(maxScrollSvh()).toBe(totalSvh() - 100);
+  test("the finale is exactly one screen, so progress can reach 1", () => {
+    // Not a restatement of `maxScrollSvh`: this is the assumption that formula
+    // rests on. If the finale ever stops being one viewport tall, progress
+    // stops reaching 1 and every fraction below is wrong by that difference.
+    const finale = BUDGET[BUDGET.length - 1];
+    expect(finale.id).toBe("finale");
+    expect(finale.svh).toBe(100);
+    expect(maxScrollSvh()).toBe(totalSvh() - finale.svh);
   });
 
   test("every stretch has a positive height", () => {
@@ -59,13 +60,25 @@ describe("fractions", () => {
     }
   });
 
-  test("world events map through the camera track, not the budget", () => {
-    // p(z) = (TRACK_START - z) / (TRACK_START - TRACK_END)
-    const span = Z.TRACK_START - Z.TRACK_END;
-    expect(worldFraction("MOUTH_SHUT")).toBeCloseTo(
-      (Z.TRACK_START - Z.MOUTH_SHUT) / span,
-      6,
-    );
+  test("world events run in z order and stay inside the ride", () => {
+    // The property that matters: the camera meets them in the order the world
+    // declares them, and none falls outside the track it is measured against.
+    const order = [
+      "MOUTH_SHUT",
+      "FLARE_END",
+      "CONE_START",
+      "CONE_WRAPPED",
+      "WORM_Z_FULL",
+      "EXIT_START",
+      "EXIT_OPEN",
+    ] as const;
+    let prev = 0;
+    for (const e of order) {
+      const f = worldFraction(e);
+      expect(f).toBeGreaterThan(prev);
+      expect(f).toBeLessThan(1);
+      prev = f;
+    }
   });
 
   test("the camera starts before the world and ends inside it", () => {
@@ -97,20 +110,54 @@ describe("pinning", () => {
     }
   });
 
-  test("every pinned beat exists in the budget", () => {
-    // The failure this catches: adding a section without pinning it shifts
-    // every fraction below it and nothing complains.
+  test("every pin names a stretch that exists", () => {
     const names = new Set(BUDGET.map((s) => s.id));
     for (const pin of BEAT_PINS) expect(names.has(pin.beat)).toBe(true);
   });
 
-  test("the beats that carry the story are all pinned", () => {
-    // Not every section needs a world event, but these do — they are the ones
-    // whose whole point is coinciding with something the world does.
+  test("every stretch that carries copy is either pinned or waived", () => {
+    // The containment that matters, and the one I had backwards: asserting
+    // every *pin* has a stretch catches nothing, because adding an unpinned
+    // section is exactly the case where no pin exists to check. Adding copy to
+    // the ride shifts every fraction below it, so a new section must either say
+    // which world event it belongs to or say out loud that it belongs to none.
     const pinned = new Set(BEAT_PINS.map((p) => p.beat));
-    for (const required of ["kickoff", "otherSide", "format"]) {
-      expect(pinned.has(required)).toBe(true);
-    }
+    const unpinned = BUDGET.filter(
+      (s) => s.copy && !pinned.has(s.id) && !UNPINNED.has(s.id),
+    ).map((s) => s.id);
+    expect(unpinned).toEqual([]);
+  });
+
+  test("the waiver list only names stretches that exist", () => {
+    // So a rename cannot quietly turn a waiver into a hole.
+    const names = new Set(BUDGET.map((s) => s.id));
+    for (const id of UNPINNED) expect(names.has(id)).toBe(true);
+  });
+});
+
+describe("the warp window", () => {
+  /**
+   * The one derivation whose failure this module's own header calls "silent",
+   * and the one that had no assertions at all — so when the total changed, all
+   * four thresholds moved and nothing said a word.
+   */
+  test("runs in order and stays inside the ride", () => {
+    const w = warpWindow();
+    expect(w.in).toBeGreaterThan(0);
+    expect(w.full).toBeGreaterThan(w.in);
+    expect(w.hold).toBeGreaterThan(w.full);
+    expect(w.out).toBeGreaterThan(w.hold);
+    expect(w.out).toBeLessThan(1);
+  });
+
+  test("brackets the beats it is choreographed against", () => {
+    const w = warpWindow();
+    // The streaks are up across the countdown and the cards, and gone by the
+    // time PRIZES has the frame — that is what the four numbers mean.
+    expect(w.in).toBeLessThanOrEqual(beatFraction("tracksIntro"));
+    expect(w.full).toBeLessThanOrEqual(beatFraction("track1"));
+    expect(w.hold).toBeGreaterThanOrEqual(beatFraction("track5"));
+    expect(w.out).toBeGreaterThanOrEqual(beatFraction("prizes"));
   });
 });
 
