@@ -4,7 +4,7 @@
 
 **The Realtime Hackathon by Portal** es un hackathon online de 39 horas organizado por **Portal y Crafter Station**.
 
-El evento se realizará del **viernes 7 al domingo 9 de agosto de 2026** y reunirá a entre 150 y 200 desarrolladores, diseñadores y creadores de productos de Latinoamérica y otras partes del mundo.
+El evento se realizará del **viernes 7 al domingo 9 de agosto de 2026** y reunirá a desarrolladores, diseñadores y creadores de productos de Latinoamérica y otras partes del mundo.
 
 Este documento contiene la información oficial del hackathon y es la fuente principal para consultar sus fechas, reglas, requisitos, entregables, premios y condiciones de participación.
 
