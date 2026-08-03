@@ -21,11 +21,11 @@ const roleConfigs = {
         slug: "arturo-barrantes",
       },
       {
-        firstName: "FAUSTO",
-        image: "fausto-rolandi.png",
-        lastName: "ROLANDI",
+        firstName: "JOSE LUIS",
+        image: "jose-luis-koller.png",
+        lastName: "KOLLER",
         roles: ["CO-FOUNDER @ RABBIT"],
-        slug: "fausto-rolandi",
+        slug: "jose-luis-koller",
       },
       {
         firstName: "MARIA CRISTINA",
