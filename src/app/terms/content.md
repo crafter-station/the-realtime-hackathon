@@ -114,29 +114,39 @@ Los commits realizados antes o después de este periodo no se tendrán en cuenta
 
 Los participantes deben asegurarse de que todos los commits relevantes estén disponibles en el repositorio público de GitHub enviado como parte de la entrega.
 
+Si la entrega se basa en un producto existente, el repositorio debe incluir un tag llamado `the-realtime-hackathon` que agrupe los commits realizados durante el periodo oficial. En estos casos, solo se evaluará el trabajo incluido en esos commits.
+
 ## 8. Requisitos de la entrega
+
+Las entregas deben enviarse mediante el [formulario oficial de The Realtime Hackathon](https://forms.gle/JVMq3Jag74218YBQ8).
 
 Cada entrega debe incluir:
 
-1. Los nombres de todos los integrantes del equipo.
-2. Los nombres de usuario de Discord de todos los integrantes.
-3. La URL del repositorio público en GitHub.
-4. La URL del producto desplegado.
-5. Un video de 1 minuto y 30 segundos sobre el producto.
+1. El nombre del equipo.
+2. Los nombres de todos los integrantes del equipo, separados por comas.
+3. El nombre de usuario de Discord de al menos un integrante, que será el contacto del equipo.
+4. Un pitch del producto de 280 caracteres o menos.
+5. La URL del producto desplegado, donde el equipo evaluador pueda probarlo.
+6. La URL de una demo grabada de 1 minuto y 30 segundos como máximo.
+7. La URL del repositorio público en GitHub.
+8. Una explicación de cómo se utilizó Portal en el producto.
 
-### Video
+### Demo en vivo
 
-El video debe presentar y explicar el producto construido.
+La URL del producto desplegado debe permitir que el equipo evaluador pruebe una versión funcional del producto.
 
-Puede consistir en una demostración del producto y puede estar editado.
+### Demo grabada
+
+La demo grabada debe presentar y explicar el producto construido y puede estar editada. Debe durar como máximo 1 minuto y 30 segundos y estar disponible mediante una URL accesible para el equipo evaluador, por ejemplo, en YouTube, Loom, Screen Studio, LinkedIn, Instagram o X.
 
 ### Repositorio de GitHub
 
-El repositorio público de GitHub debe explicar claramente:
+El repositorio de GitHub debe ser público. Si corresponde a un producto existente, debe incluir un tag llamado `the-realtime-hackathon` que agrupe los commits realizados durante el evento.
 
-1. Qué hace exactamente el producto.
+La entrega debe explicar claramente:
+
+1. Qué hace el producto mediante un pitch de 280 caracteres o menos.
 2. Cómo se utilizó Portal.
-3. Qué interacción en tiempo real fue construida con Portal.
 
 La entrega debe completarse antes de las **10:00 del domingo 9 de agosto de 2026, UTC menos 5**.
 
@@ -151,9 +161,9 @@ Los proyectos, videos y demostraciones pueden presentarse en:
 
 La evaluación tendrá en cuenta el uso de Portal dentro del producto.
 
-El equipo evaluador revisará la explicación incluida en el repositorio público de GitHub para entender cómo se utilizó Portal y qué papel cumple dentro de la experiencia.
+El equipo evaluador revisará la explicación incluida en el formulario de entrega para entender cómo se utilizó Portal y qué papel cumple dentro de la experiencia. También podrá revisar el repositorio público, la demo en vivo y la demo grabada.
 
-Durante la evaluación, solo se tendrán en cuenta los commits realizados dentro del periodo oficial indicado en este documento.
+Durante la evaluación, solo se tendrán en cuenta los commits realizados dentro del periodo oficial indicado en este documento. Para productos existentes, se evaluarán únicamente los commits agrupados en el tag `the-realtime-hackathon`.
 
 ## 11. Ideas de proyectos
 
@@ -242,12 +252,14 @@ Para participar, cada proyecto debe:
 5. Conectar usuarios, clientes de software, agentes o fuentes de datos independientes.
 6. Tener un repositorio público en GitHub.
 7. Tener una versión desplegada.
-8. Incluir un video de 1 minuto y 30 segundos.
-9. Incluir los nombres y usuarios de Discord de todos los integrantes.
-10. Explicar en GitHub qué hace el producto y cómo utiliza Portal.
-11. Tener commits realizados dentro del periodo oficial.
-12. Presentarse en español o inglés.
-13. Entregarse antes del domingo 9 de agosto de 2026 a las 10:00, UTC menos 5.
+8. Incluir una demo grabada de 1 minuto y 30 segundos como máximo.
+9. Incluir el nombre del equipo y los nombres de todos sus integrantes.
+10. Incluir el nombre de usuario de Discord de al menos un integrante como contacto.
+11. Incluir un pitch de 280 caracteres o menos.
+12. Explicar cómo utiliza Portal.
+13. Tener commits realizados dentro del periodo oficial y, si se trata de un producto existente, agruparlos en el tag `the-realtime-hackathon`.
+14. Presentarse en español o inglés.
+15. Entregarse antes del domingo 9 de agosto de 2026 a las 10:00, UTC menos 5.
 
 ## 18. Organización
 
