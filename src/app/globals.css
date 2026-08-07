@@ -2891,8 +2891,12 @@ html.xp body {
    so it reads as part of the briefing rather than as a button bolted under it —
    the page already has three Registers and does not need a fourth thing shaped
    like one. */
-.xp-panel__out {
+.xp-resourceLinks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 2rem;
   margin: 2rem 0 0;
+  max-width: 42rem;
 }
 .xp-outLink {
   display: inline-flex;
@@ -2912,6 +2916,11 @@ html.xp body {
 }
 .xp-outLink:hover {
   text-decoration-color: #ffffff;
+}
+@media (max-width: 36rem) {
+  .xp-resourceLinks {
+    grid-template-columns: 1fr;
+  }
 }
 .xp-colophon {
   margin: 2.2rem 0 0;

@@ -1,14 +1,17 @@
 "use client";
 
 import Lenis from "lenis";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Gate } from "./gate";
 import { heightOf, reducedSvh } from "./journey";
 import {
   CRAFTER_URL,
+  DISCORD_URL,
   PORTAL_DOCS_URL,
   PORTAL_URL,
   REGISTER_URL,
+  SUBMISSION_URL,
 } from "./links";
 import { PortalCanvas } from "./portal-canvas";
 import { browserGraph, createSoundscape } from "./soundscape";
@@ -193,16 +196,9 @@ const FAQ = [
     "What are the prizes?",
     "US$800 in cash: US$500 for first, US$300 for second.",
   ],
-  /*
-    Not a link, on purpose. AGENTS.md forbids committing Discord invites, and the
-    schedule names Discord three times — mentor office hours, submissions, the
-    showcase — so a visitor could reasonably read "online, in Discord" and go
-    looking for a way in that this repository is not allowed to publish. Saying
-    where it comes from costs a line and closes the loop.
-  */
   [
     "How do I get into the Discord?",
-    "The invite comes with your registration. Everything — mentors, submissions, the showcase — happens in there.",
+    "Use the Discord invite below. Mentors, event updates, and the showcase happen there.",
   ],
 ] as const;
 
@@ -658,22 +654,38 @@ export function Experience() {
               </div>
             ))}
           </dl>
-          {/*
-            The one outbound link on the page that is not the register button or a
-            credit. It sits under the questions rather than inside an answer
-            because it is the next step for somebody who has read them and
-            decided, and because a link buried in a `<dd>` is a link nobody sees.
-          */}
-          <p className="xp-panel__out">
+          <nav className="xp-resourceLinks" aria-label="Hackathon resources">
+            <a
+              className="xp-outLink"
+              href={DISCORD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Join Discord →
+            </a>
+            <Link className="xp-outLink" href="/kickoff">
+              Kickoff slides →
+            </Link>
+            <a
+              className="xp-outLink"
+              href={SUBMISSION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Submit your project →
+            </a>
+            <Link className="xp-outLink" href="/terms">
+              Terms &amp; conditions →
+            </Link>
             <a
               className="xp-outLink"
               href={PORTAL_DOCS_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Read the Portal docs →
+              Portal docs →
             </a>
-          </p>
+          </nav>
         </section>
 
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}

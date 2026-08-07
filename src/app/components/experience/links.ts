@@ -12,6 +12,8 @@
  * grep for a symbol rather than a hunt for a string.
  */
 export const REGISTER_URL = "https://luma.com/realtime-hackathon";
+export const DISCORD_URL = "https://discord.com/invite/9kaUWUT3q";
+export const SUBMISSION_URL = "https://forms.gle/35ph12gaN6LREMTS6";
 export const PORTAL_URL = "https://useportal.co";
 export const CRAFTER_URL = "https://crafter.run";
 /**
