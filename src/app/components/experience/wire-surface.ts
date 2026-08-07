@@ -234,6 +234,44 @@ export function handoverDim(x: number, z: number): number {
  * Cartesian grid happily draws the other 37% straight across it. Two topologies
  * at partial strength do not blend — they cross, and you can see every crossing.
  */
+/**
+ * Where the guard hands the ground back, downrange of the well.
+ *
+ * A HOLE IN THE WORLD, AND THE SHAPE OF IT
+ *
+ * `inside` is a radius from the well's centre at z 100, and 190 of radius
+ * reaches all the way to z -90. That was harmless while the plane was wrapped
+ * across that whole stretch, because `flat` zeroed the coverage — the old
+ * corridor ran to z -164 and nothing was ever both flat *and* inside the radius.
+ *
+ * Shortening the crossing to end at z -40 created exactly that state, and it is
+ * not a dimming, it is an absence: from z -40 to -80 the Cartesian grid was
+ * culled outright, while `wire-well.tsx` had already faded its polar mesh to
+ * zero on scroll progress by 0.14. Forty units of ground drawn by neither, which
+ * on the page is about 50svh landing on the FIVE TRACKS beat — reported as "hay
+ * como un hueco aquí", which is precisely what it was.
+ *
+ * So the guard is bounded downrange as well as radially. The well is a *place*,
+ * it spans z 38..162, and once you are through the crossing it is a hundred
+ * units behind you: there is nothing left to arbitrate.
+ *
+ * The handback runs z 14 → -11, and both ends are solved rather than picked.
+ *
+ * It has to finish before `flat` recovers, or the two guards cross and coverage
+ * *rises again* on the way out. `flat` starts letting go once `wrap` falls below
+ * 0.75, which on a 40-unit flare is z -10.8 — so a handback ending at -26, the
+ * first value tried, left a 12-unit band peaking at 0.063 coverage where the
+ * Cartesian grid lost a fifth of its brightness for no reason. Small enough
+ * never to be noticed and the same species of accident as the hole above, which
+ * is the argument for solving it rather than eyeballing it.
+ *
+ * Ending at -11 also keeps the seam inside the crossing, where `wrap` is still
+ * 0.82 and the grid is thinned — so the handover happens somewhere it cannot be
+ * seen, and is over long before the ground the tracks are read on.
+ */
+const COVER_BEHIND_IN = 14;
+const COVER_BEHIND_OUT = -11;
+
 export function wellCoverage(x: number, z: number): number {
   const r = Math.hypot(x, z - WELL_Z);
   const inside = 1 - smoothstep(COVER_IN, COVER_OUT, r);
@@ -244,7 +282,8 @@ export function wellCoverage(x: number, z: number): number {
   // brighter there — but it is two grids over one surface, which is the whole
   // thing this function exists to prevent.
   const flat = 1 - smoothstep(0.35, 0.75, wrap(z));
-  return inside * flat;
+  const ahead = 1 - smoothstep(COVER_BEHIND_IN, COVER_BEHIND_OUT, z);
+  return inside * flat * ahead;
 }
 
 /**
@@ -364,20 +403,36 @@ export function enclosure(z: number): number {
  * then every other survivor, so the spacing stays even at each stage instead of
  * clumping on one side.
  */
+/*
+  RETUNED FOR A CROSSING RATHER THAN A CORRIDOR, AND THE DIFFERENCE IS LENGTH
+
+  These were calibrated against a closed section 470 units long that the camera
+  spent a third of the page inside. Over that distance the moiré is the dominant
+  artefact and thinning three columns in four to nothing is the right trade.
+
+  The closed section is now 70 units and you are through it in about 90svh. At
+  that length there is no time for moiré to establish and the opposite failure
+  takes over: at the old values the crossing rendered as two faint corner rails
+  and a great deal of black — measured in a screenshot at 14% depth, which is
+  the page's single climax and was its emptiest frame.
+
+  So the fades still thin, because the geometry reason they exist has not gone
+  away, and they thin to a floor rather than to zero.
+*/
 export function columnFade(index: number, z: number): number {
   const w = wrap(z);
-  if (index % 2 === 1) return 1 - smoothstep(0.35, 0.65, w);
-  if (index % 4 === 2) return 1 - smoothstep(0.65, 0.9, w);
-  // The survivors dim too. Thinning three columns in four and leaving the
-  // fourth at full strength is what made the closed section read as a few
-  // bright scratches laid over a dense ring pattern rather than as one ruled
-  // surface — the rails have to sit at the rings' weight, not above it.
-  return 1 - 0.62 * smoothstep(0.4, 0.9, w);
+  if (index % 2 === 1) return 1 - 0.78 * smoothstep(0.35, 0.65, w);
+  if (index % 4 === 2) return 1 - 0.55 * smoothstep(0.65, 0.9, w);
+  // The survivors dim too. Leaving every fourth column at full strength is what
+  // made the closed section read as a few bright scratches laid over a fainter
+  // ring pattern rather than as one ruled surface — the rails have to sit at
+  // the rings' weight, not above it.
+  return 1 - 0.3 * smoothstep(0.4, 0.9, w);
 }
 
 /** Rings thin by the same rule, one stage later — they are what reads as speed. */
 export function ringFade(index: number, z: number): number {
-  if (index % 2 === 1) return 1 - smoothstep(0.45, 0.8, wrap(z));
-  if (index % 4 === 2) return 1 - 0.45 * smoothstep(0.7, 0.95, wrap(z));
-  return 1 - 0.2 * smoothstep(0.75, 0.98, wrap(z));
+  if (index % 2 === 1) return 1 - 0.7 * smoothstep(0.45, 0.8, wrap(z));
+  if (index % 4 === 2) return 1 - 0.35 * smoothstep(0.7, 0.95, wrap(z));
+  return 1 - 0.15 * smoothstep(0.75, 0.98, wrap(z));
 }
