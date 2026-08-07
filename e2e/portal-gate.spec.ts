@@ -138,8 +138,10 @@ test.describe("Portal gate + entry", () => {
         );
       }),
     ]);
-    expect(popup, "Clicking .xp-cta should open the registration URL").not
-      .toBeNull();
+    expect(
+      popup,
+      "Clicking .xp-cta should open the registration URL",
+    ).not.toBeNull();
     await popup?.close();
   });
 });
