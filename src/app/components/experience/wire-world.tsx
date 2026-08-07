@@ -172,8 +172,13 @@ export function WireWorld() {
       inside the crossing.
     */
     const enclosed = wrap(state.camera.position.z);
-    const gridFloor = THREE.MathUtils.lerp(0.22, 0.46, enclosed);
-    const dustFloor = THREE.MathUtils.lerp(0.34, 0.58, enclosed);
+    // The enclosed end of both ramps was raised with the fades in
+    // `wire-surface.ts`, and for the same reason: the crossing is the one frame
+    // on this page with no sky, no portal light and no signal layer, so this
+    // surface is the *only* thing in it. 0.46 was a corridor you passed through
+    // with a countdown drawn over it; there is nothing drawn over this.
+    const gridFloor = THREE.MathUtils.lerp(0.22, 0.66, enclosed);
+    const dustFloor = THREE.MathUtils.lerp(0.34, 0.78, enclosed);
 
     if (gridMat.current) {
       gridMat.current.opacity = THREE.MathUtils.damp(

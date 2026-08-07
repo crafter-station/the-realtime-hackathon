@@ -257,6 +257,61 @@ describe("wellCoverage", () => {
     expect(wellCoverage(0, WELL_Z)).toBeGreaterThan(0.99);
   });
 
+  test("no stretch of ground is drawn by neither grid", () => {
+    /**
+     * The assertion this file was missing, and a real hole shipped through the
+     * gap. `wellCoverage` culls the Cartesian grid wherever the polar mesh is
+     * supposed to own the surface — but `wire-well.tsx` fades that mesh out on
+     * *scroll progress*, by 0.14, while this guard is baked static geometry. The
+     * two only agreed by accident: the old corridor stayed wrapped past z -164,
+     * so `flat` zeroed the coverage everywhere the radius over-reached.
+     *
+     * Shortening the crossing to z -40 broke the accident and left z -40..-80
+     * culled from one grid and faded out of the other. Forty units of ground
+     * drawn by nobody, right under the FIVE TRACKS beat.
+     *
+     * Stated as the property: once the crossing has opened, the Cartesian grid
+     * owns the ground outright — across the width of the plane, not just the
+     * centreline, because coverage is radial and the edges reach further.
+     */
+    for (let z = Z.FLARE_END; z >= Z.TRACK_END; z -= 2) {
+      for (const x of [-FLOOR_HW, -20, 0, 20, FLOOR_HW]) {
+        expect(wellCoverage(x, z)).toBeLessThan(0.01);
+      }
+    }
+  });
+
+  test("coverage never rises again once the well is behind you", () => {
+    /**
+     * The invariant behind both halves of the fix, and the one that makes the
+     * two guards safe to hold at once.
+     *
+     * `flat` releases the ground as the plane wraps and re-claims it as the
+     * plane opens; `ahead` releases it permanently once the well is passed. If
+     * `ahead` finishes *after* `flat` starts recovering, the two cross and
+     * coverage climbs back up on the way out — measured at a 0.063 peak around
+     * z -20 before the ends were solved, which is a fifth of the grid's
+     * brightness gone in a band, for nothing.
+     *
+     * Monotonic from the well's own centre to the end of the ride says it
+     * cannot happen, whatever either window is later retuned to.
+     */
+    let prev = Number.POSITIVE_INFINITY;
+    for (let z = WELL_Z; z >= Z.TRACK_END; z -= 0.5) {
+      const c = wellCoverage(0, z);
+      expect(c).toBeLessThanOrEqual(prev + 1e-9);
+      prev = c;
+    }
+  });
+
+  test("the handback happens where the section is still closed", () => {
+    // A seam between two grids is only invisible if it falls somewhere the
+    // surface is thinned and curled. If it drifts out onto open ground the hole
+    // above comes back as a visible band instead.
+    expect(wrap(-11)).toBeGreaterThan(0.75);
+    expect(wellCoverage(0, Z.FLARE_END)).toBeLessThan(1e-6);
+  });
+
   test("the arrival plain belongs to the Cartesian grid, not the well", () => {
     // The bug this pins: coverage was a function of depth alone, and `wrap` is
     // 0 in *two* places — the opening field and the country out the far side.
