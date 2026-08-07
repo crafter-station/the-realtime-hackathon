@@ -3,7 +3,12 @@
 import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
 import { heightOf, reducedSvh } from "./journey";
-import { CRAFTER_URL, PORTAL_URL, REGISTER_URL } from "./links";
+import {
+  CRAFTER_URL,
+  PORTAL_DOCS_URL,
+  PORTAL_URL,
+  REGISTER_URL,
+} from "./links";
 import { PortalCanvas } from "./portal-canvas";
 import { browserGraph, createSoundscape } from "./soundscape";
 import { scroll } from "./store";
@@ -19,14 +24,52 @@ function detectQuality(): "high" | "lite" {
   return coarse || small || lowMem ? "lite" : "high";
 }
 
-function clockParts(now: number): string {
+function remainingParts(now: number) {
   const remaining = Math.max(0, KICKOFF - now);
-  const d = Math.floor(remaining / 86_400_000);
-  const h = Math.floor((remaining % 86_400_000) / 3_600_000);
-  const m = Math.floor((remaining % 3_600_000) / 60_000);
-  const s = Math.floor((remaining % 60_000) / 1000);
+  return {
+    d: Math.floor(remaining / 86_400_000),
+    h: Math.floor((remaining % 86_400_000) / 3_600_000),
+    m: Math.floor((remaining % 3_600_000) / 60_000),
+    s: Math.floor((remaining % 60_000) / 1000),
+  };
+}
+
+/** `DD:HH:MM:SS`, tabular, for the HUD. */
+function clockParts(now: number): string {
+  const { d, h, m, s } = remainingParts(now);
   const p = (v: number) => String(v).padStart(2, "0");
   return `${p(d)}:${p(h)}:${p(m)}:${p(s)}`;
+}
+
+/**
+ * The same countdown, in words.
+ *
+ * Four zero-padded pairs separated by colons is a legible clock and an opaque
+ * string: read aloud it is "twelve, oh four, thirty-three, oh seven", which
+ * names neither the units nor what is being counted toward. The full-width
+ * countdown this replaces carried a `DAYS : HOURS : MINUTES : SECONDS` legend
+ * underneath it and there is no room for one in a corner HUD.
+ *
+ * So the digits are decorative and this is the real text. Seconds are left out
+ * deliberately — it is not a live region, so nothing is announced
+ * spontaneously, and a sentence that changes sixty times a minute is a sentence
+ * that is different by the time it has finished being read.
+ */
+function spokenRemaining(now: number): string {
+  const { d, h, m } = remainingParts(now);
+  if (d + h + m === 0) return "Kickoff is now.";
+  const unit = (v: number, name: string) =>
+    v === 1 ? `1 ${name}` : `${v} ${name}s`;
+  const parts = [
+    ...(d > 0 ? [unit(d, "day")] : []),
+    ...(h > 0 ? [unit(h, "hour")] : []),
+    ...(m > 0 ? [unit(m, "minute")] : []),
+  ];
+  const list =
+    parts.length > 1
+      ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
+      : parts[0];
+  return `${list} until kickoff, Friday 7 August at 19:00 Lima time.`;
 }
 
 // Scroll fraction across which the hero copy rides along then fades away.
@@ -35,23 +78,27 @@ function clockParts(now: number): string {
 const HERO_FADE_START = 0.02;
 const HERO_FADE_END = 0.09;
 
-// Where the HUD hands over to the finale's own Register. Late on purpose: a
-// depth readout that vanishes at 097 never gets to say the one number the whole
-// thing is counting toward, so it holds until 100 is on screen and then goes.
+// Where the HUD's small Register hands over to the finale's own. Late on
+// purpose — the two must never be on screen together, and the finale's is the
+// one that should win, so this waits until it is genuinely arriving.
 const HUD_FADE_START = 0.985;
 const HUD_FADE_END = 0.999;
 
 /**
- * The five tracks, revealed one card at a time while you fly through the
- * streak field. Sides alternate so the cards never stack over the vanishing
- * point, which is where the eye is already pinned.
+ * The five tracks, one card at a time. Sides alternate so the cards never stack
+ * over the vanishing point, which is where the eye is already pinned.
  *
  * Names and framing come from `docs/portal-experience-brief.md` §3–7, where
  * each track is a Portal capability rather than a theme we liked the sound of.
  * The brief is explicit that these are not ours to invent ("no filler feature
  * lists that don't map to a real Portal capability"), so change them there
- * first. Adding or removing one changes the `JUMP_*` thresholds in `store.ts`
- * — see the note there.
+ * first.
+ *
+ * Each card now has a world behind it that demonstrates what it claims —
+ * `wire-tracks.ts` holds the five behaviours and `trackBand` in `journey.ts`
+ * derives each one's span of camera z from these very stretches. So adding a
+ * sixth track means a sixth entry here, a sixth `track6` in `BUDGET`, and a
+ * sixth behaviour there; the geometry follows on its own.
  */
 const TRACKS = [
   {
@@ -119,6 +166,20 @@ const SCHEDULE = [
 const FAQ = [
   ["Do I need a team?", "No. Teams are one to four people, and one is a team."],
   ["What does it cost?", "Nothing. Registration is free."],
+  /*
+    The question the page asked people to answer for themselves.
+
+    Five questions and not one of them was about the thing you have to build
+    with. The page says "a working product built with Portal" in the format
+    panel, names Portal in the hero, and published no route to its
+    documentation — so the one practical unknown a developer has before Friday
+    ("what is this, and do I need to set anything up") had no answer here. The
+    link is the answer; the sentence is so the link has a reason to be clicked.
+  */
+  [
+    "Do I need a Portal account?",
+    "Yes, and it is free to start. Set it up before Friday so kickoff is spent building — the docs are the fastest way in.",
+  ],
   [
     "Do I have to pick a track?",
     "Pick one, or ignore them all — Wild Signal exists for the things that fit nowhere.",
@@ -131,15 +192,26 @@ const FAQ = [
     "What are the prizes?",
     "US$800 in cash: US$500 for first, US$300 for second.",
   ],
+  /*
+    Not a link, on purpose. AGENTS.md forbids committing Discord invites, and the
+    schedule names Discord three times — mentor office hours, submissions, the
+    showcase — so a visitor could reasonably read "online, in Discord" and go
+    looking for a way in that this repository is not allowed to publish. Saying
+    where it comes from costs a line and closes the loop.
+  */
+  [
+    "How do I get into the Discord?",
+    "The invite comes with your registration. Everything — mentors, submissions, the showcase — happens in there.",
+  ],
 ] as const;
 
 export function Experience() {
   const [mounted, setMounted] = useState(false);
   const [clock, setClock] = useState("--:--:--:--");
+  const [spoken, setSpoken] = useState("Counting down to kickoff.");
   const progressFill = useRef<HTMLDivElement>(null);
   const heroLayer = useRef<HTMLElement>(null);
   const hud = useRef<HTMLDivElement>(null);
-  const depthValue = useRef<HTMLSpanElement>(null);
   const [sound, setSound] = useState<"idle" | "on" | "off">("idle");
   /*
     `scroll.reduce` is read by the renderers inside the frame loop, which never
@@ -206,23 +278,16 @@ export function Experience() {
         layer.style.visibility = t >= 1 ? "hidden" : "visible";
       }
 
-      // Depth readout. Written straight to the DOM rather than through state:
-      // this runs every frame, and a re-render per frame would cost more than
-      // everything else on the page put together.
-      const depth = depthValue.current;
-      if (depth) {
-        const pct = String(Math.round(scroll.progress * 100)).padStart(3, "0");
-        if (depth.textContent !== pct) depth.textContent = pct;
-      }
       // The drone follows depth. It is silent — and does no work — until the
       // visitor has asked for it, so this runs unconditionally.
       soundscape.current?.setDepth(scroll.progress);
 
-      // The HUD is bracketed by the two big CTAs and never overlaps either: it
-      // waits for the hero's own Register to leave, and stands down again as
+      // The HUD's Register is bracketed by the two big CTAs and never overlaps
+      // either: it waits for the hero's own to leave, and stands down again as
       // the finale's arrives. Its whole job is to offer a way out *during* the
       // ride — at the end the giant one is right there, and two Registers on
-      // screen at once is just the page competing with itself.
+      // screen at once is just the page competing with itself. The clock is
+      // outside this wrapper and never leaves.
       if (fading.current) {
         const inA = Math.min(
           1,
@@ -296,9 +361,14 @@ export function Experience() {
     };
   }, []);
 
-  // Live countdown to kickoff.
+  // Live countdown to kickoff. One re-render a second, and it is cheap because
+  // the only thing that reads these two is the HUD row.
   useEffect(() => {
-    const update = () => setClock(clockParts(Date.now()));
+    const update = () => {
+      const now = Date.now();
+      setClock(clockParts(now));
+      setSpoken(spokenRemaining(now));
+    };
     update();
     const interval = window.setInterval(update, 1000);
     return () => window.clearInterval(interval);
@@ -309,7 +379,7 @@ export function Experience() {
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
 
       {/*
-        The way out, for anyone who cannot or does not want to travel 21,400px
+        The way out, for anyone who cannot or does not want to travel ~20,000px
         to reach it.
 
         The ride is the point of this page, so nothing here shortens it — but a
@@ -325,13 +395,61 @@ export function Experience() {
           holds the page title and the first call to action, and `<main>` was
           the only landmark on the page before it. */}
       <header ref={heroLayer} className="xp-heroLayer">
+        {/*
+          Who is behind this, in the frame where people decide whether to care.
+
+          The credit existed only in the colophon at 100% depth — so a page whose
+          entire proposition is "build with Portal" never showed a Portal mark
+          until after the ride was over, and Crafter Station never at all above
+          the fold. Set as a wordmark line rather than an image: there is no logo
+          asset in `public/brand-assets/` cleared for use at this size, and the
+          type *is* the brand here — `visual-reference.md` gives Space Grotesk the
+          wordmark.
+        */}
+        <p className="xp-heroBrand">
+          <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
+            Portal
+          </a>
+          <span aria-hidden>×</span>
+          <a href={CRAFTER_URL} target="_blank" rel="noopener noreferrer">
+            Crafter Station
+          </a>
+        </p>
         <h1 className="xp-display">The realtime hackathon</h1>
         <div className="xp-heroSub">
+          {/*
+            SPLIT, BECAUSE ONE SENTENCE WAS DOING FIVE JOBS
+
+            It read: what you build, who with, how long, the date, the format,
+            the prize, and an instruction to scroll — in three lines, with two
+            `<strong>`s carrying unrelated weight. "Portal" was emphasis-as-brand
+            and "Scroll to enter another dimension" was emphasis-as-instruction,
+            so the one visual signal on the block meant two different things and
+            neither stood out.
+
+            Now: a proposition and the instruction, with the facts lifted out into
+            a metadata line where a date can actually be found. The date used to be
+            the fourth clause of a sentence, which on an event page is the one fact
+            that should never need reading for.
+
+            "Portal" loses its bold — the wordmark line above it now says who this
+            is, so the emphasis was repeating a fact that is already the loudest
+            thing in the block. That leaves one `<strong>` meaning one thing.
+
+            The scroll sentence stays in the copy and is not decoration: `.xp-cue`
+            below is `aria-hidden` precisely because this line is what tells a
+            screen reader that scrolling drives the page. Dropping it would have
+            left that promise unkept and the cue speaking to nobody.
+          */}
           <p className="xp-body">
-            Build a live, multiplayer or agentic AI product with{" "}
-            <strong>Portal</strong> in one weekend. August 7–9, online, teams of
-            1–4. US$800 in prizes.{" "}
-            <strong>Scroll to enter another dimension.</strong>
+            Build a live, multiplayer or agentic AI product with Portal in one
+            weekend. <strong>Scroll to enter another dimension.</strong>
+          </p>
+          <p className="xp-heroMeta">
+            <span>Aug 7–9, 2026</span>
+            <span>Online</span>
+            <span>Teams of 1–4</span>
+            <span>US$800 in prizes</span>
           </p>
           <a
             className="xp-register"
@@ -362,47 +480,21 @@ export function Experience() {
       </header>
 
       <main className="xp-overlay" id="top">
-        {/* 02 — Ride the grid, into the curves. Long. */}
+        {/* 02 — The approach and the fall into the well. */}
         <div
           className="xp-gap--ride"
           style={{ height: `${span("ride")}svh` }}
           aria-hidden
         />
 
-        {/* 02.5 — The jump: count down, punch into hyperspace, meet the
-            tracks in the streaks. */}
-        <section
-          className="xp-section xp-section--beat"
-          style={{ minHeight: `${span("holdOn")}svh` }}
-        >
-          <h2 className="xp-label">Hold on</h2>
-          <p className="xp-beat-line xp-beat-line--wide">
-            You are about to enter <strong>another dimension</strong>.
-          </p>
-        </section>
-        {[3, 2, 1].map((n) => (
-          <section
-            className="xp-section xp-count"
-            style={{ minHeight: `${span(`count${n}`)}svh` }}
-            key={n}
-          >
-            {/*
-              Present for the server, for no-JS, and for reduced motion — where
-              the camera never travels, so a glyph pinned to a z it never
-              reaches would never appear. Once the world is carrying the count,
-              this one stands down rather than doubling it.
-            */}
-            <p
-              className="xp-count__n"
-              data-inworld={reduce ? undefined : "true"}
-            >
-              {n}
-            </p>
-          </section>
-        ))}
+        {/* 02.5 — The crossing. Sealed at MOUTH_SHUT, open again at FLARE_END,
+            and the only stretch on the page with no sky. No copy in it on
+            purpose: the hero already said "scroll to enter another dimension",
+            and a caption over the one moment the page is built around would be
+            the page explaining its own joke. */}
         <div
-          className="xp-gap--jump"
-          style={{ height: `${span("jump")}svh` }}
+          className="xp-gap--through"
+          style={{ height: `${span("through")}svh` }}
           aria-hidden
         />
 
@@ -432,13 +524,8 @@ export function Experience() {
             </article>
           </section>
         ))}
-        <div
-          className="xp-gap--jumpOut"
-          style={{ height: `${span("jumpOut")}svh` }}
-          aria-hidden
-        />
 
-        {/* 03 — The curve closes: PRIZES appear. */}
+        {/* 03 — PRIZES, on the open ground past the last band. */}
         <section
           className="xp-section xp-section--beat"
           style={{ minHeight: `${span("prizes")}svh` }}
@@ -451,70 +538,17 @@ export function Experience() {
           </p>
         </section>
 
-        {/* 04 — Through the tunnel. */}
-        <div
-          className="xp-gap--tunnel"
-          style={{ height: `${span("tunnel")}svh` }}
-          aria-hidden
-        />
+        {/* 04 — THE BRIEFING. Brief spine 9: a hackathon page with no
+            schedule, no format and no answer to "do I need a team" is missing
+            the things somebody actually needs before they register.
 
-        {/* 05 — COUNTDOWN, live. */}
-        <section
-          className="xp-section xp-section--beat"
-          style={{ minHeight: `${span("kickoff")}svh` }}
-        >
-          <h2 className="xp-label">Kickoff</h2>
-          <p className="xp-clock">
-            {clock}
-            <small>
-              DAYS : HOURS : MINUTES : SECONDS — FRI AUG 07, 19:00 LIMA
-            </small>
-          </p>
-        </section>
-
-        {/* 05.5 — Into the wormhole: the grid folds into the vortex. */}
-        <div
-          className="xp-gap--wormhole"
-          style={{ height: `${span("wormhole")}svh` }}
-          aria-hidden
-        />
-        <section
-          className="xp-section xp-section--beat"
-          style={{ minHeight: `${span("anotherDimension")}svh` }}
-        >
-          <h2 className="xp-label">Another dimension</h2>
-          <p className="xp-huge xp-huge--outline">Warp</p>
-          <p className="xp-beat-line">
-            The grid folds into a wormhole. <strong>Keep falling.</strong>
-          </p>
-        </section>
-
-        {/* 05.75 — THE OTHER SIDE. The beat the page was missing: the tube
-            opens, the vortex is behind you, and the ground comes back. A
-            portal you fall into and never come out of is not a portal. */}
-        <div
-          className="xp-gap--emerge"
-          style={{ height: `${span("emerge")}svh` }}
-          aria-hidden
-        />
-        <section
-          className="xp-section xp-section--beat"
-          style={{ minHeight: `${span("otherSide")}svh` }}
-        >
-          <h2 className="xp-label">The other side</h2>
-          <p className="xp-huge">You&rsquo;re through</p>
-          <p className="xp-beat-line">
-            Open country, and a weekend to build in it.{" "}
-            <strong>This is where it starts.</strong>
-          </p>
-        </section>
-
-        {/* 05.9 — THE BRIEFING. Brief spine 9, and the largest gap the page
-            had: a hackathon page with no schedule, no format and no answer to
-            "do I need a team" is missing the things somebody actually needs
-            before they register. It sits here, on the open ground after the
-            ride, because this is where the spectacle stops and the practical
-            questions start — and because the stretch was empty scroll anyway. */}
+            This gap is the whole announcement of the second act. Across it the
+            ground stops rolling, the grid drops to 45% and the signal layer
+            switches off — all three pinned to `SETTLE_START`. There used to be
+            a section here saying "You're through / this is where it starts",
+            and it was a caption on a world that had not stopped moving. The
+            world saying it is worth more than the page saying it, and it costs
+            60svh less. */}
         <div
           className="xp-gap--brief"
           style={{ height: `${span("brief")}svh` }}
@@ -566,6 +600,22 @@ export function Experience() {
               </div>
             ))}
           </dl>
+          {/*
+            The one outbound link on the page that is not the register button or a
+            credit. It sits under the questions rather than inside an answer
+            because it is the next step for somebody who has read them and
+            decided, and because a link buried in a `<dd>` is a link nobody sees.
+          */}
+          <p className="xp-panel__out">
+            <a
+              className="xp-outLink"
+              href={PORTAL_DOCS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Read the Portal docs →
+            </a>
+          </p>
         </section>
 
         {/* 06 — FINALE: the wire hand + giant register, standing in the open. */}
@@ -611,37 +661,59 @@ export function Experience() {
       </main>
 
       {/*
-        Depth readout + a Register that is always there.
+        The countdown + a Register that is always there.
 
-        Two problems, one element. The page had exactly two focusable things,
-        both "Register free": one visible for the first tenth of the scroll and
-        the next at the very end — so for most of a thirty-screen ride there was
-        no way to act and no way to tab to anything. And the reference asks for
-        "a live % of scroll depth in a fixed corner, framing the page as literal
-        transit through the portal", which is the same corner and the same idea:
-        tell people how deep they are, and let them out whenever they want.
+        The page had exactly two focusable things, both "Register free": one
+        visible for the first tenth of the scroll and the next at the very end —
+        so for most of the ride there was no way to act and no way to tab to
+        anything. This is the way out, offered continuously.
+
+        The corner used to hold a live `% depth` instead of the clock. The
+        reference asked for it — "a live % of scroll depth in a fixed corner,
+        framing the page as literal transit through the portal" — and it was
+        right while the page *was* a descent. It is not one any more: the
+        crossing finishes at 19% and everything after it is open ground, so the
+        number was measuring a journey the page had stopped making. The scroll
+        bar along the bottom carries the same information without claiming
+        anything about depth.
       */}
       <div className="xp-hud" ref={hud}>
+        {/*
+          Outside the fading wrapper on purpose.
+
+          Every other thing in this corner is chrome that should get out of the
+          way at the finale. The countdown is the opposite: it is the argument
+          for pressing the button it sits next to, so the one moment it must not
+          disappear is the moment somebody is deciding.
+        */}
+        <p className="xp-hud__clock">
+          <span className="xp-hud__ticks" aria-hidden>
+            {clock}
+          </span>
+          <span className="xp-hud__unit" aria-hidden>
+            to kickoff
+          </span>
+          {/*
+            The digits are decorative and this is the real text — see
+            `spokenRemaining`. Not a live region: it must not interrupt, it is
+            here so the countdown exists for somebody reading the page rather
+            than looking at it.
+          */}
+          <span className="xp-hud__spoken">{spoken}</span>
+        </p>
         {/*
           Everything that is allowed to leave, and nothing else.
 
           The sound control used to sit outside the HUD entirely, fixed to a
-          `right` offset guessed at the width of this row — which is a live
-          percentage next to a pill, so it was never going to be the 12.5rem it
-          was told. It overlapped the readout by 53px.
+          `right` offset guessed at the width of this row — which it was never
+          going to match. It overlapped the readout by 53px.
 
           Fading this wrapper rather than the row means the button can stay a
-          flex item and have its position computed. The finale still clears the
-          readout and the small Register; the control over a drone that is still
-          audible there does not go with them.
+          flex item and have its position computed. The finale clears the small
+          Register; the clock and the control over a drone that is still audible
+          there do not go with it.
         */}
         <div className="xp-hud__fading" ref={fading}>
-          <p className="xp-hud__read">
-            <span ref={depthValue} className="xp-hud__depth">
-              000
-            </span>
-            <span className="xp-hud__unit">% depth</span>
-          </p>
           <a
             className="xp-register xp-register--sm"
             href={REGISTER_URL}
@@ -658,15 +730,33 @@ export function Experience() {
           // well made it announce "turn ambient sound off, pressed" — the state
           // said twice, once as a verb. The name is the thing; the pressed
           // state is the state.
+          //
+          // No `aria-label` any more either. The control now says "Sound" in
+          // actual text, and an `aria-label` beside a visible label replaces it
+          // rather than adding to it — which is how a button ends up announcing
+          // something other than what it reads.
           aria-pressed={sound === "on"}
-          aria-label="Ambient sound"
           onClick={() => {
             const engine = engineOf();
             engine.toggle();
             setSound(engine.state());
           }}
         >
-          <span aria-hidden>{sound === "on" ? "◼◼◼" : "◼──"}</span>
+          {/*
+            It used to be three squares and nothing else.
+
+            `◼──` is a level meter to whoever built it and an unlabelled grey box
+            to everybody else: no icon convention, no word, no way to know it
+            controls audio without pressing it — on a page that starts a drone at
+            the first gesture, so the one control a visitor might actually go
+            looking for was the one thing on screen with no name on it.
+
+            The word carries it and the meter keeps the state visible at a glance.
+          */}
+          <span className="xp-hud__soundLabel">Sound</span>
+          <span className="xp-hud__meter" aria-hidden>
+            {sound === "on" ? "◼◼◼" : "◼──"}
+          </span>
         </button>
       </div>
 

@@ -3,7 +3,8 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { WELL_Z, WORM_Z_END, wellThroatY } from "./wire-surface";
+import { Z } from "./journey";
+import { WELL_Z, wellThroatY } from "./wire-surface";
 
 /**
  * Portal light.
@@ -11,9 +12,20 @@ import { WELL_Z, WORM_Z_END, wellThroatY } from "./wire-surface";
  * The product is called Portal and Portal is orange, so the portals in this
  * world are not tinted orange — they are *made of* orange light. It is the only
  * chromatic thing here, it is emitted rather than painted, and it exists at
- * exactly two places: the throat the opening well drains into, and the vortex
- * at the end. Everywhere else the world is white hairlines on black, which is
- * what keeps this from reading as a colour scheme.
+ * exactly two places. Everywhere else the world is white hairlines on black,
+ * which is what keeps this from reading as a colour scheme.
+ *
+ * THE SECOND PLACE MOVED, AND IT MOVED SOMEWHERE BETTER
+ *
+ * It used to be the vortex at 65% of the page. The vortex went with the second
+ * crossing (see the header of `journey.ts`), which left this rule with one place
+ * and the page with orange only in its first fifteen seconds.
+ *
+ * So the second portal is the register. You enter through orange light and you
+ * leave through orange light, and the thing you leave through is the one action
+ * the page exists for — which is a better argument for the colour than "there is
+ * a vortex here" ever was. It also means the glow starts blooming during the FAQ
+ * and is at full strength under the button: the brief's north star, lit.
  *
  * Both portals share one ramp. They had two while the opening was cyan, and the
  * second was the only thing making the claim above false.
@@ -176,8 +188,13 @@ export function PortalLight() {
       */}
       <WellPool z={WELL_Z} y={wellThroatY()} radius={44} />
       <Glow z={WELL_Z} y={wellThroatY()} radius={11} reach={260} peak={0.3} />
-      {/* The vortex at the end of the ride. */}
-      <Glow z={WORM_Z_END + 30} radius={26} reach={130} peak={0.62} />
+      {/*
+        The register. `reach` of 150 against a portal 34 units past the end of
+        the track means it starts showing at about 88% of the page — under the
+        FAQ — and is still ahead of you when the ride stops, which is what makes
+        it a way out rather than a wall.
+      */}
+      <Glow z={Z.FINALE_PORTAL} radius={26} reach={150} peak={0.62} />
     </group>
   );
 }
