@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { beatFraction } from "./journey";
+import { beatEnd, beatFraction } from "./journey";
 import { createSoundscape, intensityAt } from "./soundscape";
 
 /**
@@ -42,30 +42,92 @@ describe("intensity", () => {
     expect(intensityAt(0)).toBe(0);
   });
 
-  test("rises through the descent", () => {
-    expect(intensityAt(0.3)).toBeGreaterThan(intensityAt(0.1));
-    expect(intensityAt(0.6)).toBeGreaterThan(intensityAt(0.3));
+  test("builds through the fall and into the crossing", () => {
+    // Sampled at the beats themselves rather than at round numbers: a literal
+    // 0.3 would quietly start sampling a different segment the first time the
+    // budget moves, which it has done repeatedly.
+    const fall = intensityAt(beatFraction("through") / 2);
+    const sealed = intensityAt(beatFraction("through"));
+    const crest = intensityAt(beatEnd("through"));
+    expect(sealed).toBeGreaterThan(fall);
+    expect(crest).toBeGreaterThan(sealed);
   });
 
-  test("is loudest in the vortex, not at the end", () => {
-    // The arrival is meant to feel like coming up for air. If the drone kept
-    // climbing to the register it would fight the thing it is scoring.
-    //
-    // Sampled at the beats themselves rather than at round numbers: 0.7 happens
-    // to sit on the plateau today, and would quietly start sampling the decay
-    // the first time the budget moves — which it has twice this week.
-    const vortex = intensityAt(beatFraction("anotherDimension"));
-    expect(vortex).toBeGreaterThan(intensityAt(1));
-    expect(vortex).toBeGreaterThanOrEqual(intensityAt(beatFraction("prizes")));
+  test("is loudest at the crossing, not at the end", () => {
+    // The crossing is the page's one climax now that the vortex is gone. If the
+    // drone kept climbing to the register it would fight the thing it scores.
+    const crest = intensityAt(beatEnd("through"));
+    expect(crest).toBeGreaterThan(intensityAt(1));
+    expect(crest).toBeGreaterThan(intensityAt(beatFraction("prizes")));
   });
 
-  test("is continuous, so switching branches cannot click", () => {
-    // A step in a sustained tone is audible as a click, and the curve is
-    // piecewise — so the joins are the thing to hold.
+  test("holds under the tracks rather than draining away", () => {
+    /**
+     * The plateau, asserted because it is the part most likely to be
+     * "simplified" into a single decay from the crossing to the end. The five
+     * tracks are the page's argument and the loudest thing on screen; a drone
+     * quietly ebbing underneath them reads as the page losing interest in its
+     * own case.
+     */
+    const first = intensityAt(beatFraction("track1"));
+    const last = intensityAt(beatFraction("track5"));
+    expect(last).toBeCloseTo(first, 6);
+    expect(first).toBeGreaterThan(intensityAt(beatFraction("format")));
+  });
+
+  test("stands down with the world, not before or after it", () => {
+    // The ground stops rolling, the grid dims and the drone falls, all pinned
+    // to the same gap. Three things standing down together is what makes the
+    // second act legible as one.
+    expect(intensityAt(beatFraction("brief"))).toBeGreaterThan(
+      intensityAt(beatFraction("questions")),
+    );
+    expect(intensityAt(beatEnd("prizes"))).toBeCloseTo(
+      intensityAt(beatFraction("track1")),
+      6,
+    );
+  });
+
+  test("the branch joins do not step", () => {
+    /**
+     * The sharp version of the continuity check, and the one that actually
+     * catches the failure it is named for. A step in a sustained tone is audible
+     * as a click, the curve is piecewise, and a click can only happen where two
+     * pieces meet — so sample either side of each join rather than hoping a
+     * coarse walk lands on one.
+     */
+    const joins = [
+      beatFraction("through"),
+      beatEnd("through"),
+      beatEnd("tracksIntro"),
+      beatFraction("brief"),
+    ];
+    for (const j of joins) {
+      const step = Math.abs(intensityAt(j - 1e-6) - intensityAt(j + 1e-6));
+      expect(step).toBeLessThan(1e-4);
+    }
+  });
+
+  test("no segment ramps fast enough to read as a jump", () => {
+    /**
+     * The blunt companion to the test above: a bound on the whole curve, so a
+     * new segment cannot be added with a slope nothing checks.
+     *
+     * 0.02 per 0.001 of progress rather than the 0.01 this used to carry. The
+     * threshold was calibrated against a drone that took 55% of the page to
+     * build; the crossing moved to 19% and the build now happens across 7% —
+     * `(0.92 - 0.18) × 1.5 / 0.070` is a peak slope of 15.8, or 0.0158 a step.
+     * That is a swell, and a swell is what the sealed section is supposed to
+     * sound like.
+     *
+     * It is still a guard rather than a waiver: any genuine branch mismatch is
+     * a step of order 0.1 — five times this — and the joins test above pins the
+     * joins themselves to 1e-4.
+     */
     let prev = intensityAt(0);
     for (let p = 0.001; p <= 1; p += 0.001) {
       const v = intensityAt(p);
-      expect(Math.abs(v - prev)).toBeLessThan(0.01);
+      expect(Math.abs(v - prev)).toBeLessThan(0.02);
       prev = v;
     }
   });
