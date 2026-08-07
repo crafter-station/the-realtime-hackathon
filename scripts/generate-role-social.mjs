@@ -14,6 +14,13 @@ const roleConfigs = {
     label: "OFFICIAL JUDGE",
     people: [
       {
+        firstName: "ADALIA",
+        image: "adalia-zhao.png",
+        lastName: "ZHAO",
+        roles: ["FOUNDER @ BUILDTRACE"],
+        slug: "adalia-zhao",
+      },
+      {
         firstName: "ARTURO",
         image: "arturo-barrantes.png",
         lastName: "BARRANTES",
@@ -40,6 +47,13 @@ const roleConfigs = {
         lastName: "GALVEZ",
         roles: ["TECH LEAD @ BCP"],
         slug: "victor-galvez",
+      },
+      {
+        firstName: "YAKKO",
+        image: "yakko-majuri.png",
+        lastName: "MAJURI",
+        roles: ["FOUNDER @ RAILCODE"],
+        slug: "yakko-majuri",
       },
     ],
   },

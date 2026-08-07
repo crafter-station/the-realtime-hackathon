@@ -138,7 +138,7 @@ The returned object has this shape:
 }
 ```
 
-Mentor emails default to the shared Mentor Office Hours spreadsheet and the `SELECT MENTORING HOURS` label. Mentors should check every 30-minute block they plan to cover under their name, with a minimum of one hour total. Participants will use the completed schedule to know when each mentor is available.
+Mentor emails ask recipients to send a Cal.com or Calendly link scoped to Saturday, August 8. One hour of availability is enough, and additional time is more than welcome. Participants use the mentor's link to book focused sessions.
 
 For judges, use the private Google Meet URL and `OPEN GOOGLE MEET` once the meeting is ready.
 
@@ -244,6 +244,6 @@ Before sending to the confirmed mentors and judges:
 1. Send both role variants to an internal test inbox.
 2. Open the PDF attachment and verify the recipient name, issue date, and role.
 3. Confirm all times are shown as Lima / UTC-5.
-4. Confirm the mentor office-hours spreadsheet or judge Google Meet URL is correct.
+4. Confirm the mentor calendar instructions or judge Google Meet URL is correct.
 5. Confirm replies go to a monitored inbox.
 6. Send one personalized email per recipient and retain the provider message ID.

@@ -35,22 +35,22 @@ describe("confirmed role email package", () => {
     },
   );
 
-  test("mentor email directs mentors to select office hours", async () => {
+  test("mentor email requests a Saturday-scoped calendar link", async () => {
     const email = await prepareConfirmationEmail({
       eventRole: "mentor",
       recipientName: "Avery Rivera",
       issuedOn: "July 22, 2026",
     });
 
-    expect(email.html).toContain("SELECT MENTORING HOURS");
+    expect(email.html).toContain("SEND AVAILABILITY LINK");
     expect(email.html).toContain(
-      "https://docs.google.com/spreadsheets/d/1lDw5IOhFpWgnnmOacaBInx7clcikKq6XnMeKXqab7Lk/edit?usp=sharing",
+      "mailto:contact@crafterstation.com?subject=Mentor%20availability%20calendar",
     );
     expect(email.text).toContain(
-      "check every 30-minute block you plan to cover under the column with your name",
+      "Cal.com or Calendly link scoped to Saturday, August 8",
     );
     expect(email.text).toContain(
-      "participants will use this schedule to know when they can contact you",
+      "One hour of availability is enough, and any additional time is more than welcome",
     );
   });
 });

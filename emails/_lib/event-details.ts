@@ -21,8 +21,6 @@ export const eventDetails = {
   format: "Online / remote",
   timezone: "Lima / UTC-5",
   siteUrl: "https://hack.useportal.co",
-  mentorOfficeHoursUrl:
-    "https://docs.google.com/spreadsheets/d/1lDw5IOhFpWgnnmOacaBInx7clcikKq6XnMeKXqab7Lk/edit?usp=sharing",
   assetOrigin: "https://the-realtime-hackathon.vercel.app",
 } as const;
 
@@ -31,17 +29,19 @@ export const roleDetails: Record<EventRole, RoleDetails> = {
     noun: "mentor",
     subject: "Confirmed: You are mentoring at The Realtime Hackathon",
     preview:
-      "Your mentor role is confirmed. Choose at least one hour on Saturday between 09:00 and 21:00 UTC-5.",
+      "Your mentor role is confirmed. Send us a Saturday-scoped Cal.com or Calendly link with at least one hour of availability.",
     headline: "You're confirmed, mentor.",
     introduction:
       "Thank you for confirming your participation with us. Your practical perspective will help teams move through difficult product and technical decisions while the clock is running.",
-    actionUrl: eventDetails.mentorOfficeHoursUrl,
-    actionLabel: "SELECT MENTORING HOURS",
+    actionUrl:
+      "mailto:contact@crafterstation.com?subject=Mentor%20availability%20calendar",
+    actionLabel: "SEND AVAILABILITY LINK",
     responsibilities: [
-      "Open the Mentor Office Hours spreadsheet and find the column with your name",
-      "Check every 30-minute block you plan to mentor (one hour minimum)",
+      "Create a Cal.com or Calendly link scoped to Saturday, August 8",
+      "Offer at least one hour of availability; additional time is more than welcome",
+      "Send your calendar link to contact@crafterstation.com",
       "Enter Discord and ask in the Lobby which groups need assistance",
-      "Join the requesting teams' channels and provide focused guidance",
+      "Join booked sessions and provide focused product or technical guidance",
     ],
     details: [
       ["DATE", "Sat, Aug 8"],
@@ -51,7 +51,7 @@ export const roleDetails: Record<EventRole, RoleDetails> = {
     schedule: [
       [
         "SAT / 09:00-21:00",
-        "Use the Mentor Office Hours spreadsheet to select every 30-minute block you plan to cover. A minimum of one hour is required; additional time is appreciated.",
+        "Share a Cal.com or Calendly link scoped to your availability on Saturday. One hour is enough; additional time is more than welcome.",
       ],
       [
         "ON ARRIVAL",
@@ -59,13 +59,13 @@ export const roleDetails: Record<EventRole, RoleDetails> = {
       ],
       [
         "DURING",
-        "Join the requesting team channels and provide practical product or technical guidance.",
+        "Join booked sessions and provide practical product or technical guidance.",
       ],
     ],
     accessNote:
       "The participants will work in Discord channels. Private Discord access details will be sent directly to confirmed mentors before Saturday.",
     followUp:
-      "In the spreadsheet, check every 30-minute block you plan to cover under the column with your name. Please select at least one hour total; participants will use this schedule to know when they can contact you.",
+      "Please reply with a Cal.com or Calendly link scoped to Saturday, August 8. One hour of availability is enough, and any additional time is more than welcome. Participants will use your link to book focused mentoring sessions.",
   },
   judge: {
     noun: "judge",
