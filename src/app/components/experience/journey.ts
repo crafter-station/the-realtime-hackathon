@@ -253,10 +253,19 @@ export const BASE_FOV = 55;
 const WIDE_ENOUGH = 0.95;
 const MAX_FOV = 78;
 
-export function framingFov(aspect: number): number {
-  if (!Number.isFinite(aspect) || aspect <= 0) return BASE_FOV;
-  if (aspect >= WIDE_ENOUGH) return BASE_FOV;
-  return Math.min(MAX_FOV, BASE_FOV * (WIDE_ENOUGH / aspect));
+/**
+ * `base` is a parameter so the gate can use the same correction.
+ *
+ * It was hardcoded to `BASE_FOV` while there was one camera on the site. The
+ * gate added a second, framing the hand at 45°, and a hardcoded 45 on a portrait
+ * phone is 22° across — the identical failure this function was written for,
+ * reintroduced two files away from the essay explaining it. Defaulted, so every
+ * existing call and every existing test means what it did before.
+ */
+export function framingFov(aspect: number, base = BASE_FOV): number {
+  if (!Number.isFinite(aspect) || aspect <= 0) return base;
+  if (aspect >= WIDE_ENOUGH) return base;
+  return Math.min(MAX_FOV, base * (WIDE_ENOUGH / aspect));
 }
 
 /**

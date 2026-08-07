@@ -2,6 +2,7 @@
 
 import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
+import { Gate } from "./gate";
 import { heightOf, reducedSvh } from "./journey";
 import {
   CRAFTER_URL,
@@ -207,6 +208,17 @@ const FAQ = [
 
 export function Experience() {
   const [mounted, setMounted] = useState(false);
+  /*
+    The gate is up until it is pressed, and it starts closed for everyone who
+    has JavaScript.
+
+    Deliberately not remembered across visits. A gate that only some visitors
+    see is a page with two first frames, and the one it is easiest to stop
+    testing is the one most people get. It costs a click; the click is the beat.
+  */
+  const [started, setStarted] = useState(false);
+  // Held so the gate can stop and start it. The mount effect owns its life.
+  const smoothScroll = useRef<Lenis | null>(null);
   const [clock, setClock] = useState("--:--:--:--");
   const [spoken, setSpoken] = useState("Counting down to kickoff.");
   const progressFill = useRef<HTMLDivElement>(null);
@@ -250,6 +262,18 @@ export function Experience() {
     scroll.reduce = reduce;
     setReduce(reduce);
     const lenis = new Lenis({ smoothWheel: !reduce, lerp: reduce ? 1 : 0.09 });
+    smoothScroll.current = lenis;
+    /*
+      Locked behind the gate, two ways, because they stop different things.
+
+      `lenis.stop()` holds the smooth-scroll loop, which is what drives the
+      camera. The class adds `overflow: hidden`, which is what stops a trackpad
+      or a keyboard `End` from moving the document underneath the overlay — a
+      thing you cannot see scrolling behind a thing you can is the sort of
+      detail that makes a gate feel broken rather than deliberate.
+    */
+    lenis.stop();
+    document.documentElement.classList.add("xp-locked");
 
     let raf = 0;
     const loop = (time: number) => {
@@ -355,11 +379,34 @@ export function Experience() {
       cancelAnimationFrame(raf);
       soundscape.current?.dispose();
       lenis.destroy();
+      smoothScroll.current = null;
+      document.documentElement.classList.remove("xp-locked");
       window.removeEventListener("pointermove", onPointer);
       for (const type of WAKERS) window.removeEventListener(type, wake);
       document.documentElement.classList.remove("xp");
     };
   }, []);
+
+  /*
+    Pressing Start hands the page back.
+
+    Its own effect rather than work done in the click handler, because the lock
+    is set up in the mount effect and this is the other half of that pair — the
+    two belong next to each other in the reader's head even though React puts
+    them in different callbacks. It also means a `started` set any other way
+    (a test, a future skip) unlocks correctly.
+
+    The scroll is pinned to the top on the way through. Browsers restore scroll
+    position on reload, so a refresh halfway down the ride would otherwise put
+    the gate over a page already at 40% and drop you there when it lifted.
+  */
+  useEffect(() => {
+    if (!started) return;
+    document.documentElement.classList.remove("xp-locked");
+    window.scrollTo(0, 0);
+    smoothScroll.current?.scrollTo(0, { immediate: true });
+    smoothScroll.current?.start();
+  }, [started]);
 
   // Live countdown to kickoff. One re-render a second, and it is cheap because
   // the only thing that reads these two is the HUD row.
@@ -379,6 +426,17 @@ export function Experience() {
       {mounted ? <PortalCanvas /> : <div className="xp-stage" aria-hidden />}
 
       {/*
+        The gate, over everything, until it is pressed.
+
+        Behind `mounted` for the same reason the canvas is: it draws WebGL and
+        it locks scrolling, and neither belongs in server-rendered output where
+        a visitor without JavaScript would get the lock and never the control
+        that lifts it. No JS means no gate and the landing straight away, which
+        is the right fallback rather than a degraded one.
+      */}
+      {mounted && !started ? <Gate onStart={() => setStarted(true)} /> : null}
+
+      {/*
         The way out, for anyone who cannot or does not want to travel ~20,000px
         to reach it.
 
@@ -387,14 +445,14 @@ export function Experience() {
         one action the page exists for except the whole journey. First focusable
         thing on the page, invisible until focused.
       */}
-      <a className="xp-skip" href="#register">
+      <a className="xp-skip" href="#register" inert={!started}>
         Skip the ride, go to register
       </a>
 
       {/* 01 — HERO layer (fixed over the grid horizon). A banner landmark: it
           holds the page title and the first call to action, and `<main>` was
           the only landmark on the page before it. */}
-      <header ref={heroLayer} className="xp-heroLayer">
+      <header ref={heroLayer} className="xp-heroLayer" inert={!started}>
         {/*
           Who is behind this, in the frame where people decide whether to care.
 
@@ -479,7 +537,7 @@ export function Experience() {
         </div>
       </header>
 
-      <main className="xp-overlay" id="top">
+      <main className="xp-overlay" id="top" inert={!started}>
         {/* 02 — The approach and the fall into the well. */}
         <div
           className="xp-gap--ride"
@@ -677,7 +735,7 @@ export function Experience() {
         bar along the bottom carries the same information without claiming
         anything about depth.
       */}
-      <div className="xp-hud" ref={hud}>
+      <div className="xp-hud" ref={hud} inert={!started}>
         {/*
           Outside the fading wrapper on purpose.
 
