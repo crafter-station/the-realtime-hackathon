@@ -353,3 +353,19 @@ export function buildHandGeometry(): THREE.BufferGeometry {
   g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(col), 3));
   return g;
 }
+
+/**
+ * Where the index fingertip is, in hand-local space.
+ *
+ * Derived rather than written down, because it is the point the gate reaches
+ * toward the cursor with and it moves whenever the pointing finger's lengths or
+ * bends are touched. A hardcoded copy of it would go stale on the first pose
+ * change and the hand would start reaching with a spot in mid-air.
+ *
+ * Index is the fifth limb — forearm, wrist, palm, thumb, then the fingers — and
+ * `hand-shape.test.ts` pins that ordering so this cannot quietly grab the thumb.
+ */
+export function indexTip(): readonly [number, number, number] {
+  const index = buildHand()[4];
+  return index.path[index.path.length - 1];
+}

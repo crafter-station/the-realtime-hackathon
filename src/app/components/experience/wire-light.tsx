@@ -72,7 +72,7 @@ const GLOW_RGBA = [
 
 type GlowRamp = readonly (readonly [number, string])[];
 
-function useGlowTexture(ramp: GlowRamp = GLOW_RGBA) {
+export function useGlowTexture(ramp: GlowRamp = GLOW_RGBA) {
   return useMemo(() => {
     const size = 256;
     const canvas = document.createElement("canvas");
