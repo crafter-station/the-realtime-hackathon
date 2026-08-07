@@ -1,28 +1,18 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { Z } from "./journey";
-import { scroll, warpRender } from "./store";
-import { WireCompanion } from "./wire-companion";
-import { WireCount } from "./wire-count";
-import { WireHand } from "./wire-hand";
+import { BASE_FOV, framingFov, Z } from "./journey";
+import { scroll } from "./store";
 import { PortalLight } from "./wire-light";
-import {
-  enclosure,
-  rideY,
-  WELL_Z,
-  wellThroatY,
-  wormholePresence,
-} from "./wire-surface";
-import { WireWarp } from "./wire-warp";
+import { WireSignal } from "./wire-signal";
+import { enclosure, rideY, WELL_Z, wellThroatY } from "./wire-surface";
 import { WellGrid } from "./wire-well";
 import { WireWorld } from "./wire-world";
-import { WireWormhole } from "./wire-wormhole";
 
-// Camera track: one long continuous ride (the well → the ground gives way →
-// corridor → open country → the ground closes → wormhole → end).
+// Camera track: one continuous ride — the well, the ground giving way, the
+// crossing, and then open country all the way to the register.
 const TRACK_START = Z.TRACK_START;
 const TRACK_END = Z.TRACK_END;
 
@@ -31,35 +21,19 @@ const TRACK_END = Z.TRACK_END;
  *
  * visual-reference §4.5 asks for exactly this: "corridor freezes at a static
  * one-point plate; content cross-fades. **The still frame must be a good poster
- * on its own.**" Scaling the streak field to 0.22 was a discount, not a freeze —
- * the camera still travelled the full 1,106 units, which is the large-field
- * motion the setting is actually about.
+ * on its own.**"
  *
- * The station is the corridor rather than the well, because the spec names the
- * corridor and because a one-point plate is what a rectangular tunnel gives you
- * and a funnel does not. The cost is real and worth stating: somebody who asks
- * for reduced motion gets the tunnel but not the fall into the well — and the
- * fall is the motion, which is the thing they asked us to remove.
- */
-const POSTER_Z = -34;
-/**
- * The hand sits a short way in front of where the ride stops.
+ * The station is inside the crossing, which is the only sealed section left on
+ * the page and the only place a one-point plate exists — a funnel does not give
+ * you one and open country certainly does not. The sealed window runs
+ * `MOUTH_SHUT` (30) to `FLARE_START` (0), so this sits in the middle of it.
  *
- * Two ways to get this wrong and I found both. At -940 it was 42 units out,
- * past the fog's far plane at 105 and about 5% of frame height — visible in
- * principle, unreadable in practice. At -884 it was *behind* the camera: travel
- * is toward -z, so a z greater than `TRACK_END` is somewhere you have already
- * been. Seventeen units ahead puts it inside the fog's near plane at 26, so it
- * arrives clear rather than grey.
+ * The cost is real and worth stating: somebody who asks for reduced motion gets
+ * the room but not the fall into the well — and the fall is the motion, which is
+ * the thing they asked us to remove.
  */
-const HAND_Z = -977;
-/**
- * Off the centreline. Art-direction asks for the hand "beside a giant REGISTER
- * button" — centred it lands on the finale's own line of copy and occludes it,
- * which is the same mistake as the centred hero type the layout rule exists to
- * prevent.
- */
-const HAND_X = 7.6;
+const POSTER_Z = 15;
+
 /** How far above the rim the opening frame sits, in world units. */
 const OPENING_LIFT = 13;
 
@@ -94,18 +68,14 @@ function Starfield({ count }: { count: number }) {
       if (arr[i] > camZ - 10) arr[i] -= 88;
     }
     geometry.attributes.position.needsUpdate = true;
-    // Stars dim inside the closed tunnel, then blaze back up around the
-    // wormhole — deep space, dense starfield.
+    // The sky goes out inside the crossing and comes back on the far side. It
+    // is the only thing that reports the crossing from outside the geometry, so
+    // it is also what makes the sealed stretch read as sealed rather than as a
+    // dark patch.
     if (material.current) {
-      const inside = enclosure(camZ);
-      const worm = wormholePresence(camZ);
-      const base = THREE.MathUtils.lerp(0.7, 0.12, inside);
-      // The streak field replaces the starfield outright during the jump —
-      // two star layers at once just reads as noise.
       material.current.opacity = THREE.MathUtils.damp(
         material.current.opacity,
-        THREE.MathUtils.lerp(base, 0.92, worm) *
-          (1 - warpRender(scroll.progress)),
+        THREE.MathUtils.lerp(0.7, 0.1, enclosure(camZ)),
         3,
         dt,
       );
@@ -129,12 +99,15 @@ function Starfield({ count }: { count: number }) {
 
 /**
  * Scroll = velocity. The camera rides the curved path the whole way;
- * faster scrolling adds real speed, banking and a FOV kick.
+ * faster scrolling adds real speed and a FOV kick.
  */
 function Rig() {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const reduce = scroll.reduce;
-  useFrame((state, dt) => {
+  // `_` for the frame state: this rig reads the camera off `useThree` rather than
+  // off the per-frame state, so only the delta is wanted — same shape as the
+  // other `useFrame((_, dt)` callbacks in the renderers.
+  useFrame((_, dt) => {
     const cdt = Math.min(dt, 0.05);
     const v = Math.min(Math.abs(scroll.velocity), 30);
 
@@ -186,9 +159,15 @@ function Rig() {
       : THREE.MathUtils.lerp(Math.atan(slope) * 0.55, aimPitch, aim);
     camera.rotation.x = damp(camera.rotation.x, pitch, 4, cdt);
 
-    // FOV kick with speed (skipped for reduced motion).
+    // FOV kick with speed (skipped for reduced motion), over whatever base the
+    // viewport's shape asks for. The kick is scaled back by however much the
+    // base was already widened — a phone starting at 78° does not need another
+    // 16 on top to sell speed, and 94° would bow the room's rails.
     const cam = camera as THREE.PerspectiveCamera;
-    const targetFov = reduce ? 55 : 55 + Math.min(v * 0.9, 16);
+    const fovBase = framingFov(size.width / Math.max(size.height, 1));
+    const targetFov = reduce
+      ? fovBase
+      : fovBase + Math.min(v * 0.9, 16) * (BASE_FOV / fovBase);
     const nextFov = damp(cam.fov, targetFov, 5, cdt);
     if (Math.abs(nextFov - cam.fov) > 0.01) {
       cam.fov = nextFov;
@@ -198,40 +177,26 @@ function Rig() {
   return null;
 }
 
-/** Activates the finale hand once the journey is nearly complete. */
-function FinaleHand() {
-  const [active, setActive] = useState(false);
-  const { camera, size } = useThree();
-  useFrame(() => {
-    const shouldBeActive = scroll.progress > 0.9;
-    if (shouldBeActive !== active) setActive(shouldBeActive);
-  });
-
-  // `HAND_X` is a world offset, and a world offset is not a place on screen:
-  // the same 7.6 units that sits beside the CTA on a wide desktop is off the
-  // edge of a portrait phone, where the horizontal field of view is a fraction
-  // as wide. Solve for the frustum's half-width at the hand's own depth and
-  // keep it inside that.
-  const handX = useMemo(() => {
-    const cam = camera as THREE.PerspectiveCamera;
-    const distance = Math.abs(TRACK_END - HAND_Z);
-    const halfHeight = Math.tan((cam.fov * Math.PI) / 360) * distance;
-    const halfWidth = halfHeight * (size.width / Math.max(size.height, 1));
-    return Math.min(HAND_X, halfWidth * 0.56);
-  }, [camera, size]);
-
-  return <WireHand active={active} x={handX} z={HAND_Z} />;
-}
-
 export function PortalCanvas() {
   const stars = scroll.quality === "lite" ? 2200 : 6500;
+  /*
+    The opening fov, resolved before the first frame rather than damped into.
+
+    `Rig` corrects the field every frame, but it damps — so a phone mounting at a
+    hardcoded 55 would play a half-second zoom out to 78 on load, over the one
+    frame that has to be right immediately. Reading the viewport here costs
+    nothing: this component only ever mounts behind `experience.tsx`'s `mounted`
+    gate, so `window` is always there.
+  */
+  const openingFov =
+    typeof window === "undefined"
+      ? BASE_FOV
+      : framingFov(window.innerWidth / Math.max(window.innerHeight, 1));
   return (
     // Decorative, and it has to say so. Every word of the ride lives in the
     // overlay's DOM, so the scene carries nothing a reader would miss — but an
     // unlabelled <canvas> is still a node a screen reader can stop on and
-    // announce as nothing in particular. The placeholder this replaces on mount
-    // was already `aria-hidden`; the real one being louder than its own
-    // placeholder was an oversight, not a decision.
+    // announce as nothing in particular.
     <div className="xp-stage" aria-hidden>
       <Canvas
         dpr={scroll.quality === "lite" ? [1, 1.3] : [1, 1.8]}
@@ -243,7 +208,12 @@ export function PortalCanvas() {
           // thing while building it.
           preserveDrawingBuffer: true,
         }}
-        camera={{ fov: 55, near: 0.1, far: 190, position: [0, 0, TRACK_START] }}
+        camera={{
+          fov: openingFov,
+          near: 0.1,
+          far: 190,
+          position: [0, 0, TRACK_START],
+        }}
       >
         <color attach="background" args={["#0e0e10"]} />
         {/* Reaches far enough that the whole well and the curve of the ground
@@ -252,12 +222,16 @@ export function PortalCanvas() {
         <Starfield count={stars} />
         <WireWorld />
         <WellGrid />
-        <WireCompanion />
-        <WireCount />
+        {/*
+          Skipped outright under reduced motion rather than frozen. The camera
+          holds station inside the crossing, which is 100+ units short of the
+          first band — so the layer would be drawing five animated worlds that
+          are never in frame. Every one of the five behaviours is also motion
+          with nothing motivating it once the camera stops, which is the exact
+          thing the request asks us not to do.
+        */}
+        {scroll.reduce ? null : <WireSignal />}
         <PortalLight />
-        <WireWarp />
-        <WireWormhole />
-        <FinaleHand />
         <Rig />
       </Canvas>
     </div>

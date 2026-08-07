@@ -4,22 +4,28 @@
  * Lenis (in the overlay tree) writes here every frame; the R3F `useFrame` loop
  * (in a sibling tree) reads it. A plain mutable singleton avoids React re-renders
  * on every scroll tick — the canvas reacts through the animation loop instead.
+ *
+ * WHAT LEFT
+ *
+ * `warpAmount` / `warpRender` / `streakDim` and the four thresholds behind them
+ * were the hyperspace beat: a 520-streak field that played across the countdown
+ * and the five track cards. The beat is gone with the rocket-launch metaphor —
+ * see the header of `journey.ts` — and so is the awkward part of this module,
+ * which was that scroll progress had to be translated into an effect envelope
+ * here while the geometry it was supposed to agree with lived two files away.
+ *
+ * Nothing derived lives here now. Where the world does things is `journey.ts`,
+ * how the surface responds is `wire-surface.ts`, and this is just the frame's
+ * shared facts.
  */
-
-import { warpWindow } from "./journey";
-import { smoothstep } from "./wire-surface";
 
 export type Quality = "high" | "lite";
 
 export const scroll = {
   /** Normalized scroll progress across the whole experience, 0..1. */
   progress: 0,
-  /** Instantaneous scroll velocity (for reactive warp/shake). */
+  /** Instantaneous scroll velocity (drives grid brightness and the FOV kick). */
   velocity: 0,
-  /** True once the visitor has clicked ENTER and flown through the portal. */
-  entered: false,
-  /** Traversal animation 0..1 (portal fly-through), independent of scroll. */
-  warp: 0,
   /** Rendering budget chosen by capability detection. */
   quality: "high" as Quality,
   /**
@@ -27,9 +33,7 @@ export const scroll = {
    *
    * Lives here because four separate components were each running their own
    * `matchMedia` call for it — four chances to disagree about one fact, and in
-   * practice they already did: the streak field checked the flag, then used it
-   * only to zero a velocity term while the full-field hyperspace jump played at
-   * full strength anyway.
+   * practice they already did.
    */
   reduce: false,
   /**
@@ -52,56 +56,3 @@ export const scroll = {
 };
 
 export type ScrollState = typeof scroll;
-
-/**
- * The jump to hyperspace, in scroll-progress space rather than world z.
- *
- * The streaks are WebGL and the track cards are DOM, so the one thing that has
- * to agree between them is *scroll position* — tying the effect to progress
- * keeps it in sync with the overlay by construction. These four numbers are
- * section boundaries in `globals.css` divided by the total scrollable height.
- *
- * They are derived, not chosen, and two separate things move them:
- *   - any `.xp-gap--*` / `.xp-count` / `.xp-trackSlot` height in `globals.css`;
- *   - the *number* of `.xp-section`s in `experience.tsx` — adding a track card
- *     adds 100svh to the total and shifts every fraction below.
- * Re-derive them together or the streaks drift out of step with the copy.
- * Camera z is `lerp(TRACK_START, TRACK_END, progress)` in `portal-canvas.tsx`,
- * so these fractions also decide which world event each beat lands on.
- */
-const {
-  in: JUMP_IN,
-  full: JUMP_FULL,
-  hold: JUMP_HOLD,
-  out: JUMP_OUT,
-} = warpWindow();
-
-/**
- * 0 → 1 → 0 across the hyperspace beat.
- *
- * The pure curve, and the thing the four thresholds above are reasoned about.
- * Renderers want `warpRender` instead.
- */
-export function warpAmount(progress: number): number {
-  return (
-    smoothstep(JUMP_IN, JUMP_FULL, progress) *
-    (1 - smoothstep(JUMP_HOLD, JUMP_OUT, progress))
-  );
-}
-
-/**
- * What anything that draws should read.
- *
- * `prefers-reduced-motion` asks for less vestibular motion, not less content —
- * so under it the beat still happens and the copy still lands on it, the
- * streaks just stay short and the world never fully drops away. A full-field
- * radial rush is the single most likely thing on this page to make someone ill,
- * and until now it played at full strength no matter what the visitor asked
- * their operating system for.
- */
-export function warpRender(progress: number): number {
-  // Off, not quieter. The camera holds still under reduced motion, so a streak
-  // field firing past a stationary viewpoint is motion with nothing motivating
-  // it — the worst of both. 0.22 was a discount from when the ride still moved.
-  return scroll.reduce ? 0 : warpAmount(progress);
-}

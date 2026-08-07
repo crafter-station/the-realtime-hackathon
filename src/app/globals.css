@@ -224,46 +224,9 @@ button {
   scale: 0.96;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  html,
-  body {
-    cursor:
-      url("/cursors/retro-arrow.svg") 1 1,
-      default;
-  }
-
-  a[href],
-  button:not(:disabled),
-  summary,
-  [role="button"]:not([aria-disabled="true"]) {
-    cursor:
-      url("/cursors/retro-pointer.svg") 11 1,
-      pointer;
-  }
-
-  button:disabled,
-  [aria-disabled="true"] {
-    cursor: not-allowed;
-  }
-
-  html[data-pointer-pressed="true"],
-  html[data-pointer-pressed="true"] body {
-    cursor:
-      url("/cursors/retro-arrow-pressed.svg") 1 1,
-      default;
-  }
-
-  html[data-pointer-pressed="true"]
-    :where(
-      a[href],
-      button:not(:disabled),
-      summary,
-      [role="button"]:not([aria-disabled="true"])
-    ) {
-    cursor:
-      url("/cursors/retro-pointer-pressed.svg") 9 1,
-      pointer;
-  }
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 ::selection {
@@ -1239,12 +1202,6 @@ h2 {
   padding-left: 1.3rem;
 }
 
-.schedule-day,
-.schedule-day + .schedule-day {
-  border: 2px solid var(--rule);
-  background: var(--surface);
-}
-
 .schedule-day__header strong {
   color: var(--signal-hover);
 }
@@ -1278,12 +1235,6 @@ h2 {
     right: 1.25rem;
     max-width: 13rem;
     text-align: right;
-  }
-
-  .facts,
-  .signal-flow,
-  .schedule-grid {
-    gap: 0.65rem;
   }
 }
 
@@ -1624,11 +1575,6 @@ h2 {
   .countdown-slide__status i {
     animation: none;
   }
-
-  .particle-countdown__fallback,
-  .countdown-slide__footer a {
-    transition: none;
-  }
 }
 
 /* Minimal final slide: mirror the opening particle object. */
@@ -1776,13 +1722,6 @@ h2 {
   }
 
   .hero-details .facts,
-  .signal-flow,
-  .mission-list,
-  .capability-list,
-  .schedule-grid {
-    margin-top: 1.5rem;
-  }
-
   .mission h3 {
     font-size: clamp(1.1rem, 5vw, 1.35rem);
   }
@@ -2070,11 +2009,6 @@ h2 {
 .keyboard-navigation button:hover {
   background: var(--signal);
   color: var(--black);
-}
-
-.keyboard-navigation svg {
-  width: 1rem;
-  height: 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2378,16 +2312,6 @@ h2 {
   }
 }
 
-/* The final CTA stays quiet so the closing statement carries the slide. */
-#main-content > .apply-section .apply-section__action {
-  width: fit-content;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  justify-self: end;
-}
-
 #main-content > .apply-section .apply-section__cta {
   border-color: var(--rule);
   background: transparent;
@@ -2407,10 +2331,6 @@ h2 {
 }
 
 @media (max-width: 48rem) {
-  #main-content > .apply-section .apply-section__action {
-    justify-self: start;
-  }
-
   #main-content > .schedule-section .schedule-grid {
     margin-top: 1rem;
     gap: 0.5rem;
@@ -2622,15 +2542,10 @@ html.xp body {
 
 /* Editorial hero — huge type left, body column right, portal card center/bg. */
 
-/* Content floats over the continuous space — never covers the canvas. */
-/* Soft legibility scrim behind each floating section's copy. */
-.xp-editorial .xp-section {
-  background: radial-gradient(
-    120% 80% at 20% 50%,
-    rgba(6, 6, 8, 0.72),
-    rgba(6, 6, 8, 0) 70%
-  );
-}
+/* `.xp-editorial .xp-section` stood here — a per-section legibility scrim from a
+   wrapper element that no longer exists. Nothing in `src` renders `.xp-editorial`,
+   so at (0,2,0) its only remaining effect was to outrank the real `.xp-section`
+   rule further down and make that one look like it was losing a fight. */
 
 /* -- The briefing panels ---------------------------------------------------
    Schedule, format and FAQ. These are the only stretches on the page you read
@@ -2778,6 +2693,16 @@ html.xp body {
     color var(--dur-ui) var(--ease-out),
     border-color var(--dur-ui) var(--ease-out);
 }
+.xp-hud__sound {
+  gap: 0.55rem;
+  text-transform: uppercase;
+}
+.xp-hud__meter {
+  /* Tabular so switching between `◼──` and `◼◼◼` cannot change the button's
+     width and nudge the row beside it. */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
 .xp-hud__sound[aria-pressed="true"] {
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.6);
@@ -2834,6 +2759,32 @@ html.xp body {
 
 /* Organiser credit under the finale CTA. Quiet on purpose — it is a colophon,
    not a second call to action. */
+/* The next step out of a panel. Mono and uppercase like the panel's own labels,
+   so it reads as part of the briefing rather than as a button bolted under it —
+   the page already has three Registers and does not need a fourth thing shaped
+   like one. */
+.xp-panel__out {
+  margin: 2rem 0 0;
+}
+.xp-outLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Comfortably over the 24px target floor without a background. */
+  padding: 0.6rem 0;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 0.4em;
+  text-decoration-color: rgba(255, 255, 255, 0.34);
+  transition: text-decoration-color var(--dur-ui) var(--ease-out);
+}
+.xp-outLink:hover {
+  text-decoration-color: #ffffff;
+}
 .xp-colophon {
   margin: 2.2rem 0 0;
   font-family: var(--mono);
@@ -2865,9 +2816,21 @@ html.xp body {
   }
 }
 
-/* Depth readout + persistent Register, top right. Mono, hairline, small — it
-   is instrumentation, not chrome, and it must never compete with the centre
-   band the vanishing point lives in. */
+/* Countdown + persistent Register, top right. Mono, hairline, small — it is
+   instrumentation, not chrome, and it must never compete with the centre band
+   the vanishing point lives in.
+
+   IT USED TO READ `000 % DEPTH`, AND THAT NUMBER STOPPED BEING TRUE
+
+   The readout framed the page as literal descent through the portal. Once the
+   crossing moved to the first 240svh, "depth" had nothing left to measure — you
+   arrive at 19% and spend the rest of the page on open ground — and the scroll
+   bar at the bottom was already drawing the same information honestly.
+
+   What took its place is the only live number on the page that is genuinely
+   urgent. A countdown to kickoff sitting in a section at 55% is read once and
+   scrolled past; sitting here it is permanently beside the Register, which is
+   the one place urgency does any work. */
 /* The row itself no longer fades — `.xp-hud__fading` does. The sound control is
    a flex item in here, so its position is computed rather than guessed at; the
    previous arrangement fixed it to a `right` offset told the row was 12.5rem
@@ -2882,9 +2845,13 @@ html.xp body {
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.4rem);
 }
-/* Everything that stands down at the finale, so the giant Register is alone —
-   which is the readout and the small Register, and not the control over a drone
-   that is still playing. */
+/* Everything that stands down at the finale, so the giant Register is alone.
+
+   That is now the small Register and nothing else. The clock stays: it is not
+   competing with the finale's CTA, it is the reason to press it, and a
+   countdown that disappears at the exact moment somebody is deciding is
+   throwing away its own argument. The sound control stays for the older reason
+   — the drone outlasts the ride. */
 .xp-hud__fading {
   display: flex;
   align-items: center;
@@ -2892,7 +2859,7 @@ html.xp body {
   opacity: 0;
   transition: opacity var(--dur-ui) var(--ease-out);
 }
-.xp-hud__read {
+.xp-hud__clock {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
@@ -2904,10 +2871,26 @@ html.xp body {
   color: rgba(255, 255, 255, 0.62);
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
 }
-.xp-hud__depth {
+/* Tabular, or the row reflows on every tick. Eleven glyphs changing once a
+   second in a proportional mono is a HUD that shivers. */
+.xp-hud__ticks {
   font-variant-numeric: tabular-nums;
   font-size: 0.95rem;
+  letter-spacing: 0.08em;
   color: #ffffff;
+}
+/* The countdown in words, for anyone reading rather than looking. Hidden the
+   long way rather than with `display: none`, which would take it out of the
+   accessibility tree along with the pixels — the whole point is that it stays
+   in the tree while the digits above it, which say nothing out loud, do not. */
+.xp-hud__spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* No `:focus-within` override here. It used to force the group visible so a
    keyboard could never lose the link, but the HUD is now hidden with
@@ -2915,9 +2898,9 @@ html.xp body {
    the first place, so the rule could never fire. The guarantee it was making is
    kept by the finale's own Register, which is a real focusable link and is on
    screen exactly when this one is not. */
-/* On a phone the ride is 24,000px long, which is exactly where knowing how
-   deep you are matters most — so the readout stays and sheds its label instead
-   of disappearing. `% DEPTH` is the part you only need to read once. */
+/* The clock stays and sheds its label instead of disappearing. `TO KICKOFF` is
+   the part you only need to read once, and the digits are the part that has to
+   survive a 390px row holding three things. */
 @media (max-width: 40rem) {
   .xp-hud {
     gap: 0.6rem;
@@ -2925,8 +2908,23 @@ html.xp body {
   .xp-hud__unit {
     display: none;
   }
-  .xp-hud__depth {
-    font-size: 0.82rem;
+  .xp-hud__ticks {
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+  /* The word goes, the accessible name does not. `display: none` here would take
+     the button's only name with it and leave a screen reader announcing "button,
+     pressed" — so it is removed visually and left in the tree. The row has three
+     things in it at 390px and cannot afford the glyphs; the meter still shows the
+     state. */
+  .xp-hud__soundLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
@@ -3050,70 +3048,24 @@ html.xp body {
   gap: 1.4rem;
   padding: clamp(4rem, 10vh, 8rem) clamp(1.25rem, 5vw, 4rem);
 }
-/* The display line in a beat.
+/* The display line in a beat lives with the rest of `.xp-huge`, further down.
 
-   This targeted `.xp-section h2` on the assumption that every heading inside a
-   section was the big one. That stopped being true when the eyebrows became the
-   section headings: at (0,1,1) this beat `.xp-label` at (0,1,0) and rendered
-   every label at 89.6px. Naming the thing it means instead of inferring it from
-   the tag is both the fix and what it should always have said. */
-.xp-section .xp-huge {
-  margin: 0;
-  max-width: 16ch;
-  font-family: var(--sans);
-  font-weight: 560;
-  font-size: clamp(2.4rem, 7vw, 6rem);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-}
-.xp-section .xp-huge em {
-  font-style: normal;
-  color: transparent;
-  -webkit-text-stroke: 1.5px #ffffff;
-}
+   It used to be declared here as `.xp-section .xp-huge` — a descendant selector
+   at (0,2,0) sitting 160 lines *above* the (0,1,0) `.xp-huge` it shadowed. See
+   the note there for what that cost. */
 
 /* -- Journey beats (B&W dimension) ---------------------------------------- */
 
-/* -- The jump to hyperspace ------------------------------------------------
-   These heights are what `warpAmount()` in store.ts is calibrated against:
-   its four thresholds are these boundaries over the total scrollable height.
-   Change a height here and the streaks drift out of step with the copy. */
+/* No heights in here, and that is load-bearing rather than tidy. Every stretch
+   of the page is sized from `BUDGET` in `journey.ts`, applied inline — because a
+   unit test cannot read a stylesheet, and while these numbers lived here the
+   budget and the page drifted apart four times running. */
 
-/* 3 · 2 · 1 — one screen each, which is the floor rather than a preference.
-   The numeral is sticky rather than centred in its section: a section taller
-   than the viewport would otherwise park its content near the top of the
-   window and scroll it off, and the beat is supposed to *hold* while you keep
-   scrolling, then hand over to the next.
-   The pinned band has to be a full viewport. Shrink it (say a 50svh band on a
-   60svh stride) and two numerals fit on screen together — the countdown reads
-   "2 1" instead of counting. So the drum roll is paid for out of the ride gap
-   ahead of it, not out of the numerals. */
-.xp-count {
-  display: block;
-  padding: 0;
-}
-/* The world draws these once the ride is running — see `wire-count.tsx`. Hidden
-   rather than removed so the server still sends them and a visitor without
-   WebGL, or with reduced motion, still gets the count. */
-.xp-count__n[data-inworld="true"] {
-  visibility: hidden;
-}
-.xp-count__n {
-  position: sticky;
-  top: 0;
-  display: grid;
-  place-content: center;
-  height: 100svh;
-  margin: 0;
-  font-family: var(--font-space), var(--sans);
-  font-weight: 700;
-  font-size: clamp(7rem, 22vw, 18rem);
-  line-height: 0.9;
-  color: #ffffff;
-  font-variant-numeric: tabular-nums;
-}
-/* One card per slot, alternating sides of the vanishing point. Sticky for the
-   same reason as the numerals: each card holds its screen, then hands over. */
+/* One card per slot, alternating sides of the vanishing point. Sticky because
+   each card has to *hold* its screen while the world underneath it demonstrates
+   the capability it names — a section taller than the viewport would otherwise
+   park its content near the top of the window and scroll it off, and the card
+   would be gone before its band had finished playing. */
 .xp-trackSlot {
   display: block;
   padding: 0;
@@ -3134,7 +3086,7 @@ html.xp body {
    Legibility was the reason the fill existed, and it is bought back with a
    shadow on the text rather than a slab behind it. */
 .xp-trackCard {
-  max-width: min(30rem, 84vw);
+  max-width: min(34rem, 88vw);
   padding: 1.4rem 1.6rem 1.5rem;
   border: 0;
   border-inline-start: 1px solid rgba(255, 255, 255, 0.55);
@@ -3148,33 +3100,60 @@ html.xp body {
     0 1px 16px rgba(8, 8, 10, 0.98),
     0 0 40px rgba(8, 8, 10, 0.9);
 }
+/* SIGNAGE IS BIG. THIS WAS 15px.
+
+   Two things were wrong and they were the same thing. `visual-reference.md` §3
+   gives Space Grotesk "section titles, track names, the wordmark" and gives the
+   mono a different job — so a track name set in mono was the wrong face doing
+   the wrong job at the wrong size. And the comment above calls these signage
+   while 0.95rem of letterspaced mono is a caption: five names that are the most
+   important content on the page were the smallest type in the ride, read against
+   520 moving streaks.
+
+   At display size the leading hairline finally reads as a sign's edge rather than
+   as a list bullet, and the words survive the field even before it dims. */
 .xp-trackCard__head {
   display: flex;
-  gap: 1.5rem;
+  /* Not `space-between` any more. Pinning the index to the card's far edge
+     worked while the name was 15px and the card was 30rem of mostly-full line;
+     at display size the name ends well short of the edge and the tag was left
+     stranded in open space with no visible relationship to it. It trails the
+     name now, which is how a numbered sign actually reads. */
+  gap: 1rem;
   align-items: baseline;
-  justify-content: space-between;
-  margin: 0 0 1.1rem;
-  font-family: var(--mono);
-  /* An `<h3>` now — see `.xp-label`. Same reason for pinning the weight. */
-  font-weight: 400;
-  font-size: 0.95rem;
-  letter-spacing: 0.14em;
+  justify-content: flex-start;
+  margin: 0 0 0.9rem;
+  font-family: var(--font-space), var(--sans);
+  font-weight: 600;
+  font-size: clamp(1.55rem, 3.4vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: 0.005em;
   text-transform: uppercase;
   color: #ffffff;
 }
+/* The index stays mono and stays small — it is a tag on the sign, not part of
+   the name, and it has to stop competing now that the name is four times its
+   size. `flex-shrink: 0` because the longest name (REAL-TIME LOCATION) now wraps
+   and a shrinking tag would collapse to nothing beside it. */
 .xp-trackCard__n {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
   color: rgba(255, 255, 255, 0.62);
-  font-size: 0.78rem;
 }
 .xp-trackCard__copy {
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.86rem;
-  line-height: 1.7;
-  letter-spacing: 0.06em;
+  /* Was 0.86rem. Uppercase mono at 0.06em tracking is the least legible setting
+     on the page and it was also the smallest — raised until it holds against the
+     streaks rather than relying on them being gone. */
+  font-size: clamp(0.95rem, 1.35vw, 1.08rem);
+  line-height: 1.65;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   /* Was 0.72, which held up against a slab and not against moving streaks. */
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.92);
 }
 .xp-trackSlot .xp-trackCard {
   position: sticky;
@@ -3187,53 +3166,86 @@ html.xp body {
 .xp-trackSlot--right .xp-trackCard {
   margin-left: auto;
 }
-.xp-beat-line--wide {
-  max-width: 26ch;
-}
+/* GIANT BEAT TYPOGRAPHY — ONE RULE, FLATTENED FROM TWO THAT FOUGHT
 
-/* Giant beat typography (prizes / countdown). */
+   There were two: this one at (0,1,0) and `.xp-section .xp-huge` at (0,2,0)
+   declared 160 lines earlier. Every `.xp-huge` on the page is inside an
+   `.xp-section` — prizes, warp, the other side, the finale, all of them — so the
+   descendant rule won every time and the four font declarations here were dead
+   code that read like the truth. This block said `--font-space` at 700 and
+   `clamp(4rem, 16vw, 15rem)`; what actually rendered was `--sans` at 560 and
+   89.6px.
+
+   That is not a tidiness complaint, it cost a real fix. The first attempt at the
+   outline tracking below set `letter-spacing` on `.xp-huge--outline` at (0,1,0)
+   and changed nothing at all, because the shadowing rule's `-0.03em` outranked
+   it — verified by reading the computed style off the finale plate, which still
+   said `-2.688px`. Flattening to one selector is what makes the modifier able to
+   modify.
+
+   Values are the ones that were rendering, so this is a refactor and not a
+   restyle. `.xp-finale .xp-huge` at (0,2,0) still narrows the measure, which is a
+   real override rather than an accidental one. */
 .xp-huge {
   margin: 0;
-  font-family: var(--font-space), var(--sans);
-  font-weight: 700;
-  font-size: clamp(4rem, 16vw, 15rem);
+  max-width: 16ch;
+  font-family: var(--sans);
+  font-weight: 560;
+  font-size: clamp(2.4rem, 7vw, 6rem);
   line-height: 0.95;
+  letter-spacing: -0.03em;
   color: #ffffff;
-  letter-spacing: 0.01em;
 }
+.xp-huge em {
+  font-style: normal;
+  color: transparent;
+  -webkit-text-stroke: 1.5px #ffffff;
+}
+/* Outlined type needs air that filled type does not.
+
+   The base runs -0.03em, which is right for a solid white slab — letters nearly
+   touching is what gives it weight, and where they overlap you cannot tell
+   because both glyphs are the same white. Hollow them out with a 2px stroke and
+   the same negative tracking turns every near-touch into two visible lines
+   crossing: the 't' crossbars in "realtime" and "hackathon" ran into the letters
+   beside them and read as a rendering fault.
+
+   So the tracking belongs to the treatment rather than to the size. Positive and
+   small — it only has to undo the 2.7px the base pulls letters together by at
+   this size, not open the word up. */
 .xp-huge--outline {
   color: transparent;
+  letter-spacing: 0.012em;
   -webkit-text-stroke: 2px #ffffff;
 }
+/* Beat lines are single sentences that have to wrap well at 390px, and the
+   longest of them did not: "1st — US$500 · 2nd — US$300 · cash, no strings" ran
+   the full measure and dropped "strings" onto a line of its own. The side padding
+   was never the problem — there is 20px of it — the measure was.
+
+   `balance` is the right tool rather than a guessed `max-width` alone: it is for
+   exactly this, a short block where the last line should not be one orphaned
+   word, and it degrades to normal wrapping where unsupported. The measure caps
+   how wide it can get on the way there. */
 .xp-beat-line {
-  margin: 1.2rem 0 0;
+  margin: 1.2rem auto 0;
+  max-width: 38ch;
   font-family: var(--sans);
   font-size: clamp(1rem, 2vw, 1.5rem);
   letter-spacing: 0.04em;
+  text-wrap: balance;
   color: var(--ink-2);
 }
 .xp-beat-line strong {
   color: #ffffff;
   font-weight: 600;
-}
-
-/* Live countdown clock — pixel mono, tabular, enormous. */
-.xp-clock {
-  margin: 0;
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  font-size: clamp(2.6rem, 11vw, 10rem);
-  line-height: 1;
-  letter-spacing: 0.04em;
-  color: #ffffff;
-}
-.xp-clock small {
-  display: block;
-  margin-top: 1rem;
-  font-family: var(--mono);
-  font-size: clamp(0.7rem, 1.2vw, 0.95rem);
-  letter-spacing: 0.28em;
-  color: var(--ink-2);
+  /* Every emphasised fragment in a beat line is a short atomic phrase — a place,
+     a prize, an instruction — and none of them means anything broken in half.
+     `balance` alone got the line lengths even and still split "2nd — US$500"
+     across the break, because it optimises for equal rows and knows nothing about
+     which words belong together. This says which ones do; balance then picks the
+     best break among the ones left. */
+  white-space: nowrap;
 }
 
 /* Finale: giant register. */
@@ -3270,13 +3282,38 @@ html.xp body {
      whole plate off the top of the viewport at rest. */
   top: -100svh;
   bottom: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(8, 8, 10, 0) 0%,
-    rgba(8, 8, 10, 0.72) 34%,
-    rgba(8, 8, 10, 0.97) 52%,
-    #08080a 62%
-  );
+  /* A VIGNETTE, NOT A WALL OF BLACK
+
+     This used to reach `#08080a` — fully opaque — at 62% and hold it to the
+     bottom, which made the last screen of the page a black rectangle with type
+     on it. The ride ends on open country, the same warm arrival plain that reads
+     so well behind the briefing panels twenty percent earlier, and the finale
+     was painting over all of it.
+
+     It also made `FinaleHand` structurally invisible. That was the real reason
+     the wire hand never showed: not its size — though 3.7% of frame height did
+     not help — but an opaque plate in front of it. Chasing the geometry without
+     finding this would have scaled a hand up behind a blackout.
+
+     So the darkness goes where the darkness is needed. The radial keeps a deep
+     pool under the headline and the button; the linear wash stops well short of
+     opaque, so the ground grid, the dust and the hand all survive at the margins.
+     Composited at centre this still reaches ~0.97, which is what the outlined
+     stroke needs to hold. */
+  background:
+    radial-gradient(
+      58% 44% at 50% 50%,
+      rgba(8, 8, 10, 0.94) 0%,
+      rgba(8, 8, 10, 0.72) 54%,
+      rgba(8, 8, 10, 0) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(8, 8, 10, 0) 0%,
+      rgba(8, 8, 10, 0.44) 34%,
+      rgba(8, 8, 10, 0.56) 52%,
+      rgba(8, 8, 10, 0.6) 62%
+    );
   pointer-events: none;
 }
 /* The lift: a soft grey haze behind the title, so the plate is not a flat
@@ -3442,13 +3479,20 @@ html.xp body {
   );
   pointer-events: none;
 }
+/* Narrow viewports stack rather than rake, so the scrim runs bottom-up.
+   Recalibrated with `framingFov`: this used to fade out by 68%, which was
+   plenty over a portrait hero that had almost no glow in it — the 55° vertical
+   field was showing phones bare rings with the throat off-frame. Now that the
+   well actually renders here, the lit throat lands directly behind the headline,
+   so the cover has to reach further up. The top sixth stays clear so the rim
+   still reads as the subject. */
 @media (max-width: 60rem) {
   .xp-heroLayer::before {
     background: linear-gradient(
       to top,
-      rgba(4, 7, 9, 0.94) 0%,
-      rgba(4, 7, 9, 0.82) 38%,
-      rgba(4, 7, 9, 0) 68%
+      rgba(4, 7, 9, 0.95) 0%,
+      rgba(4, 7, 9, 0.88) 46%,
+      rgba(4, 7, 9, 0) 84%
     );
   }
 }
@@ -3470,9 +3514,71 @@ html.xp body {
   max-width: min(100%, 34rem);
   will-change: opacity;
 }
+/* 34ch, not 40. Lifting the facts out into `.xp-heroMeta` made this paragraph two
+   lines instead of three, so each line got longer and the second one reached into
+   the well's bright band — "with Portal in" sat over the throat at about 40% scrim
+   and lost its contrast. Narrowing the measure is the fix rather than raking the
+   scrim further across, because the centre band has to stay the brightest thing in
+   the frame; that is the layout rule the hero exists to obey. */
 .xp-heroSub .xp-body {
-  max-width: 40ch;
+  max-width: 34ch;
   text-align: left;
+}
+/* The wordmark line above the title. Mono and small, like the colophon it makes
+   redundant at the far end of the page — this is a credit, not a headline, and it
+   has to sit under the display type without competing with it. */
+/* Deliberately NOT a flex row. Flex blockifies its children, and a blockified
+   anchor takes vertical padding into layout — which would turn the hit-area trick
+   below into a row 24px taller than the type in it. Inline children keep the
+   padding out of layout, the same arrangement `.xp-colophon` relies on. */
+.xp-heroBrand {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.xp-heroBrand span {
+  margin: 0 0.5rem;
+}
+.xp-heroBrand a {
+  /* `.xp-heroLayer` sets `pointer-events: none` so the layer never eats scroll;
+     anything clickable inside it has to opt back in, the same way `.xp-colophon a`
+     does. */
+  pointer-events: auto;
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  text-decoration-color: rgba(255, 255, 255, 0.28);
+  transition: color var(--dur-ui) var(--ease-out);
+  /* Same WCAG 2.5.8 problem as the colophon's links and the same fix: vertical
+     padding on an inline box grows the target past the 24px floor without
+     entering layout, so the baseline of the wordmark does not move. */
+  padding: 0.55rem 0;
+}
+.xp-heroBrand a:hover {
+  color: #ffffff;
+}
+/* The facts, as facts. A row of short values separated by rules rather than a
+   sentence with commas — the date is the thing people come back to check, and it
+   should be findable without reading a clause. Wraps to two rows on a phone
+   rather than scrolling, hence `flex-wrap`. */
+.xp-heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+.xp-heroMeta span + span {
+  padding-left: 0.9rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 /* Too narrow for a side column: drop the copy to the foot of the frame so the

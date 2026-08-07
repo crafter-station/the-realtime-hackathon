@@ -1,4 +1,4 @@
-import { beatFraction } from "./journey";
+import { beatEnd, beatFraction } from "./journey";
 
 /**
  * The sound of the descent.
@@ -41,36 +41,56 @@ export type GraphFactory = () => Graph;
 /**
  * How loud the drone is at a given depth.
  *
- * Anchored to the ride rather than to round numbers: silent on the opening
- * frame, climbing as the corridor closes, heaviest through the vortex, and
- * easing once you are through — the arrival is meant to feel like coming up for
- * air, and a drone still climbing into the register would be scoring against
- * the thing it is there to support.
+ * Anchored to the ride rather than to round numbers, and re-anchored when the
+ * ride lost its second half. The old curve climbed for two thirds of the page to
+ * peak on the vortex; there is no vortex, and the page's loudest moment is now
+ * the crossing at 19% — so the shape is a build, a release, a long plateau under
+ * the five tracks, and then a fall as the world settles for the briefing.
+ *
+ * The plateau is the part worth defending. It would be easy to decay
+ * continuously from the crossing to the end, and it would be wrong: the tracks
+ * are the page's argument, they are the loudest thing visually, and a drone
+ * quietly draining away underneath them would read as the page losing interest
+ * in its own case. It holds, and then it drops on `brief` — which is the same
+ * moment the ground stops rolling and the grid dims. Three things standing down
+ * together is what makes the second act legible as a second act.
  *
  * The unit is 0..1 of *this curve's* range, not of output loudness: the peak is
- * 0.9 and `browserGraph` scales again by `HEADROOM` on the way to the gain node.
- * Two scalings, both deliberate — this one shapes the ride, that one decides how
- * loud the loudest point is allowed to be.
+ * 0.92 and `browserGraph` scales again by `HEADROOM` on the way to the gain
+ * node. Two scalings, both deliberate — this one shapes the ride, that one
+ * decides how loud the loudest point is allowed to be.
  */
+const PEAK = 0.92;
+const PLATEAU = 0.7;
+const TAIL = 0.12;
+
+function ease(t: number): number {
+  return t * t * (3 - 2 * t);
+}
+
 export function intensityAt(progress: number): number {
   const p = Math.min(1, Math.max(0, progress));
-  const start = beatFraction("holdOn");
-  const peak = beatFraction("anotherDimension");
-  const out = beatFraction("format");
+  const enter = beatFraction("through");
+  const crest = beatEnd("through");
+  const level = beatEnd("tracksIntro");
+  const out = beatFraction("brief");
 
-  if (p < start) {
+  if (p < enter) {
     // Fading up out of nothing across the fall into the well.
-    return 0.18 * (p / start);
+    return 0.18 * (p / enter);
   }
-  if (p < peak) {
-    const t = (p - start) / (peak - start);
-    return 0.18 + 0.72 * t * t * (3 - 2 * t);
+  if (p < crest) {
+    // Pressure building inside the sealed section.
+    return 0.18 + (PEAK - 0.18) * ease((p - enter) / (crest - enter));
+  }
+  if (p < level) {
+    // The release, as the walls let go.
+    return PEAK - (PEAK - PLATEAU) * ease((p - crest) / (level - crest));
   }
   if (p < out) {
-    return 0.9;
+    return PLATEAU;
   }
-  const t = (p - out) / (1 - out);
-  return 0.9 - 0.55 * t * t * (3 - 2 * t);
+  return PLATEAU - (PLATEAU - TAIL) * ease((p - out) / (1 - out));
 }
 
 /**

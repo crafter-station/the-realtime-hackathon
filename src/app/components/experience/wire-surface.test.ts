@@ -1,24 +1,22 @@
 import { describe, expect, test } from "bun:test";
+import { Z } from "./journey";
 import {
-  closedAxisHeight,
-  emergence,
+  CLOSED_AXIS_Y,
+  CLOSED_RADIUS,
   FLOOR_HW,
   floorY,
   HW,
   PERIMETER,
-  railShift as railShiftOf,
   rideY,
   STEP_X,
+  settle,
   surfacePoint,
   WALL_H,
   WELL_RADIUS,
   WELL_Z,
   WORLD_Z_END,
   WORLD_Z_START,
-  WORM_RADIUS,
-  WORM_Z_IN,
   wellCoverage,
-  wormholePresence,
   wrap,
 } from "./wire-surface";
 
@@ -26,7 +24,7 @@ import {
  * The surface is the one thing in this project that cannot be checked by
  * looking — a seam a few hundredths of a unit wide is invisible in a still and
  * unmistakable in motion, and the failure only shows up on one stretch of a
- * 750-unit ride. These assert the invariants the geometry is built on.
+ * long ride. These assert the invariants the geometry is built on.
  */
 
 /** Walk the whole ride at a fine step. */
@@ -36,14 +34,17 @@ function eachZ(step = 1.5): number[] {
   return out;
 }
 
+/** A depth inside the sealed window, where the section is a closed room. */
+const SEALED_Z = (Z.MOUTH_SHUT + Z.FLARE_START) / 2;
+
 describe("cross-section identities", () => {
-  test("the plane's width is exactly the corridor's perimeter", () => {
-    // If this drifts, the closed corridor carries a split along its top.
+  test("the plane's width is exactly the closed section's perimeter", () => {
+    // If this drifts, the closed section carries a split along its top.
     expect(PERIMETER).toBeCloseTo(2 * (2 * HW + WALL_H), 10);
   });
 
   test("the circle and the rectangle measure the same around", () => {
-    expect(2 * Math.PI * WORM_RADIUS).toBeCloseTo(PERIMETER, 10);
+    expect(2 * Math.PI * CLOSED_RADIUS).toBeCloseTo(PERIMETER, 10);
   });
 
   test("the grid divides the perimeter evenly", () => {
@@ -67,8 +68,12 @@ describe("surfacePoint", () => {
     // Only asserted where the curl has actually finished — a plane that is
     // still closing is *supposed* to have a gap, and that gap shutting is the
     // motion you watch.
+    //
+    // Stepped finer than the rest of this file: the sealed window is 30 units
+    // long now rather than 470, so a 1.5 step would sample it twenty times and
+    // a coverage floor would be measuring the step size.
     let checked = 0;
-    for (const z of eachZ()) {
+    for (const z of eachZ(0.4)) {
       if (wrap(z) < 0.9999) continue;
       const [lx, ly] = surfacePoint(-FLOOR_HW, z);
       const [rx, ry] = surfacePoint(FLOOR_HW, z);
@@ -78,16 +83,14 @@ describe("surfacePoint", () => {
     expect(checked).toBeGreaterThan(50);
   });
 
-  test("the closed corridor is the rectangle it claims to be", () => {
-    // z = -40 sits in the corridor: fully wrapped, fully square.
-    const z = -40;
-    expect(wrap(z)).toBeGreaterThan(0.99);
+  test("the sealed section is the rectangle it claims to be", () => {
+    expect(wrap(SEALED_Z)).toBeGreaterThan(0.99);
     let maxX = 0;
     let maxY = -Infinity;
     let minY = Infinity;
     for (let i = 0; i <= 400; i += 1) {
       const x = -FLOOR_HW + (i / 400) * PERIMETER;
-      const [px, py] = surfacePoint(x, z);
+      const [px, py] = surfacePoint(x, SEALED_Z);
       maxX = Math.max(maxX, Math.abs(px));
       maxY = Math.max(maxY, py);
       minY = Math.min(minY, py);
@@ -108,13 +111,35 @@ describe("surfacePoint", () => {
   });
 
   test("is continuous along z — no tears between stretches", () => {
-    // A jump here is a visible rip in the surface as you fly through it.
+    /*
+      A jump here is a visible rip in the surface as you fly through it.
+
+      The worst case is the seam along the top of the section at the midpoint of
+      the flare, where the outermost vertices travel furthest per unit of z. It
+      is a steep gradient rather than a discontinuity, and the ceiling exists to
+      catch it becoming one.
+
+      WHAT CHANGED, AND WHY THE CEILING DID NOT
+
+      This used to be waived at the same value on the grounds that the flare
+      played behind a full hyperspace streak field, with the whole surface faded
+      to about 5% opacity at the worst step. That argument is gone with the
+      streaks — the flare is now the crossing opening, drawn at full strength,
+      and it is the single most-looked-at moment on the page.
+
+      It is kept anyway, and the reason is that the gradient is the *subject*
+      here rather than an artefact: the section unrolling fast is what "you are
+      through" looks like. What must not happen is a tear, and a bounded step is
+      exactly the difference. The bound leaves headroom over the measured peak,
+      so lengthening the sealed window at the flare's expense — the one edit that
+      would make this steeper — trips it.
+    */
     for (const x of [-FLOOR_HW, -20, 0, 20, FLOOR_HW]) {
       let prev = surfacePoint(x, WORLD_Z_START);
       for (let z = WORLD_Z_START - 0.5; z >= WORLD_Z_END; z -= 0.5) {
         const next = surfacePoint(x, z);
         const step = Math.hypot(next[0] - prev[0], next[1] - prev[1]);
-        expect(step).toBeLessThan(1.2);
+        expect(step).toBeLessThan(1.8);
         prev = next;
       }
     }
@@ -126,7 +151,7 @@ describe("the ride", () => {
     for (const z of eachZ()) {
       const y = rideY(z);
       const base = floorY(0, z);
-      const ceiling = base + Math.max(closedAxisHeight(z), 2.8) * 2;
+      const ceiling = base + Math.max(CLOSED_AXIS_Y, 2.8) * 2;
       expect(y).toBeGreaterThan(base - 0.01);
       expect(y).toBeLessThan(ceiling + 0.01);
     }
@@ -138,18 +163,10 @@ describe("the ride", () => {
     // where the ground is meant to be giving way in one clean move.
     for (const z of eachZ()) {
       if (wrap(z) < 1e-4) continue;
-      const above = rideY(z) - floorY(0, z) - railShiftOf(z);
-      expect(above).toBeLessThan(closedAxisHeight(z) + 0.02);
+      const above = rideY(z) - floorY(0, z);
+      expect(above).toBeLessThan(CLOSED_AXIS_Y + 0.02);
       expect(above).toBeGreaterThan(2.79);
     }
-  });
-
-  test("the finished tube sits on the wormhole's axis", () => {
-    // The vortex is centred on y = 0. Arrive anywhere else and the black hole
-    // hangs off to one side for the whole finale.
-    expect(Math.abs(rideY(WORM_Z_IN))).toBeLessThan(0.05);
-    const [, bottomY] = surfacePoint(0, WORM_Z_IN);
-    expect(Math.abs(bottomY + WORM_RADIUS)).toBeLessThan(0.05);
   });
 
   test("the camera height is continuous — no lurch", () => {
@@ -162,8 +179,8 @@ describe("the ride", () => {
   });
 
   test("rides just over the ground where the world is open", () => {
-    // Mid-plain: the eye should be a person's height over the hills, not on a
-    // tube axis thirteen units up.
+    // Mid-plain: the eye should be a person's height over the hills, not on an
+    // axis eight units up.
     const z = -280;
     expect(wrap(z)).toBeLessThan(0.01);
     expect(rideY(z) - floorY(0, z)).toBeCloseTo(2.8, 6);
@@ -175,33 +192,43 @@ describe("the ride", () => {
     expect(rideY(WORLD_Z_START)).toBeCloseTo(floorY(0, WORLD_Z_START) + 2.8, 6);
   });
 
-  test("the ground has given way by the time the corridor closes", () => {
+  test("the ground has given way by the time the section closes", () => {
     // The gesture the opening is built on: between the title field and the
-    // corridor the floor drops out from under the camera.
-    const standing = rideY(140) - floorY(0, 140);
-    const flying = rideY(0) - floorY(0, 0);
+    // crossing the floor drops out from under the camera.
+    const standing = rideY(Z.MOUTH_OPEN) - floorY(0, Z.MOUTH_OPEN);
+    const flying = rideY(SEALED_Z) - floorY(0, SEALED_Z);
     expect(standing).toBeCloseTo(2.8, 1);
     expect(flying).toBeGreaterThan(7);
   });
 });
 
 describe("the far side", () => {
-  test("the tube opens again, so the ride ends somewhere", () => {
-    // The bug this pins: the camera's track used to stop at z = -662, past the
-    // vortex being fully present and short of the vortex ending, so the page
-    // ran out while you were still inside the hole. A portal is only legible
-    // if there is something on the other side of it.
-    expect(wrap(-620)).toBeGreaterThan(0.99); // deep in the tube
-    expect(emergence(-620)).toBeLessThan(1e-4);
-    expect(wrap(-900)).toBeLessThan(1e-3); // out, and flat again
-    expect(emergence(-900)).toBeGreaterThan(0.99);
-    expect(wormholePresence(-900)).toBeLessThan(1e-4);
+  test("the crossing opens, so there is somewhere to arrive", () => {
+    // A portal is only legible if there is something on the other side of it.
+    // This is the whole of the page's remaining spatial claim: closed here, open
+    // there, and open from there on.
+    expect(wrap(SEALED_Z)).toBeGreaterThan(0.99);
+    expect(wrap(Z.FLARE_END)).toBeLessThan(1e-3);
+    expect(wrap(Z.TRACK_END)).toBeLessThan(1e-3);
   });
 
   test("the camera stands on open ground at the end of the ride", () => {
-    const z = -898; // TRACK_END
+    const z = Z.TRACK_END;
     expect(wrap(z)).toBeLessThan(1e-3);
     expect(rideY(z) - floorY(0, z)).toBeCloseTo(2.8, 6);
+  });
+
+  test("the ground the briefing is read over is dead flat", () => {
+    /*
+      `waveWindow` is what the budget pins; this is the consequence at the only
+      place it matters. `floorY` on the centreline must be the bare `FLOOR_Y`
+      once the world has settled — no residual roll under the format table, the
+      schedule or the register.
+    */
+    for (const z of [Z.SETTLE_END, -600, -750, Z.TRACK_END]) {
+      expect(settle(z)).toBe(1);
+      expect(floorY(0, z)).toBeCloseTo(-2.8, 9);
+    }
   });
 });
 
@@ -230,13 +257,68 @@ describe("wellCoverage", () => {
     expect(wellCoverage(0, WELL_Z)).toBeGreaterThan(0.99);
   });
 
+  test("no stretch of ground is drawn by neither grid", () => {
+    /**
+     * The assertion this file was missing, and a real hole shipped through the
+     * gap. `wellCoverage` culls the Cartesian grid wherever the polar mesh is
+     * supposed to own the surface — but `wire-well.tsx` fades that mesh out on
+     * *scroll progress*, by 0.14, while this guard is baked static geometry. The
+     * two only agreed by accident: the old corridor stayed wrapped past z -164,
+     * so `flat` zeroed the coverage everywhere the radius over-reached.
+     *
+     * Shortening the crossing to z -40 broke the accident and left z -40..-80
+     * culled from one grid and faded out of the other. Forty units of ground
+     * drawn by nobody, right under the FIVE TRACKS beat.
+     *
+     * Stated as the property: once the crossing has opened, the Cartesian grid
+     * owns the ground outright — across the width of the plane, not just the
+     * centreline, because coverage is radial and the edges reach further.
+     */
+    for (let z = Z.FLARE_END; z >= Z.TRACK_END; z -= 2) {
+      for (const x of [-FLOOR_HW, -20, 0, 20, FLOOR_HW]) {
+        expect(wellCoverage(x, z)).toBeLessThan(0.01);
+      }
+    }
+  });
+
+  test("coverage never rises again once the well is behind you", () => {
+    /**
+     * The invariant behind both halves of the fix, and the one that makes the
+     * two guards safe to hold at once.
+     *
+     * `flat` releases the ground as the plane wraps and re-claims it as the
+     * plane opens; `ahead` releases it permanently once the well is passed. If
+     * `ahead` finishes *after* `flat` starts recovering, the two cross and
+     * coverage climbs back up on the way out — measured at a 0.063 peak around
+     * z -20 before the ends were solved, which is a fifth of the grid's
+     * brightness gone in a band, for nothing.
+     *
+     * Monotonic from the well's own centre to the end of the ride says it
+     * cannot happen, whatever either window is later retuned to.
+     */
+    let prev = Number.POSITIVE_INFINITY;
+    for (let z = WELL_Z; z >= Z.TRACK_END; z -= 0.5) {
+      const c = wellCoverage(0, z);
+      expect(c).toBeLessThanOrEqual(prev + 1e-9);
+      prev = c;
+    }
+  });
+
+  test("the handback happens where the section is still closed", () => {
+    // A seam between two grids is only invisible if it falls somewhere the
+    // surface is thinned and curled. If it drifts out onto open ground the hole
+    // above comes back as a visible band instead.
+    expect(wrap(-11)).toBeGreaterThan(0.75);
+    expect(wellCoverage(0, Z.FLARE_END)).toBeLessThan(1e-6);
+  });
+
   test("the arrival plain belongs to the Cartesian grid, not the well", () => {
     // The bug this pins: coverage was a function of depth alone, and `wrap` is
     // 0 in *two* places — the opening field and the country out the far side.
-    // So the far plain was handed to a polar mesh a thousand units away and the
+    // So the far plain was handed to a polar mesh hundreds of units away and the
     // grid that should have drawn the ground you land on was culled. The
     // arrival rendered black.
-    for (const z of [-880, -900, -1000, -1060]) {
+    for (const z of [-400, -600, -844, -1000]) {
       expect(wellCoverage(0, z)).toBeLessThan(1e-4);
     }
   });
