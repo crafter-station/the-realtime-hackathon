@@ -2734,6 +2734,134 @@ html.xp body {
 /* The escape hatch. Off-screen until focused, then it lands in the top-left
    above everything — z-index 60 clears the HUD at 30 and the cue at 50.
    Square, like everything else here: `visual-reference.md` says radius 0. */
+/* -- The gate ------------------------------------------------------------- */
+
+/* Held while the gate is up. `lenis.stop()` holds the smooth-scroll loop that
+   drives the camera; this holds the document, which is a different thing — a
+   trackpad flick or a keyboard `End` moves the page even with Lenis parked, and
+   a landing sliding around behind an overlay reads as broken rather than as
+   deliberate. Set on `<html>` from `experience.tsx`, and only ever after mount,
+   so a visitor without JavaScript is never locked out of a page whose unlock
+   button they would not have either. */
+.xp-locked,
+.xp-locked body {
+  overflow: hidden;
+}
+
+.xp-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  /* One cell: the stage fills it and the panel sits on top, so the hand is
+     never laid out around the copy. It is the subject; the copy is a caption. */
+  grid-template-areas: "gate";
+  background: #0e0e10;
+  animation: xp-gate-in var(--dur-ui) var(--ease-out) both;
+}
+.xp-gate__stage,
+.xp-gate__panel {
+  grid-area: gate;
+}
+.xp-gate__stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Bottom-left, opposite the hand, which reaches in from the left and up. Not
+   centred: a control in the middle of the frame lands on the fingers at every
+   viewport ratio, and the hand is the thing worth looking at. */
+.xp-gate__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1.1rem;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  pointer-events: none;
+}
+.xp-gate__panel > * {
+  pointer-events: auto;
+}
+
+.xp-gate__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.xp-gate__brand a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  text-decoration-thickness: 1px;
+}
+.xp-gate__brand a:hover {
+  color: #ffffff;
+}
+
+/* The one control. Mono and bracketed so it belongs to the same voice as the
+   `[01]` numerals on the track cards, and sized to the 44px minimum rather than
+   to the text — this is the first hit target on the site and on a phone it is
+   the only one. */
+.xp-gate__start {
+  min-height: 44px;
+  padding: 0.7rem 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.xp-gate__start:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+}
+.xp-gate__start:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.xp-gate__note {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes xp-gate-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The fade-in is decoration on a screen that is already the first thing you
+   see; there is nothing to orient from, so it is only cost. */
+@media (prefers-reduced-motion: reduce) {
+  .xp-gate {
+    animation: none;
+  }
+}
+
 .xp-skip {
   position: fixed;
   top: 0;
