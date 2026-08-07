@@ -27,8 +27,11 @@ const PALM = byIndex(2);
 const THUMB = byIndex(3);
 const FINGERS = LIMBS.slice(4);
 
-const maxRx = (l: Limb) => Math.max(l.rx[0], l.rx[1]);
-const minRx = (l: Limb) => Math.min(l.rx[0], l.rx[1]);
+const maxRx = (l: Limb) => Math.max(...l.rx);
+const minRx = (l: Limb) => Math.min(...l.rx);
+/** Radii are profiles now, so "round" means the whole profile matches. */
+const same = (a: readonly number[], b: readonly number[]) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
 
 /** Total spine length of a limb, walked control point to control point. */
 function span(l: Limb): number {
@@ -54,7 +57,7 @@ describe("it is a hand and not a club", () => {
 
   test("the palm is flat — much wider than it is thick", () => {
     // A round palm is a forearm that happens to have fingers on the end.
-    const thickest = Math.max(PALM.ry[0], PALM.ry[1]);
+    const thickest = Math.max(...PALM.ry);
     expect(maxRx(PALM) / thickest).toBeGreaterThan(2.5);
   });
 
@@ -73,8 +76,8 @@ describe("it is a hand and not a club", () => {
   });
 
   test("the forearm arrives narrower than it starts", () => {
-    expect(FOREARM.rx[1]).toBeLessThan(FOREARM.rx[0]);
-    expect(FOREARM.ry[1]).toBeLessThan(FOREARM.ry[0]);
+    expect(FOREARM.rx[FOREARM.rx.length - 1]).toBeLessThan(FOREARM.rx[0]);
+    expect(FOREARM.ry[FOREARM.ry.length - 1]).toBeLessThan(FOREARM.ry[0]);
   });
 
   test("the fingers are long enough to read as three segments", () => {
@@ -154,8 +157,18 @@ describe("it is a hand and not a club", () => {
     };
 
     const [index, ...closed] = FINGERS;
-    expect(bendOf(index)).toBeLessThan(0.25);
+    /*
+      Relative rather than absolute, and the absolute version was wrong.
+
+      It capped the index at 0.25 radians, which is a ruler — and a pointing
+      finger that is dead straight reads as a spike welded to a fist. What has
+      to be true is that it is *far* straighter than the ones that are closed,
+      which is a claim about the pose rather than about a number.
+    */
     for (const f of closed) expect(bendOf(f)).toBeGreaterThan(Math.PI / 2);
+    const tightest = Math.min(...closed.map(bendOf));
+    expect(bendOf(index)).toBeLessThan(0.5);
+    expect(bendOf(index)).toBeLessThan(tightest / 4);
   });
 
   test("the closed fingers come back to the palm rather than hanging in air", () => {
@@ -168,7 +181,7 @@ describe("it is a hand and not a club", () => {
      * The palm's surface is at its half-thickness, so a fingertip within about
      * its own radius of that reads as closed onto the hand.
      */
-    const palmSurface = Math.max(PALM.ry[0], PALM.ry[1]);
+    const palmSurface = Math.max(...PALM.ry);
     for (const f of FINGERS.slice(1)) {
       const tipZ = f.path[f.path.length - 1][2];
       expect(tipZ - palmSurface).toBeLessThan(0.35);
@@ -234,9 +247,7 @@ describe("the cross-section's axes", () => {
      * three of them run along the hand, nowhere near the normal.
      */
     const normal = new THREE.Vector3(0, 0, 1);
-    const flat = LIMBS.filter(
-      (l) => l.rx[0] !== l.ry[0] || l.rx[1] !== l.ry[1],
-    );
+    const flat = LIMBS.filter((l) => !same(l.rx, l.ry));
     expect(flat).toEqual([FOREARM, WRIST, PALM]);
     for (const l of flat) {
       for (let i = 1; i < l.path.length; i += 1) {
@@ -251,8 +262,7 @@ describe("the cross-section's axes", () => {
   test("the round limbs really are round, which is what makes that safe", () => {
     for (const l of LIMBS) {
       if (l === FOREARM || l === WRIST || l === PALM) continue;
-      expect(l.rx[0]).toBe(l.ry[0]);
-      expect(l.rx[1]).toBe(l.ry[1]);
+      expect(same(l.rx, l.ry)).toBe(true);
     }
   });
 

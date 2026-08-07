@@ -34,10 +34,18 @@ const SIDES = 20;
 export type Limb = {
   /** Control points of the spine, hand-local. Catmull-Rom runs through them. */
   path: readonly (readonly [number, number, number])[];
-  /** Half-width across the palm, at the start and end of the limb. */
-  rx: readonly [number, number];
-  /** Half-thickness through the palm, at the start and end. */
-  ry: readonly [number, number];
+  /**
+   * Half-width across the palm, as a profile along the limb.
+   *
+   * Two values is a linear taper; three or more is a shape. That distinction is
+   * the difference between a hand and a set of cones — a finger is not a taper,
+   * it is a swell at each knuckle with a waist between them, and a palm is not a
+   * box, it is a mass that bulges and narrows again at the fingers. The first
+   * version interpolated straight from one end to the other and read as CAD.
+   */
+  rx: readonly number[];
+  /** Half-thickness through the palm, same profile rules. */
+  ry: readonly number[];
   /** Cross-sections along the length. More on the parts that curve. */
   rings: number;
   /** Brightness at the start and end — this is how the forearm trails off. */
@@ -45,6 +53,23 @@ export type Limb = {
 };
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+
+/**
+ * A radius profile, sampled along a limb.
+ *
+ * Smoothstepped between control points rather than linear, so the knots are
+ * flat rather than creased — a knuckle wants to be a swell, and piecewise-linear
+ * control points give it a visible corner instead. Two values degrade to exactly
+ * the taper this replaced.
+ */
+export function sampleProfile(p: readonly number[], t: number): number {
+  if (p.length === 1) return p[0];
+  const n = p.length - 1;
+  const x = THREE.MathUtils.clamp(t, 0, 1) * n;
+  const i = Math.min(Math.floor(x), n - 1);
+  const f = x - i;
+  return THREE.MathUtils.lerp(p[i], p[i + 1], f * f * (3 - 2 * f));
+}
 
 /**
  * A finger, as the joints it actually bends at.
@@ -119,46 +144,65 @@ export function buildHand(): Limb[] {
     of the palm it is supposed to be closing onto.
   */
   const fingers: Limb[] = [
-    // Index — the one that does the pointing. Barely bent at all.
+    /*
+      Index — the one that does the pointing, and it is not a ruler.
+
+      A real pointing finger keeps a gentle curve; a dead-straight one reads as
+      a spike welded to a fist, which is what the first version of this looked
+      like at 0.06 a joint. Enough bend to see three segments, far less than the
+      three that are closed.
+
+      The `rx` profile is where the knuckles are: swell, waist, swell, taper to
+      the tip. Four control points, and it is most of what separates a finger
+      from a cone.
+    */
     {
       base: [-0.44, 0.44, 0.0] as const,
       spread: 0.1,
-      tilt: 0.0,
-      lengths: [0.66, 0.42, 0.3],
-      bends: [0.06, 0.06, 0.05],
-      rx: [0.135, 0.088] as const,
+      tilt: -0.04,
+      lengths: [0.62, 0.4, 0.3],
+      bends: [0.14, 0.16, 0.12],
+      rx: [0.15, 0.121, 0.132, 0.083] as const,
+      rings: 24,
     },
-    // Middle, ring, little — closed. Each a little tighter and a little
-    // shorter than the last, so the fist is a curve rather than a block.
+    /*
+      Middle, ring, little — closed, and closed *together*. Their bases sit
+      nearer each other than anatomy alone would put them, because three
+      separately curling tubes read as three sausages and a fist has to read as
+      one mass.
+    */
     {
-      base: [-0.15, 0.48, 0.0] as const,
-      spread: 0.03,
+      base: [-0.17, 0.47, 0.0] as const,
+      spread: 0.02,
       tilt: 0.2,
       lengths: [0.6, 0.4, 0.28],
       bends: [1.3, 1.4, 1.2],
-      rx: [0.14, 0.09] as const,
+      rx: [0.152, 0.124, 0.134, 0.088] as const,
+      rings: 22,
     },
     {
-      base: [0.14, 0.46, 0.0] as const,
-      spread: -0.06,
+      base: [0.09, 0.45, 0.0] as const,
+      spread: -0.05,
       tilt: 0.24,
       lengths: [0.56, 0.37, 0.26],
       bends: [1.34, 1.44, 1.22],
-      rx: [0.132, 0.086] as const,
+      rx: [0.144, 0.117, 0.127, 0.083] as const,
+      rings: 22,
     },
     {
-      base: [0.4, 0.38, -0.02] as const,
-      spread: -0.18,
+      base: [0.33, 0.38, -0.02] as const,
+      spread: -0.16,
       tilt: 0.3,
       lengths: [0.46, 0.3, 0.22],
       bends: [1.38, 1.46, 1.2],
-      rx: [0.115, 0.076] as const,
+      rx: [0.126, 0.102, 0.111, 0.073] as const,
+      rings: 20,
     },
   ].map((f) => ({
     path: finger(f.base, f.spread, f.tilt, f.lengths, f.bends),
     rx: f.rx,
     ry: f.rx,
-    rings: 16,
+    rings: f.rings,
     fade: [1, 0.92] as const,
   }));
 
@@ -171,26 +215,26 @@ export function buildHand(): Limb[] {
     */
     {
       path: [
-        [0.06, -3.2, -0.12],
-        [0.03, -2.1, -0.06],
-        [0, -1.25, 0],
+        [0.06, -3.3, -0.12],
+        [0.03, -2.2, -0.06],
+        [0, -1.35, 0],
       ],
-      rx: [0.42, 0.26],
-      ry: [0.36, 0.22],
-      rings: 16,
+      rx: [0.42, 0.36, 0.27],
+      ry: [0.37, 0.31, 0.23],
+      rings: 22,
       fade: [0, 0.62],
     },
     // The wrist: the narrowest point, and where the section starts flattening
     // out of the arm's near-circle into the palm's oval.
     {
       path: [
-        [0, -1.25, 0],
-        [0, -1.0, 0.01],
-        [0, -0.78, 0.02],
+        [0, -1.35, 0],
+        [0, -1.05, 0.01],
+        [0, -0.74, 0.02],
       ],
-      rx: [0.26, 0.44],
-      ry: [0.22, 0.18],
-      rings: 7,
+      rx: [0.27, 0.3, 0.43],
+      ry: [0.23, 0.21, 0.2],
+      rings: 14,
       fade: [0.62, 0.88],
     },
     /*
@@ -202,13 +246,13 @@ export function buildHand(): Limb[] {
     */
     {
       path: [
-        [0, -0.78, 0.02],
-        [0, -0.1, 0.04],
-        [0, 0.62, 0.0],
+        [0, -0.74, 0.02],
+        [0, -0.1, 0.05],
+        [0, 0.58, 0.0],
       ],
-      rx: [0.42, 0.6],
-      ry: [0.2, 0.23],
-      rings: 13,
+      rx: [0.43, 0.6, 0.53],
+      ry: [0.2, 0.235, 0.2],
+      rings: 20,
       fade: [0.88, 1],
     },
     /*
@@ -305,8 +349,8 @@ function limbLines(limb: Limb, pos: number[], col: number[]) {
     const t = i / n;
     const centre = curve.getPointAt(t);
     const { wide: binormal, thick: normal } = handFrame(curve.getTangentAt(t));
-    const rx = THREE.MathUtils.lerp(limb.rx[0], limb.rx[1], t);
-    const ry = THREE.MathUtils.lerp(limb.ry[0], limb.ry[1], t);
+    const rx = sampleProfile(limb.rx, t);
+    const ry = sampleProfile(limb.ry, t);
     const ring: THREE.Vector3[] = [];
     for (let s = 0; s < SIDES; s += 1) {
       const a = (s / SIDES) * Math.PI * 2;
