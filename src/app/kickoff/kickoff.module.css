@@ -427,7 +427,7 @@
 }
 .timezone {
   position: absolute;
-  right: clamp(1.5rem, 4vw, 4rem);
+  left: clamp(1.5rem, 4vw, 4rem);
   bottom: clamp(1.5rem, 4vw, 4rem);
   color: var(--deck-gray);
 }
@@ -753,6 +753,14 @@
   font-family: var(--font-geist-pixel), monospace;
   font-size: 0.65rem;
   letter-spacing: 0.06em;
+  transition:
+    opacity 220ms var(--deck-ease),
+    transform 220ms var(--deck-ease);
+}
+.controlsHidden:not(:focus-within) {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.5rem);
 }
 .controls button {
   display: grid;
@@ -984,6 +992,7 @@
     scroll-behavior: auto;
   }
   .progress span,
+  .controls,
   .controls button,
   .finalActions a {
     transition: none;

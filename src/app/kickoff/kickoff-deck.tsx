@@ -24,6 +24,9 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./kickoff.module.css";
 
 const TOTAL_SLIDES = 9;
+const CONTROLS_IDLE_DELAY = 1800;
+const CONTROLS_TRIGGER_WIDTH = 320;
+const CONTROLS_TRIGGER_HEIGHT = 180;
 const SUBMISSION_URL = "https://forms.gle/JVMq3Jag74218YBQ8";
 
 const schedule = [
@@ -59,6 +62,8 @@ function scrollToSlide(
 
 export function KickoffDeck() {
   const [current, setCurrent] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const controlsHovered = useRef(false);
   const currentSlide = useRef(0);
   const slides = useRef<(HTMLElement | null)[]>([]);
 
@@ -107,6 +112,38 @@ export function KickoffDeck() {
     return () => {
       observer.disconnect();
       window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    const hasMouse = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
+
+    if (!hasMouse) return;
+
+    let hideTimer = 0;
+    const showControls = () => {
+      window.clearTimeout(hideTimer);
+      setControlsVisible(true);
+      hideTimer = window.setTimeout(() => {
+        if (!controlsHovered.current) setControlsVisible(false);
+      }, CONTROLS_IDLE_DELAY);
+    };
+    const onMouseMove = (event: MouseEvent) => {
+      const isNearControls =
+        event.clientX >= window.innerWidth - CONTROLS_TRIGGER_WIDTH &&
+        event.clientY >= window.innerHeight - CONTROLS_TRIGGER_HEIGHT;
+
+      if (isNearControls) showControls();
+    };
+
+    showControls();
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+
+    return () => {
+      window.clearTimeout(hideTimer);
+      window.removeEventListener("mousemove", onMouseMove);
     };
   }, []);
 
@@ -431,8 +468,15 @@ export function KickoffDeck() {
       </section>
 
       <nav
-        className={styles.controls}
+        className={`${styles.controls} ${controlsVisible ? "" : styles.controlsHidden}`}
         aria-label="Navegación de la presentación"
+        onMouseEnter={() => {
+          controlsHovered.current = true;
+          setControlsVisible(true);
+        }}
+        onMouseLeave={() => {
+          controlsHovered.current = false;
+        }}
       >
         <button
           type="button"
