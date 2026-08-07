@@ -40,79 +40,127 @@ import { scroll } from "./store";
  * keeps a cursor-tracking object off the per-frame geometry budget entirely.
  */
 
-/*
-  Staging: reaching in from the lower left, turned so the thumb side is toward
-  the camera. Rotations are applied in the group's own ZYX order by three's
-  default 'XYZ' Euler, which is why the big roll sits in z.
-*/
-const REST_ROT = { x: 0.3, y: -0.46, z: -1.72 };
-const HOME = { x: -1.15, y: -0.15, z: 0 };
-/** Big enough that the forearm leaves the frame rather than ending in it. */
+/**
+ * Staging.
+ *
+ * The hand stands left of centre so that pointing at the cursor means pointing
+ * *across* the frame rather than out of it, and the forearm leaves the edge
+ * instead of ending in open space.
+ */
+const HOME = new THREE.Vector3(-1.5, -0.1, 0);
+/**
+ * Roll about the pointing axis — which way the palm faces as it aims.
+ *
+ * Solved rather than nudged. After `toForward` the palm's normal sits on local
+ * -Y, and `lookAt` maps local X onto the camera axis whenever the hand points
+ * across the frame — so a roll of exactly π/2 turns the palm away from the
+ * viewer and shows the back of the hand square on, and 0 leaves it edge-on,
+ * which is what -0.5 was doing: a pointing hand with no body to it.
+ *
+ * A little under π/2 gives the three-quarter the reference has, where the
+ * closed fingers read as a mass rather than as a silhouette.
+ */
+const ROLL = 1.2;
 const HAND_SCALE = 1.02;
-
-/** How far the cursor can turn it. Small — it is tracking you, not pointing. */
-const YAW = 0.42;
-const PITCH = 0.3;
+/** Where it points before anyone has moved a mouse: out across the copy. */
+const IDLE_TARGET = new THREE.Vector3(1.7, -0.5, 0.4);
+const UP = new THREE.Vector3(0, 1, 0);
 
 export function WireHand() {
-  const group = useRef<THREE.Group>(null);
+  const aim = useRef<THREE.Group>(null);
   const geometry = useMemo(() => buildHandGeometry(), []);
 
+  /**
+   * The fixed part of the orientation, so the moving part can be a `lookAt`.
+   *
+   * `Object3D.lookAt` aims an object's **+Z** at a target. The hand is modelled
+   * with its fingers up +Y, so this maps that onto +Z once, and then a roll
+   * about the new forward decides which face of the hand you see. Everything
+   * after that is one quaternion a frame with no Euler angles to reason about —
+   * which is the whole reason the pose is built this way rather than as three
+   * axis rotations tuned by screenshot.
+   */
+  const orient = useMemo(() => {
+    const toForward = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(1, 0, 0),
+      Math.PI / 2,
+    );
+    const roll = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1),
+      ROLL,
+    );
+    return roll.multiply(toForward);
+  }, []);
+
+  // Scratch, so the frame loop allocates nothing.
+  const target = useMemo(() => new THREE.Vector3(), []);
+  const look = useMemo(() => new THREE.Matrix4(), []);
+  const want = useMemo(() => new THREE.Quaternion(), []);
+
   useFrame((state, dt) => {
-    const g = group.current;
+    const g = aim.current;
     if (!g) return;
     const cdt = Math.min(dt, 0.05);
     const t = state.clock.elapsedTime;
 
     /*
-      A hand that only moves when the mouse does is a prop. The idle is tiny —
-      under two degrees — and slow enough not to read as an animation, which is
-      the point: it reads as something alive holding still.
+      IT POINTS AT THE CURSOR RATHER THAN LEANING TOWARD IT
+
+      The first version added the pointer to a rest rotation, scaled to 0.42
+      radians of yaw. That is a hand that tilts when you move the mouse, and it
+      was reported as not following the cursor at all — correctly, because 24°
+      of lean is not tracking, it is a nod.
+
+      This solves for the direction instead: the cursor's normalised position
+      becomes a point in the world at the near plane, and the hand's forward
+      axis is aimed at it. `state.viewport` is already the frame's size in world
+      units at z = 0, so the mapping needs no field-of-view arithmetic and stays
+      correct when the gate widens its camera on a phone.
     */
-    const breatheY = Math.sin(t * 0.42) * 0.03;
-    const breatheX = Math.sin(t * 0.31 + 1.2) * 0.025;
+    if (scroll.reduce || !scroll.pointerMoved) {
+      target.copy(IDLE_TARGET);
+    } else {
+      target.set(
+        scroll.pointer.x * state.viewport.width * 0.5,
+        scroll.pointer.y * state.viewport.height * 0.5,
+        0.5,
+      );
+    }
 
-    // Reduced motion keeps the hand and drops the chase. The cursor is the
-    // vestibular half of this, and it is the half that was asked about.
-    const chase = scroll.reduce || !scroll.pointerMoved;
-    const targetY =
-      REST_ROT.y + (chase ? 0 : scroll.pointer.x * YAW) + breatheY;
-    const targetX =
-      REST_ROT.x - (chase ? 0 : scroll.pointer.y * PITCH) + breatheX;
+    /*
+      A drift on the target rather than on the hand. Under a tenth of a unit and
+      slow — it is not an animation, it is the difference between something
+      holding still and something switched off. Skipped for reduced motion,
+      which is the request this one is actually about.
+    */
+    if (!scroll.reduce) {
+      target.y += Math.sin(t * 0.5) * 0.07;
+      target.x += Math.sin(t * 0.37 + 1.1) * 0.06;
+    }
 
-    g.rotation.y = THREE.MathUtils.damp(g.rotation.y, targetY, 3.4, cdt);
-    g.rotation.x = THREE.MathUtils.damp(g.rotation.x, targetX, 3.4, cdt);
-    // A little bodily drift as well, so the turn does not read as a hinge.
-    g.position.x = THREE.MathUtils.damp(
-      g.position.x,
-      HOME.x + (chase ? 0 : scroll.pointer.x * 0.22),
-      3,
-      cdt,
-    );
-    g.position.y = THREE.MathUtils.damp(
-      g.position.y,
-      HOME.y + (chase ? 0 : scroll.pointer.y * 0.16),
-      3,
-      cdt,
-    );
+    // `lookAt(target, eye, up)` in this order, because that is what
+    // `Object3D.lookAt` does for anything that is not a camera: +Z toward the
+    // target rather than away from it.
+    look.lookAt(target, g.position, UP);
+    want.setFromRotationMatrix(look);
+    // Slerped rather than snapped, and frame-rate independent — a hand that
+    // arrives instantly reads as a cursor, not as a hand.
+    g.quaternion.slerp(want, 1 - Math.exp(-4.5 * cdt));
   });
 
   return (
-    <group
-      ref={group}
-      position={[HOME.x, HOME.y, HOME.z]}
-      rotation={[REST_ROT.x, REST_ROT.y, REST_ROT.z]}
-      scale={HAND_SCALE}
-    >
-      <lineSegments geometry={geometry}>
-        <lineBasicMaterial
-          color={HAND_COLOR}
-          vertexColors
-          transparent
-          opacity={0.95}
-          depthWrite={false}
-        />
-      </lineSegments>
+    <group ref={aim} position={HOME} scale={HAND_SCALE}>
+      <group quaternion={orient}>
+        <lineSegments geometry={geometry}>
+          <lineBasicMaterial
+            color={HAND_COLOR}
+            vertexColors
+            transparent
+            opacity={0.95}
+            depthWrite={false}
+          />
+        </lineSegments>
+      </group>
     </group>
   );
 }

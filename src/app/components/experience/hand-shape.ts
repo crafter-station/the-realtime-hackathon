@@ -17,8 +17,19 @@ import * as THREE from "three";
 /** Bright enough to read as light on black; the brand's own mid-ramp tone. */
 export const HAND_COLOR = "#ff7a45";
 
-/** Faces around each cross-section. Twelve is what the reference reads as. */
-const SIDES = 12;
+/**
+ * Faces around each cross-section.
+ *
+ * Twelve made the palm a plank. A cross-section 4.6 times wider than it is
+ * thick, sampled twelve times, puts consecutive vertices a long way apart across
+ * the flat of it and barely apart through the thickness — so the "ellipse" draws
+ * as two long straight rails with square ends, and the palm reads as a piece of
+ * board with fingers glued to it. Visible in a close-up and invisible at the
+ * size the first screenshots were taken at.
+ *
+ * Twenty costs about 65% more segments and is what makes a wide section curve.
+ */
+const SIDES = 20;
 
 export type Limb = {
   /** Control points of the spine, hand-local. Catmull-Rom runs through them. */
@@ -93,49 +104,54 @@ export function buildHand(): Limb[] {
     it starts. And the fingers have to be long enough to be legible as three
     segments each, which means barely closed rather than gripping.
   */
-  const fingers: Limb[] = [
-    /*
-      Index, middle, ring, little. Each curls a little further than the one
-      before it and splays a little wider, which is what stops four fingers
-      reading as one slab.
+  /*
+    POINTING, WHICH IS A POSE AND NOT A DECORATION
 
-      Every base sits *inside* the palm rather than on its knuckle line. Sharing
-      a boundary exactly is what left visible gaps between the fingers and the
-      hand: two tubes that merely touch do not read as joined, and the middle
-      finger's base was past the palm's end entirely. Overlapping by a radius or
-      so costs nothing — the interior lines are hidden by the surface around
-      them — and it is what makes the fingers grow out of the hand.
-    */
+    The hand exists to aim at the cursor, so the index is nearly straight and
+    the other three roll into a fist under it. That is also what makes the
+    tracking legible: a splayed hand turning toward you reads as a hand turning,
+    while a pointing hand turning toward you reads as a hand *pointing at you*.
+
+    The curls are near 4 radians across three joints — about 75° a knuckle,
+    which is what a real fist does. It has to be that much: a finger 1.28 long
+    curling through 2.4 leaves its tip 0.9 in front of the palm, hanging in the
+    air, and only past about 4 does the tip come back to within a finger's width
+    of the palm it is supposed to be closing onto.
+  */
+  const fingers: Limb[] = [
+    // Index — the one that does the pointing. Barely bent at all.
     {
-      base: [-0.47, 0.5, 0.0] as const,
-      spread: 0.17,
-      tilt: 0.1,
-      lengths: [0.62, 0.4, 0.28],
-      bends: [0.22, 0.34, 0.32],
+      base: [-0.44, 0.44, 0.0] as const,
+      spread: 0.1,
+      tilt: 0.0,
+      lengths: [0.66, 0.42, 0.3],
+      bends: [0.06, 0.06, 0.05],
       rx: [0.135, 0.088] as const,
     },
+    // Middle, ring, little — closed. Each a little tighter and a little
+    // shorter than the last, so the fist is a curve rather than a block.
     {
-      base: [-0.16, 0.56, 0.0] as const,
-      spread: 0.05,
-      tilt: 0.06,
-      lengths: [0.68, 0.44, 0.3],
-      bends: [0.2, 0.32, 0.32],
+      base: [-0.15, 0.48, 0.0] as const,
+      spread: 0.03,
+      tilt: 0.2,
+      lengths: [0.6, 0.4, 0.28],
+      bends: [1.3, 1.4, 1.2],
       rx: [0.14, 0.09] as const,
     },
     {
-      base: [0.16, 0.53, 0.0] as const,
-      spread: -0.08,
-      tilt: 0.08,
-      lengths: [0.62, 0.4, 0.28],
-      bends: [0.24, 0.36, 0.34],
+      base: [0.14, 0.46, 0.0] as const,
+      spread: -0.06,
+      tilt: 0.24,
+      lengths: [0.56, 0.37, 0.26],
+      bends: [1.34, 1.44, 1.22],
       rx: [0.132, 0.086] as const,
     },
     {
-      base: [0.44, 0.44, -0.02] as const,
-      spread: -0.22,
-      tilt: 0.14,
-      lengths: [0.5, 0.32, 0.23],
-      bends: [0.28, 0.4, 0.38],
+      base: [0.4, 0.38, -0.02] as const,
+      spread: -0.18,
+      tilt: 0.3,
+      lengths: [0.46, 0.3, 0.22],
+      bends: [1.38, 1.46, 1.2],
       rx: [0.115, 0.076] as const,
     },
   ].map((f) => ({
@@ -190,8 +206,8 @@ export function buildHand(): Limb[] {
         [0, -0.1, 0.04],
         [0, 0.62, 0.0],
       ],
-      rx: [0.44, 0.72],
-      ry: [0.18, 0.155],
+      rx: [0.42, 0.6],
+      ry: [0.2, 0.23],
       rings: 13,
       fade: [0.88, 1],
     },
@@ -206,7 +222,7 @@ export function buildHand(): Limb[] {
       palm's plane toward the camera, which is what the reference shows.
     */
     {
-      path: finger([-0.42, -0.34, 0.05], 1.24, 0.1, [0.54, 0.38], [0.3, 0.46]),
+      path: finger([-0.4, -0.28, 0.1], 1.0, 0.5, [0.48, 0.34], [0.5, 0.62]),
       rx: [0.165, 0.1],
       ry: [0.165, 0.1],
       rings: 13,
@@ -244,13 +260,31 @@ export function buildHand(): Limb[] {
  * radian off +Y — `handFrame` asserts the margin rather than trusting it.
  */
 const PALM_NORMAL = new THREE.Vector3(0, 0, 1);
+/** Used only where a limb runs along the normal and the first reference dies. */
+const FALLBACK_REF = new THREE.Vector3(1, 0, 0);
+/** Past this much alignment the cross product is too short to trust. */
+const DEGENERATE = 0.94;
 
 export function handFrame(tangent: THREE.Vector3): {
   wide: THREE.Vector3;
   thick: THREE.Vector3;
 } {
   const t = tangent.clone().normalize();
-  const wide = new THREE.Vector3().crossVectors(t, PALM_NORMAL).normalize();
+  /*
+    A curled finger runs *through* the palm's plane on its way round, and at the
+    moment its tangent is parallel to the normal the cross product is zero —
+    three's `normalize()` returns (0,0,0) rather than NaN, so the ring collapses
+    to a point and the finger pinches shut. Not hypothetical: the pointing pose
+    curls three fingers past 90°, so every one of them crosses it.
+
+    Switching reference twists the section, and that is free here: every limb
+    that can reach this state is circular, and a circle has no orientation to
+    twist. The flat limbs run along the hand and never come close —
+    `hand-shape.test.ts` asserts both halves of that.
+  */
+  const ref =
+    Math.abs(t.dot(PALM_NORMAL)) > DEGENERATE ? FALLBACK_REF : PALM_NORMAL;
+  const wide = new THREE.Vector3().crossVectors(t, ref).normalize();
   const thick = new THREE.Vector3().crossVectors(wide, t).normalize();
   return { wide, thick };
 }

@@ -123,30 +123,55 @@ describe("it is a hand and not a club", () => {
     for (const f of FINGERS) expect(across(f)).toBeLessThan(1);
   });
 
-  test("the fingers curl, and none of them curls into a fist", () => {
+  test("it is pointing: one finger out, three closed", () => {
     /**
-     * A curl is the difference between a hand and a rake. Measured as the angle
-     * between the first and last phalanx: some bend, or the fingers are sticks;
-     * not past a right angle, or they fold under the palm and the hand reads as
-     * a paw — which is what 1.2 radians of total bend did on the first pass.
+     * The pose, as the two numbers that make it one.
+     *
+     * This test used to forbid any finger from curling past a right angle,
+     * which was right for the splayed hand it was written against and is
+     * exactly backwards now — three of these fingers are *supposed* to be a
+     * fist. Replaced rather than relaxed, because "no finger closes much" and
+     * "one finger is straight and the rest close hard" are different claims and
+     * only the second one describes a hand that points at something.
+     *
+     * Measured as the angle between the first and last phalanx: the index is
+     * nearly a straight line, and the others turn through more than a right
+     * angle each.
      */
-    for (const f of FINGERS) {
-      const p = f.path;
-      const first = [
+    const bendOf = (l: Limb) => {
+      const p = l.path;
+      const a = new THREE.Vector3(
         p[1][0] - p[0][0],
         p[1][1] - p[0][1],
         p[1][2] - p[0][2],
-      ] as const;
-      const last = [
+      ).normalize();
+      const b = new THREE.Vector3(
         p[p.length - 1][0] - p[p.length - 2][0],
         p[p.length - 1][1] - p[p.length - 2][1],
         p[p.length - 1][2] - p[p.length - 2][2],
-      ] as const;
-      const norm = (v: readonly number[]) => Math.hypot(v[0], v[1], v[2]);
-      const dot = first[0] * last[0] + first[1] * last[1] + first[2] * last[2];
-      const angle = Math.acos(dot / (norm(first) * norm(last)));
-      expect(angle).toBeGreaterThan(0.35);
-      expect(angle).toBeLessThan(Math.PI / 2);
+      ).normalize();
+      return Math.acos(THREE.MathUtils.clamp(a.dot(b), -1, 1));
+    };
+
+    const [index, ...closed] = FINGERS;
+    expect(bendOf(index)).toBeLessThan(0.25);
+    for (const f of closed) expect(bendOf(f)).toBeGreaterThan(Math.PI / 2);
+  });
+
+  test("the closed fingers come back to the palm rather than hanging in air", () => {
+    /**
+     * The failure a curl angle alone cannot see. A finger 1.28 long turning
+     * through 2.4 radians is unambiguously curled and still leaves its tip 0.9
+     * units in front of the palm, floating — which is what the first fist
+     * looked like. What matters is where the tip *ends up*.
+     *
+     * The palm's surface is at its half-thickness, so a fingertip within about
+     * its own radius of that reads as closed onto the hand.
+     */
+    const palmSurface = Math.max(PALM.ry[0], PALM.ry[1]);
+    for (const f of FINGERS.slice(1)) {
+      const tipZ = f.path[f.path.length - 1][2];
+      expect(tipZ - palmSurface).toBeLessThan(0.35);
     }
   });
 });
