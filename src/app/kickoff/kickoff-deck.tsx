@@ -23,11 +23,14 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import styles from "./kickoff.module.css";
 
-const TOTAL_SLIDES = 9;
+const TOTAL_SLIDES = 10;
 const CONTROLS_IDLE_DELAY = 1800;
 const CONTROLS_TRIGGER_WIDTH = 320;
 const CONTROLS_TRIGGER_HEIGHT = 180;
 const SUBMISSION_URL = "https://forms.gle/JVMq3Jag74218YBQ8";
+const KICKOFF_PRESENTATION_START = new Date(
+  "2026-08-07T19:10:00-05:00",
+).getTime();
 
 const schedule = [
   ["VIE 19:00", "Kickoff", "start"],
@@ -49,6 +52,55 @@ const deliverables = [
 
 function SlideNumber({ children }: { children: string }) {
   return <span className={styles.slideNumber}>{children}</span>;
+}
+
+function KickoffCountdown() {
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      setRemainingSeconds(
+        Math.max(
+          0,
+          Math.ceil((KICKOFF_PRESENTATION_START - Date.now()) / 1000),
+        ),
+      );
+    };
+
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 250);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const hours =
+    remainingSeconds === null ? null : Math.floor(remainingSeconds / 3600);
+  const minutes =
+    remainingSeconds === null
+      ? null
+      : Math.floor((remainingSeconds % 3600) / 60);
+  const seconds = remainingSeconds === null ? null : remainingSeconds % 60;
+  const parts = [hours, minutes, seconds].map((part) =>
+    part === null ? "--" : String(part).padStart(2, "0"),
+  );
+
+  return (
+    <div
+      className={styles.countdownClock}
+      role="timer"
+      aria-label={
+        remainingSeconds === 0
+          ? "El kickoff comienza ahora"
+          : `Faltan ${parts.join(":")} para el kickoff`
+      }
+    >
+      {parts.map((part, index) => (
+        <span key={["hours", "minutes", "seconds"][index]}>
+          <strong>{part}</strong>
+          <small>{["horas", "minutos", "segundos"][index]}</small>
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function scrollToSlide(
@@ -150,10 +202,29 @@ export function KickoffDeck() {
   return (
     <main className={styles.deck} lang="es">
       <section
-        className={`${styles.slide} ${styles.opening}`}
+        className={`${styles.slide} ${styles.countdownSlide}`}
         data-slide="0"
         ref={(node) => {
           slides.current[0] = node;
+        }}
+      >
+        <div className={styles.topline}>
+          <span>Portal × Crafter Station</span>
+          <span>07.08.26 · Lima</span>
+        </div>
+        <div className={styles.countdownBody}>
+          <p className={styles.kicker}>The Realtime Hackathon</p>
+          <h1>Empezamos en</h1>
+          <KickoffCountdown />
+          <p className={styles.countdownStart}>KICKOFF · 19:10 · UTC−5</p>
+        </div>
+      </section>
+
+      <section
+        className={`${styles.slide} ${styles.opening}`}
+        data-slide="1"
+        ref={(node) => {
+          slides.current[1] = node;
         }}
       >
         <div className={styles.topline}>
@@ -180,9 +251,9 @@ export function KickoffDeck() {
 
       <section
         className={`${styles.slide} ${styles.light}`}
-        data-slide="1"
+        data-slide="2"
         ref={(node) => {
-          slides.current[1] = node;
+          slides.current[2] = node;
         }}
       >
         <SlideNumber>01 / EL RETO</SlideNumber>
@@ -223,9 +294,9 @@ export function KickoffDeck() {
 
       <section
         className={styles.slide}
-        data-slide="2"
+        data-slide="3"
         ref={(node) => {
-          slides.current[2] = node;
+          slides.current[3] = node;
         }}
       >
         <SlideNumber>02 / LA FÓRMULA</SlideNumber>
@@ -252,9 +323,9 @@ export function KickoffDeck() {
 
       <section
         className={`${styles.slide} ${styles.light}`}
-        data-slide="3"
+        data-slide="4"
         ref={(node) => {
-          slides.current[3] = node;
+          slides.current[4] = node;
         }}
       >
         <SlideNumber>03 / PORTAL</SlideNumber>
@@ -301,9 +372,9 @@ export function KickoffDeck() {
 
       <section
         className={styles.slide}
-        data-slide="4"
+        data-slide="5"
         ref={(node) => {
-          slides.current[4] = node;
+          slides.current[5] = node;
         }}
       >
         <SlideNumber>04 / 39 HORAS</SlideNumber>
@@ -331,9 +402,9 @@ export function KickoffDeck() {
 
       <section
         className={`${styles.slide} ${styles.light}`}
-        data-slide="5"
+        data-slide="6"
         ref={(node) => {
-          slides.current[5] = node;
+          slides.current[6] = node;
         }}
       >
         <SlideNumber>05 / LA ENTREGA</SlideNumber>
@@ -354,9 +425,9 @@ export function KickoffDeck() {
 
       <section
         className={styles.slide}
-        data-slide="6"
+        data-slide="7"
         ref={(node) => {
-          slides.current[6] = node;
+          slides.current[7] = node;
         }}
       >
         <SlideNumber>06 / ELEGIBILIDAD</SlideNumber>
@@ -399,9 +470,9 @@ export function KickoffDeck() {
 
       <section
         className={`${styles.slide} ${styles.light}`}
-        data-slide="7"
+        data-slide="8"
         ref={(node) => {
-          slides.current[7] = node;
+          slides.current[8] = node;
         }}
       >
         <SlideNumber>07 / PREMIOS</SlideNumber>
@@ -433,9 +504,9 @@ export function KickoffDeck() {
 
       <section
         className={`${styles.slide} ${styles.finalSlide}`}
-        data-slide="8"
+        data-slide="9"
         ref={(node) => {
-          slides.current[8] = node;
+          slides.current[9] = node;
         }}
       >
         <SlideNumber>08 / AHORA</SlideNumber>

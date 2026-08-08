@@ -62,6 +62,67 @@
   color: var(--deck-gray);
 }
 
+.countdownSlide {
+  align-content: stretch;
+}
+
+.countdownBody {
+  display: grid;
+  align-self: center;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.countdownBody h1 {
+  color: var(--deck-gray);
+  font-family: var(--font-geist-pixel), monospace;
+  font-size: clamp(1.1rem, 2vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.countdownClock {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--deck-rule-dark);
+  border-bottom: 1px solid var(--deck-rule-dark);
+  font-family: var(--font-geist-pixel), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdownClock > span {
+  display: grid;
+  min-width: 0;
+  padding: clamp(1rem, 2.5vw, 2rem) clamp(0.25rem, 1vw, 1rem);
+  gap: 1rem;
+  text-align: center;
+}
+
+.countdownClock > span + span {
+  border-left: 1px solid var(--deck-rule-dark);
+}
+
+.countdownClock strong {
+  color: var(--deck-white);
+  font-size: clamp(4rem, 13vw, 12rem);
+  letter-spacing: -0.08em;
+  line-height: 0.75;
+}
+
+.countdownClock small,
+.countdownStart {
+  color: var(--deck-gray);
+  font-size: clamp(0.58rem, 0.8vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.countdownStart {
+  color: var(--deck-orange);
+  text-align: right;
+}
+
 .opening {
   align-content: stretch;
 }
@@ -90,6 +151,10 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.countdownBody .kicker {
+  margin-bottom: 0;
 }
 
 .opening h1 {
@@ -821,6 +886,16 @@
 }
 
 @media (max-width: 48rem) {
+  .countdownBody {
+    gap: 1.25rem;
+  }
+  .countdownClock strong {
+    font-size: clamp(3.2rem, 19vw, 6rem);
+  }
+  .countdownClock small {
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
   .openingBody {
     grid-template-columns: 1fr;
     align-content: center;
